@@ -1,8 +1,7 @@
 import 'package:fluentui_icons/fluentui_icons.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../page/home_Page.dart';
+import '../page/home_page.dart';
 
 class BottomNavbar extends StatefulWidget {
   const BottomNavbar({super.key});
