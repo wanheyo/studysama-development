@@ -16,7 +16,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
     // const Text("Home"),
     // const Text("List"),
     // const Text("Profile"),
-    const HomePage(),
+    // const HomePage(),
     const Text("List"),
     const Text("Profile"),
   ];

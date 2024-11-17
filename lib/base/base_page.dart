@@ -1,0 +1,79 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:studysama/page/my_course/my_course_page.dart';
+import 'package:studysama/page/home_page.dart';
+import 'package:studysama/page/profile_page.dart';
+import 'package:studysama/utils/colors.dart';
+
+class BasePage extends StatefulWidget {
+  @override
+  _BasePageState createState() => _BasePageState();
+}
+
+class _BasePageState extends State<BasePage> {
+  // Selected index for bottom navigation bar
+  int _selectedIndex = 0;
+
+  // List of pages for bottom navigation
+  final List<Widget> _pages = [
+    HomePage(),
+    MyCoursePage(),
+    ProfilePage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'StudySama',
+          style: TextStyle(
+            fontFamily: 'Montserrat',  // Set the font to Montserrat
+            fontWeight: FontWeight.bold,
+          )
+        ,),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+      ),
+      body: _pages[_selectedIndex], // Display selected page
+      bottomNavigationBar: BottomNavigationBar(
+        //backgroundColor: AppColors.background,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.house),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.scroll),
+            label: 'My Course',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.solidUser),
+            label: 'Profile',
+          ),
+        ],
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: Colors.grey,
+        selectedLabelStyle: TextStyle(
+          fontFamily: 'Montserrat', // Set the font to Montserrat
+          fontWeight: FontWeight.bold, // Optional: Make the label bold
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontFamily: 'Montserrat', // Set the font to Montserrat
+          fontWeight: FontWeight.normal, // Optional: Normal weight for unselected labels
+        ),
+        type: BottomNavigationBarType.shifting, // Keeps label visible on tap
+      ),
+    );
+  }
+}
+
