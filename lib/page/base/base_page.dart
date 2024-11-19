@@ -1,10 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:studysama/page/my_course/my_course_page.dart';
-import 'package:studysama/page/home_page.dart';
-import 'package:studysama/page/profile_page.dart';
+import 'package:studysama/page/base/ai/ai_page.dart';
+import 'package:studysama/page/base/my_course/my_course_page.dart';
+import 'package:studysama/page/base/home/home_page.dart';
+import 'package:studysama/page/base/profile/profile_page.dart';
 import 'package:studysama/utils/colors.dart';
+
+import 'find/find_page.dart';
 
 class BasePage extends StatefulWidget {
   @override
@@ -18,6 +21,8 @@ class _BasePageState extends State<BasePage> {
   // List of pages for bottom navigation
   final List<Widget> _pages = [
     HomePage(),
+    AiPage(),
+    FindPage(),
     MyCoursePage(),
     ProfilePage(),
   ];
@@ -53,6 +58,14 @@ class _BasePageState extends State<BasePage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.robot),
+            label: 'Chatbot',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.magnifyingGlass),
+            label: 'Find',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.scroll),
             label: 'My Course',
           ),
@@ -71,7 +84,8 @@ class _BasePageState extends State<BasePage> {
           fontFamily: 'Montserrat', // Set the font to Montserrat
           fontWeight: FontWeight.normal, // Optional: Normal weight for unselected labels
         ),
-        type: BottomNavigationBarType.shifting, // Keeps label visible on tap
+        type: BottomNavigationBarType.fixed, // Keeps label visible on tap
+        showUnselectedLabels: false, // Turn off labels for unselected items
       ),
     );
   }

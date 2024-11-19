@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:studysama/base/base_page.dart';
+import 'package:studysama/page/base/base_page.dart';
 import 'package:studysama/page/auth/signup_page.dart';
-import 'package:studysama/page/home_page.dart';
+import 'package:studysama/page/base/home/home_page.dart';
 import 'package:studysama/utils/colors.dart';
 
 import '../../models/user.dart';
@@ -32,11 +32,32 @@ class _LoginPageState extends State<LoginPage> {
   final ApiService apiService = ApiService();
 
   @override
+  void initState() {
+    super.initState();
+    _checkStoredCredentials(); // Check for stored credentials
+  }
+
+  @override
   void dispose() {
     // TODO: implement dispose
     _usernameOrEmailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _checkStoredCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Retrieve token and auto-login if valid
+    final storedToken = prefs.getString('token');
+    // final storedUser = prefs.getString('user');
+
+    if (storedToken != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => BasePage()),
+      );
+    }
   }
 
   void _login() async {

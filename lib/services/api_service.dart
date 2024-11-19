@@ -8,7 +8,7 @@ class ApiService {
   // final String baseUrl = 'https://{domain}/api/studysama';
 
   //development
-  final String baseUrl = 'https://cc5f-2001-e68-8201-e200-50cf-2ac1-9c00-6fd1.ngrok-free.app/api/studysama';
+  final String baseUrl = 'http://192.168.16.22/api/studysama';
 
   Future<List<User>> getUsers() async {
     try {
@@ -126,4 +126,78 @@ class ApiService {
     }
   }
 
+  Future<void> course_store(String token, String name, String desc) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/course/store'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'name': name,
+          'desc': desc,
+        }),
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201) {
+        // Handle success
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+        }
+        return;
+      } else {
+        // Handle validation errors
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body.trim());
+
+          // Check if the response contains 'errors'
+          if (responseData.containsKey('errors')) {
+            final errors = responseData['errors'];
+            String errorMessage = '';
+
+            // Throw the combined error message
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error if no validation errors are present
+            throw Exception(responseData['message'] ?? 'Failed to create course');
+          }
+        }
+      }
+    } catch (e) {
+      // Rethrow the exception for the caller to handle
+      // throw Exception('Error registering user: $e');
+      throw Exception(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> index_user_course(String token) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/course/index_user_course'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        // body: jsonEncode({'user_id': user_id}),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch courses');
+        } else {
+          throw Exception('Failed to fetch courses: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching user courses: $e');
+    }
+  }
 }

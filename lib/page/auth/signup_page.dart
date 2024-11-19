@@ -39,14 +39,11 @@ class _SignupPageState extends State<SignupPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    bool _isLoading = false;
-
     if (!_formKey.currentState!.validate()) {
       return; // Exit if the form is invalid
     }
 
     setState(() {
-      _isLoading = true;
       context.loaderOverlay.show();
     });
 
@@ -68,7 +65,6 @@ class _SignupPageState extends State<SignupPage> {
       print(errorMsg);
     } finally {
       setState(() {
-        _isLoading = false;
         context.loaderOverlay.hide();
       });
     }

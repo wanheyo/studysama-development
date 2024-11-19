@@ -14,7 +14,7 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary, // Button background color
         foregroundColor: Colors.white, // Button text color
-        textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16),
+        textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16, fontWeight: FontWeight.bold,),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8), // Rounded corners
         ),
@@ -32,7 +32,7 @@ class AppTheme {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary, // Text color
         side: BorderSide(color: AppColors.primary, width: 2), // Border color and width
-        textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16),
+        textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16, fontWeight: FontWeight.bold,),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8), // Rounded corners
         ),
@@ -57,7 +57,7 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary, // Button background color
         foregroundColor: Colors.white, // Button text color
-        textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16),
+        textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16, fontWeight: FontWeight.bold,),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8), // Rounded corners
         ),
@@ -75,7 +75,7 @@ class AppTheme {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.accent, // Text color
         side: BorderSide(color: AppColors.accent, width: 2), // Border color and width
-        textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16),
+        textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16, fontWeight: FontWeight.bold,),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8), // Rounded corners
         ),

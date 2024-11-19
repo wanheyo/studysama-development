@@ -1,12 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:studysama/base/base_page.dart';
-import 'package:studysama/page/home_page.dart';
+import 'package:studysama/page/base/base_page.dart';
+import 'package:studysama/page/base/home/home_page.dart';
 import 'package:studysama/page/auth/login_page.dart';
 import 'package:studysama/theme/app_theme.dart';
 import 'package:studysama/utils/colors.dart';
-
-import 'base/bottom_navbar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'StudySama v1',
+      title: 'StudySama dev',
       theme: AppTheme.lightTheme, // Light Theme
       darkTheme: AppTheme.darkTheme, // Dark Theme
       themeMode: ThemeMode.system, // Use system settings
@@ -33,7 +31,7 @@ class MyApp extends StatelessWidget {
       //home: LoginPage(),
       initialRoute: '/',
       routes: {
-        '/': (context) => LoginPage(),
+        '/': (context) => LoginPage(), //start page
         '/home': (context) => BasePage(),
       }
     );
@@ -85,7 +83,8 @@ class _MyHomePageState extends State<MyHomePage> {
         // TRY THIS: Try changing the color here to a specific color (to
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
         // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),

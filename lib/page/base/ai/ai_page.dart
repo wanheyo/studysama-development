@@ -2,17 +2,18 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/user.dart';
-import '../utils/user_data_util.dart';
+import '../../../models/user.dart';
+import '../../../utils/user_data_util.dart';
 
-class HomePage extends StatefulWidget {
+class AiPage extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _AiPageState createState() => _AiPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _AiPageState extends State<AiPage> {
   User? user;
   String? username;
   bool isLoading = true;
@@ -49,7 +50,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.home, size: 100, color: Colors.blue),
+          Icon(FontAwesomeIcons.bots, size: 100, color: Colors.blue),
           SizedBox(height: 20),
           if (isLoading)
             CircularProgressIndicator()
@@ -57,7 +58,7 @@ class _HomePageState extends State<HomePage> {
             Column(
               children: [
                 Text(
-                  'Welcome to StudySama!',
+                  'AI Page',
                   style: TextStyle(fontFamily: 'Montserrat', fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
