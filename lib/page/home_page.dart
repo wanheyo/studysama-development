@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
             Column(
               children: [
                 Text(
-                  'Welcome to StudySama!',
+                  'Welcome to StudySama! Hi',
                   style: TextStyle(fontFamily: 'Montserrat', fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
