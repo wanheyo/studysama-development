@@ -8,7 +8,7 @@ class ApiService {
   // final String baseUrl = 'https://{domain}/api/studysama';
 
   //development
-  final String baseUrl = 'http://192.168.16.22/api/studysama';
+  final String baseUrl = 'https://a78b-2001-e68-8222-e00-9dc7-96f-31f-f1ac.ngrok-free.app/api/studysama';
 
   Future<List<User>> getUsers() async {
     try {
@@ -123,6 +123,38 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error logging in: $e');
+    }
+  }
+
+  Future<void> logout(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/logout'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        // body: jsonEncode(<String, String>{
+        //   'login': usernameOrEmail,
+        //   'password': password,
+        // }),
+      );
+
+      if (response.statusCode == 200) {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body.trim());
+          print('Success Logout: $responseData');
+        }
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to logout');
+        } else {
+          throw Exception('Failed to logout: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error logging out: $e');
     }
   }
 
