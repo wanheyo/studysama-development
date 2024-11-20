@@ -44,7 +44,7 @@ class ProfilePage extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             child: Text(
-                              'Username', // Replace with the actual username
+                              '@aliya', // Replace with the actual username
                               style: TextStyle(
                                 fontFamily: 'Montserrat',
                                 fontWeight: FontWeight.bold,
@@ -58,7 +58,7 @@ class ProfilePage extends StatelessWidget {
 
                         // Follower Count in the middle
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0), // Adds space around the follower count
+                          padding: const EdgeInsets.symmetric(horizontal: 30.0), // Adds space around the follower count
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -66,7 +66,7 @@ class ProfilePage extends StatelessWidget {
                                 'Followers',
                                 style: TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 14,
+                                  fontSize: 25,
                                   fontFamily: 'Montserrat',
                                 ),
                               ),
@@ -74,7 +74,7 @@ class ProfilePage extends StatelessWidget {
                                 '120', // Replace with actual follower count
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 16,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Montserrat',
                                 ),
