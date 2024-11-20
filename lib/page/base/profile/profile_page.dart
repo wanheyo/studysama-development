@@ -58,11 +58,11 @@ Widget build(BuildContext context) {
   fontWeight: FontWeight.bold,
   color: Colors.white,
   fontSize: 18
-  ),
-  ),
-  ],
-  ),
-  ),
+             ),
+          ),
+        ],
+      ),
+    ),
   );
 }
 
