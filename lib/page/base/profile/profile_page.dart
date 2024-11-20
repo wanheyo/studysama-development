@@ -24,7 +24,7 @@ class ProfilePage extends StatelessWidget {
           Column(
             children: <Widget>[
               Expanded(
-                flex: 3.5,
+                flex: 4,
                 child: Container(
                   color: AppColors.primary,
                   child: Padding(
@@ -106,7 +106,7 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 7.5,
+                flex: 8,
                 child: Container(
                   color: Colors.white,
                 ),
