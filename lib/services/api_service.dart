@@ -8,7 +8,7 @@ class ApiService {
   // final String baseUrl = 'https://{domain}/api/studysama';
 
   //development
-  final String baseUrl = 'https://a78b-2001-e68-8222-e00-9dc7-96f-31f-f1ac.ngrok-free.app/api/studysama';
+  final String baseUrl = 'https://9452-2001-e68-8222-e00-883b-f73d-2694-6333.ngrok-free.app/api/studysama';
 
   Future<List<User>> getUsers() async {
     try {
@@ -215,7 +215,6 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        // body: jsonEncode({'user_id': user_id}),
       );
 
       if (response.statusCode == 200) {
@@ -230,6 +229,32 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error fetching user courses: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> index_lesson_course(String token, int course_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/lesson/index_lesson_course'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'course_id': course_id}),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch lesson');
+        } else {
+          throw Exception('Failed to fetch lessons: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching lessons: $e');
     }
   }
 }

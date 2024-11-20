@@ -10,6 +10,10 @@ class AppTheme {
       bodyMedium: TextStyle(fontFamily: 'Montserrat', color: AppColors.text),
       titleLarge: TextStyle(fontFamily: 'Montserrat', color: AppColors.text, fontWeight: FontWeight.bold),
     ),
+    cardTheme: CardTheme(
+      color: AppColors.background2,
+
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary, // Button background color
