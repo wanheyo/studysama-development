@@ -24,7 +24,7 @@ class ProfilePage extends StatelessWidget {
           Column(
             children: <Widget>[
               Expanded(
-                flex: 4,
+                flex: 3.5,
                 child: Container(
                   color: AppColors.primary,
                   child: Padding(
@@ -34,7 +34,7 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         // Profile Image on the left
                         CircleAvatar(
-                          radius: 40, // Adjust the size of the profile image
+                          radius: 75, // Adjust the size of the profile image
                           backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
                           backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
                         ),
@@ -106,7 +106,7 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 5,
+                flex: 7.5,
                 child: Container(
                   color: Colors.white,
                 ),
