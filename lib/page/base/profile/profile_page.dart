@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/colors.dart';
 
-
 class ProfilePage extends StatelessWidget {
   get headingTextStyle9 => null;
   get headingTextStyle => null;
@@ -25,7 +24,7 @@ class ProfilePage extends StatelessWidget {
           Column(
             children: <Widget>[
               Expanded(
-                flex: 3,
+                flex: 4,
                 child: Container(
                   color: AppColors.primary,
                   child: Padding(
@@ -35,7 +34,7 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         // Profile Image on the left
                         CircleAvatar(
-                          radius: 60, // Adjust the size of the profile image
+                          radius: 40, // Adjust the size of the profile image
                           backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
                           backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
                         ),
@@ -45,7 +44,7 @@ class ProfilePage extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             child: Text(
-                              'Aliya', // Replace with the actual username
+                              'Username', // Replace with the actual username
                               style: TextStyle(
                                 fontFamily: 'Montserrat',
                                 fontWeight: FontWeight.bold,
@@ -55,6 +54,30 @@ class ProfilePage extends StatelessWidget {
                               overflow: TextOverflow.ellipsis, // To handle long usernames
                             ),
                           ),
+                        ),
+
+                        // Follower Count in the middle
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Followers',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                                fontFamily: 'Montserrat',
+                              ),
+                            ),
+                            Text(
+                              '120', // Replace with actual follower count
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Montserrat',
+                              ),
+                            ),
+                          ],
                         ),
 
                         // Edit Profile button on the right
@@ -83,7 +106,7 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 7,
+                flex: 5,
                 child: Container(
                   color: Colors.white,
                 ),
@@ -95,7 +118,8 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-      /*child: Column(
+
+/*child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.person, size: 100, color: Colors.blue),
