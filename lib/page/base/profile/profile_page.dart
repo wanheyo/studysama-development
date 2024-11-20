@@ -20,7 +20,7 @@ class ProfilePage extends StatelessWidget {
           Icon(Icons.person, size: 100, color: Colors.blue),
           SizedBox(height: 20),
           Text(
-            'View your profile details here!',
+           'here!',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 20),

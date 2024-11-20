@@ -1,3 +1,4 @@
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:studysama/page/base/base_page.dart';
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       //home: LoginPage(),
       initialRoute: '/',
       routes: {
-        '/': (context) => LoginPage(), //start page
+        '/': (context) => BasePage(), //start page
         '/home': (context) => BasePage(),
       }
     );
