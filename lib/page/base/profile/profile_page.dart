@@ -2,8 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../utils/colors.dart';
+
+
 class ProfilePage extends StatelessWidget {
-  get primary => null;
+
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -23,7 +26,7 @@ class ProfilePage extends StatelessWidget {
                     Expanded(
                         flex: 4,
                         child: Container(
-                          color: primary,
+                          color: AppColors.primary,
                         ),
                     ),
 
