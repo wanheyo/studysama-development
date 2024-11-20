@@ -44,6 +44,30 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+    title: const Row(
+    children: [
+  SizedBox(width: 8), // Space between the icon and text
+  Text(
+  ' | My Profile',
+  style: TextStyle(
+  fontFamily: 'Montserrat',
+  fontWeight: FontWeight.bold,
+  color: Colors.white,
+  fontSize: 18
+  ),
+  ),
+  ],
+  ),
+  ),
+  );
+}
+
+
+
       /*child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
