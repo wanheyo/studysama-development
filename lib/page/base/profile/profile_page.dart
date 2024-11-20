@@ -28,11 +28,56 @@ class ProfilePage extends StatelessWidget {
                 flex: 4,
                 child: Container(
                   color: AppColors.primary,
-                  child: Center(
-                    child: CircleAvatar(
-                      radius: 50, // Adjust the size of the profile image
-                      backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
-                      backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Profile Image on the left
+                        CircleAvatar(
+                          radius: 40, // Adjust the size of the profile image
+                          backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
+                          backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
+                        ),
+
+                        // Username beside the profile image
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Text(
+                              'Username', // Replace with the actual username
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                              overflow: TextOverflow.ellipsis, // To handle long usernames
+                            ),
+                          ),
+                        ),
+
+                        // Edit Profile button on the right
+                        ElevatedButton(
+                          onPressed: () {
+                            // Add the edit profile action here
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: AppColors.primary, backgroundColor: Colors.white, // Text color
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8), // Rounded corners
+                            ),
+                          ),
+                          child: Text(
+                            'Edit Profile',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -50,11 +95,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
       /*child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
