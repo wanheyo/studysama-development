@@ -7,10 +7,7 @@ import '../../../utils/colors.dart';
 
 class ProfilePage extends StatelessWidget {
   get headingTextStyle9 => null;
-
   get headingTextStyle => null;
-
-
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -20,41 +17,36 @@ class ProfilePage extends StatelessWidget {
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Stack(
+      body: Stack(
+        children: <Widget>[
+          Column(
             children: <Widget>[
-              Column(
-                  children: <Widget>[
-                    Expanded(
-                        flex: 4,
-                        child: Container(
-                          color: AppColors.primary,
-                        ),
+              Expanded(
+                flex: 4,
+                child: Container(
+                  color: AppColors.primary,
+                  child: Center(
+                    child: CircleAvatar(
+                      radius: 50, // Adjust the size of the profile image
+                      backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
+                      backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
                     ),
-
-                    Expanded(
-                      flex: 5,
-                      child: Container(
-                        color: Colors.white,
-                      ),
-                    ),
-
-                    Align(
-                      alignment:Alignment.centerLeft,
-                      child:Text(
-                        "My Profile",
-                        textAlign:TextAlign.left,
-                          style:headingTextStyle,
-                      )
-                    )
-                  ],
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 5,
+                child: Container(
+                  color: Colors.white,
+                ),
               ),
             ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -91,4 +83,12 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
+  Align(
+                      alignment:Alignment.centerLeft,
+                      child:Text(
+                        "My Profile",
+                        textAlign:TextAlign.left,
+                          style:headingTextStyle,
+                      )
+                    )
 }*/
