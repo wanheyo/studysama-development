@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatelessWidget {
+  get primary => null;
+
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear all data from SharedPreferences
@@ -13,8 +15,33 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
+    return Scaffold(
+        body: Stack(
+            children: <Widget>[
+              Column(
+                  children: <Widget>[
+                    Expanded(
+                        flex: 4,
+                        child: Container(
+                          color: primary,
+                        ),
+                    ),
+
+                    Expanded(
+                      flex: 5,
+                      child: Container(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+              ),
+            ],
+        ),
+    );
+  }
+}
+
+      /*child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.person, size: 100, color: Colors.blue),
@@ -42,4 +69,4 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-}
+}*/
