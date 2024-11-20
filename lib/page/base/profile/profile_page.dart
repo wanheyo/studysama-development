@@ -35,7 +35,7 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         // Profile Image on the left
                         CircleAvatar(
-                          radius: 40, // Adjust the size of the profile image
+                          radius: 60, // Adjust the size of the profile image
                           backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
                           backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
                         ),
@@ -45,7 +45,7 @@ class ProfilePage extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             child: Text(
-                              'Username', // Replace with the actual username
+                              'Aliya', // Replace with the actual username
                               style: TextStyle(
                                 fontFamily: 'Montserrat',
                                 fontWeight: FontWeight.bold,
