@@ -32,26 +32,27 @@ class ProfilePage extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Profile Image on the left
-                        CircleAvatar(
-                          radius: 70, // Adjust the size of the profile image
-                          backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
-                          backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
+                        // Profile Image and Username in a Column on the left
+                        Column(
+                          children: [
+                            CircleAvatar(
+                              radius: 40, // Size of the profile image
+                              backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
+                              backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
+                            ),
+                            const SizedBox(height: 8), // Space between image and username
+                            Text(
+                              'Username', // Replace with the actual username
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                              overflow: TextOverflow.ellipsis, // To handle long usernames
+                            ),
+                          ],
                         ),
-
-                        const SizedBox(height: 8), // Space between image and username
-                        Text(
-                          'Username', // Replace with the actual username
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                          overflow: TextOverflow.ellipsis, // To handle long usernames
-                        ),
-                      ],
-                    ),
 
                         // Spacer to center the followers and button
                         Spacer(),
@@ -65,7 +66,7 @@ class ProfilePage extends StatelessWidget {
                               'Followers',
                               style: TextStyle(
                                 color: Colors.white70,
-                                fontSize: 20,
+                                fontSize: 14,
                                 fontFamily: 'Montserrat',
                               ),
                             ),
@@ -73,7 +74,7 @@ class ProfilePage extends StatelessWidget {
                               '120', // Replace with actual follower count
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 25,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Montserrat',
                               ),
@@ -144,6 +145,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
+
 
 
 
