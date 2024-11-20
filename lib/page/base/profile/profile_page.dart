@@ -57,27 +57,30 @@ class ProfilePage extends StatelessWidget {
                         ),
 
                         // Follower Count in the middle
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Followers',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                                fontFamily: 'Montserrat',
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0), // Adds space around the follower count
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Followers',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  fontFamily: 'Montserrat',
+                                ),
                               ),
-                            ),
-                            Text(
-                              '120', // Replace with actual follower count
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Montserrat',
+                              Text(
+                                '120', // Replace with actual follower count
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Montserrat',
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
 
                         // Edit Profile button on the right
