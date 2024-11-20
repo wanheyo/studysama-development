@@ -24,20 +24,19 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         title: const Row(
           children: [
-            SizedBox(width: 8), // Space between the icon and text
+            // Space between the icon and text
             Text(
               ' | My Profile',
               style: TextStyle(
                   fontFamily: 'Montserrat',
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  backgroundColor: AppColors.primary,
                   fontSize: 18
               ),
             ),
           ],
         ),
-      ),
+
         body: Stack(
             children: <Widget>[
               Column(
