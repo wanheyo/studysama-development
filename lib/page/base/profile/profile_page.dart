@@ -40,70 +40,71 @@ class ProfilePage extends StatelessWidget {
                         ),
 
                         // Username beside the profile image
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 16.0),
-                            child: Text(
-                              '@aliya', // Replace with the actual username
-                              style: TextStyle(
-                                fontFamily: 'Montserrat',
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                              overflow: TextOverflow.ellipsis, // To handle long usernames
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          child: Text(
+                            'Username', // Replace with the actual username
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 18,
                             ),
+                            overflow: TextOverflow.ellipsis, // To handle long usernames
                           ),
                         ),
 
+                        // Spacer to center the followers and button
+                        Spacer(),
+
                         // Followers Count and Edit Profile button in the center
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Followers label and count
-                              Text(
-                                'Followers',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 20,
-                                  fontFamily: 'Montserrat',
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Followers label and count
+                            Text(
+                              'Followers',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 20,
+                                fontFamily: 'Montserrat',
+                              ),
+                            ),
+                            Text(
+                              '120', // Replace with actual follower count
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Montserrat',
+                              ),
+                            ),
+                            const SizedBox(height: 8), // Spacing between count and button
+                            // Edit Profile button below followers count
+                            ElevatedButton(
+                              onPressed: () {
+                                // Add the edit profile action here
+                              },
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: AppColors.primary, backgroundColor: Colors.white, // Text color
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8), // Rounded corners
                                 ),
                               ),
-                              Text(
-                                '120', // Replace with actual follower count
+                              child: Text(
+                                'Edit Profile',
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 25,
+                                  fontFamily: 'Montserrat',
                                   fontWeight: FontWeight.bold,
-                                  fontFamily: 'Montserrat',
+                                  color: AppColors.primary,
                                 ),
                               ),
-                              const SizedBox(height: 8), // Spacing between count and button
-                              // Edit Profile button below followers count
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Add the edit profile action here
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  foregroundColor: AppColors.primary, backgroundColor: Colors.white, // Text color
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8), // Rounded corners
-                                  ),
-                                ),
-                                child: Text(
-                                  'Edit Profile',
-                                  style: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+
+                        // Spacer to maintain center alignment
+                        Spacer(),
 
                         // Badge Frame on the right side
                         Container(
@@ -144,6 +145,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
+
 
 
 /*child: Column(
