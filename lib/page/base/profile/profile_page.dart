@@ -17,31 +17,31 @@ class ProfilePage extends StatelessWidget {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          color: Colors
-              .purple, // Change this to your preferred background color
-          // Uncomment and replace the image path if you want a background image
-          // image: DecorationImage(
-          //   image: AssetImage('assets/background.png'),
-          //   fit: BoxFit.cover,
-          // ),
+        body: Stack(
+            children: <Widget>[
+              Column(
+                  children: <Widget>[
+                    Expanded(
+                        flex: 4,
+                        child: Container(
+                          color: AppColors.primary,
+                        ),
+                    ),
+
+                    Expanded(
+                      flex: 5,
+                      child: Container(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+              ),
+            ],
         ),
-        child: Center(
-          child: Text(
-            'My Profile',
-            style: TextStyle(
-              fontFamily: 'Montserrat',
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 18,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -49,7 +49,8 @@ class ProfilePage extends StatelessWidget {
 
 
 
-/*child: Column(
+
+      /*child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.person, size: 100, color: Colors.blue),
