@@ -58,7 +58,7 @@ class ProfilePage extends StatelessWidget {
 
                         // Follower Count in the middle
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 30.0), // Adds space around the follower count
+                          padding: const EdgeInsets.symmetric(horizontal: 50.0), // Adds space around the follower count
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
