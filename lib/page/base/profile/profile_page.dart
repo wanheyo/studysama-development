@@ -30,11 +30,11 @@ class ProfilePage extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // Profile Image on the left
                         CircleAvatar(
-                          radius: 75, // Adjust the size of the profile image
+                          radius: 70, // Adjust the size of the profile image
                           backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
                           backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
                         ),
@@ -42,7 +42,7 @@ class ProfilePage extends StatelessWidget {
                         // Username beside the profile image
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            padding: const EdgeInsets.only(left: 16.0),
                             child: Text(
                               '@aliya', // Replace with the actual username
                               style: TextStyle(
@@ -56,17 +56,18 @@ class ProfilePage extends StatelessWidget {
                           ),
                         ),
 
-                        // Follower Count in the middle
+                        // Followers Count and Edit Profile button in the center
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 100), // Adds space around the follower count
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              // Followers label and count
                               Text(
                                 'Followers',
                                 style: TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 25,
+                                  fontSize: 20,
                                   fontFamily: 'Montserrat',
                                 ),
                               ),
@@ -74,32 +75,54 @@ class ProfilePage extends StatelessWidget {
                                 '120', // Replace with actual follower count
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 20,
+                                  fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Montserrat',
+                                ),
+                              ),
+                              const SizedBox(height: 8), // Spacing between count and button
+                              // Edit Profile button below followers count
+                              ElevatedButton(
+                                onPressed: () {
+                                  // Add the edit profile action here
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: AppColors.primary, backgroundColor: Colors.white, // Text color
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8), // Rounded corners
+                                  ),
+                                ),
+                                child: Text(
+                                  'Edit Profile',
+                                  style: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
 
-                        // Edit Profile button on the right
-                        ElevatedButton(
-                          onPressed: () {
-                            // Add the edit profile action here
-                          },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: AppColors.primary, backgroundColor: Colors.white, // Text color
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8), // Rounded corners
+                        // Badge Frame on the right side
+                        Container(
+                          width: 50, // Width of the badge frame
+                          height: 50, // Height of the badge frame
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.white, // Border color for badge frame
+                              width: 2,
                             ),
+                            borderRadius: BorderRadius.circular(8), // Rounded corners
                           ),
-                          child: Text(
-                            'Edit Profile',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
+                          child: Center(
+                            child: Text(
+                              '🎖️', // Placeholder for badge (can replace with an icon or image)
+                              style: TextStyle(
+                                fontSize: 24,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -109,7 +132,7 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 8,
+                flex: 5,
                 child: Container(
                   color: Colors.white,
                 ),
@@ -121,6 +144,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
+
 
 /*child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
