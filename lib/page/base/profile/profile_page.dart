@@ -6,6 +6,10 @@ import '../../../utils/colors.dart';
 
 
 class ProfilePage extends StatelessWidget {
+  get headingTextStyle9 => null;
+
+  get headingTextStyle => null;
+
 
 
   Future<void> _logout(BuildContext context) async {
@@ -38,6 +42,15 @@ class ProfilePage extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
+
+                    Align(
+                      alignment:Alignment.centerLeft,
+                      child:Text(
+                        "My Profile",
+                        textAlign:TextAlign.left,
+                          style:headingTextStyle,
+                      )
+                    )
                   ],
               ),
             ],
