@@ -16,6 +16,8 @@ class ProfilePage extends StatelessWidget {
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,18 +31,13 @@ class ProfilePage extends StatelessWidget {
                   fontFamily: 'Montserrat',
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  backgroundColor: AppColors.primary,
                   fontSize: 18
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
         body: Stack(
             children: <Widget>[
               Column(
