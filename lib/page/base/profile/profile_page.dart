@@ -39,20 +39,19 @@ class ProfilePage extends StatelessWidget {
                           backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
                         ),
 
-                        // Username beside the profile image
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: Text(
-                            'Username', // Replace with the actual username
-                            style: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 18,
-                            ),
-                            overflow: TextOverflow.ellipsis, // To handle long usernames
+                        const SizedBox(height: 8), // Space between image and username
+                        Text(
+                          'Username', // Replace with the actual username
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 18,
                           ),
+                          overflow: TextOverflow.ellipsis, // To handle long usernames
                         ),
+                      ],
+                    ),
 
                         // Spacer to center the followers and button
                         Spacer(),
