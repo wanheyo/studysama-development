@@ -38,12 +38,6 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
     }
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
-  }
   }
 
   @override
@@ -172,6 +166,8 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     popularLessonCard(
                       title: 'MATH',
+                      description:
+                      'Master mathematical concepts and sharpen your problem-solving skills.',
                       image: "assets/math.jpeg",
                       likes: 1200,
                       rating: 4.9,
@@ -182,6 +178,8 @@ class _HomePageState extends State<HomePage> {
                     SizedBox(height: 10),
                     popularLessonCard(
                       title: 'SCIENCE',
+                      description:
+                      'Explore the wonders of science and expand your knowledge.',
                       image: "assets/science.jpeg",
                       likes: 972,
                       rating: 4.7,
@@ -275,6 +273,7 @@ class _HomePageState extends State<HomePage> {
   // Widget for Popular Lesson Card
   Widget popularLessonCard({
     required String title,
+    required String description,
     required String image,
     required int likes,
     required double rating,
@@ -290,6 +289,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.only(
@@ -317,39 +317,48 @@ class _HomePageState extends State<HomePage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      SizedBox(height: 5),
                       Text(
-                        '$likes Likes',
+                        description,
                         style: TextStyle(color: Colors.grey[400]),
                       ),
+                      SizedBox(height: 5),
                       Text(
-                        '⭐ $rating',
-                        style: TextStyle(color: Colors.amber),
+                        'Total Visits: $totalVisits',
+                        style: TextStyle(color: Colors.grey[500]),
+                      ),
+                      Text(
+                        'Created: $createdAt',
+                        style: TextStyle(color: Colors.grey[500]),
+                      ),
+                      Text(
+                        'Updated: $updatedAt',
+                        style: TextStyle(color: Colors.grey[500]),
                       ),
                     ],
                   ),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0, top: 10.0),
+                child: Column(
+                  children: [
+                    Text(
+                      '⭐ $rating',
+                      style: TextStyle(
+                        color: Colors.amber,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '$likes Likes',
+                      style: TextStyle(color: Colors.grey[400]),
+                    ),
+                  ],
+                ),
+              ),
             ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Total Visits: $totalVisits',
-                  style: TextStyle(color: Colors.grey[500]),
-                ),
-                Text(
-                  'Created: $createdAt',
-                  style: TextStyle(color: Colors.grey[500]),
-                ),
-                Text(
-                  'Updated: $updatedAt',
-                  style: TextStyle(color: Colors.grey[500]),
-                ),
-              ],
-            ),
           ),
         ],
       ),
