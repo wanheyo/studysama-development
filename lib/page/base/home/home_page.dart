@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('Error loading username: $e');
       setState(() {
-        isLoading = false;
+        isLoading = false);
       });
     }
 
@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                       likes: 450,
                       rating: 4.8,
                       totalVisits: 1000,
-                      createdAt: '2023-07-11',
+                      createdAt: '2023-07-01',
                       updatedAt: '2024-11-20',
                     ),
                     SizedBox(height: 10),
@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
                       rating: 4.6,
                       totalVisits: 750,
                       createdAt: '2023-02-20',
-                      updatedAt: '2024-10-19',
+                      updatedAt: '2024-11-19',
                     ),
                   ],
                 ),
