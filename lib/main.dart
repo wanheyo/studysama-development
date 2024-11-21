@@ -32,13 +32,12 @@ class MyApp extends StatelessWidget {
       //home: LoginPage(),
       initialRoute: '/',
       routes: {
-<<<<<<< HEAD
+
         '/': (context) => BasePage(), //start page
-=======
+
         '/': (context) => LoginPage(),
         //tukar jadi BasePage() kalau nak test run tanpa login
 
->>>>>>> 4648dd47ae3071151b7d9e79aaca6fa0b5201c57
         '/home': (context) => BasePage(),
       }
     );
