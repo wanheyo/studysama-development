@@ -27,13 +27,11 @@ class ProfilePage extends StatelessWidget {
                 flex: 4,
                 child: Container(
                   color: AppColors.primary,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                  //child: Padding(
+                   // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Spacer to maintain center alignment
-                        Spacer(),
                         // Profile Image and Username in a Column on the left
                         Column(
                           children: [
@@ -131,7 +129,7 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
+                  //),
                 ),
               ),
               Expanded(
