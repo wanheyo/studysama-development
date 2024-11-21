@@ -117,20 +117,75 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 70),
                             Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children:[
+                              mainAxisSize: MainAxisSize.min, // Minimal vertical space usage
+                              children: [
+                                // Row for Post and Followers
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center, // Center align horizontally
+                                  children: [
+                                    // Column for Posts
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Post',
+                                          style: TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 20,
+                                            fontFamily: 'Montserrat',
+                                          ),
+                                        ),
+                                        Text(
+                                          '10', // Replace with actual post count
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Montserrat',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(width: 40), // Space between Post and Followers
+
+                                    // Column for Followers
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Followers',
+                                          style: TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 20,
+                                            fontFamily: 'Montserrat',
+                                          ),
+                                        ),
+                                        Text(
+                                          '120', // Replace with actual follower count
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Montserrat',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20), // Space between Row and Button
+
                                 // Edit Profile Button
                                 ElevatedButton(
                                   onPressed: () {
                                     // Add the edit profile action here
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    foregroundColor: AppColors.primary,
-                                    backgroundColor: Colors.white,
+                                    foregroundColor: AppColors.primary, // Text color
+                                    backgroundColor: Colors.white, // Button background color
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(8), // Rounded corners
                                     ),
                                   ),
                                   child: Text(
@@ -145,36 +200,7 @@ class ProfilePage extends StatelessWidget {
                               ],
                             ),
 
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children:[
-
-                                ElevatedButton(
-                                  onPressed: () {
-                                    // Add the edit profile action here
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: AppColors.primary,
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'Share Profile',
-                                    style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                              ]
-                            ),
-
-                        Spacer(),
+                            Spacer(),
 
                         // Badge Frame
                         Container(
