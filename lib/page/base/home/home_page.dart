@@ -169,7 +169,6 @@ class _HomePageState extends State<HomePage> {
                       description:
                       'Master mathematical concepts and sharpen your problem-solving skills.',
                       image: "assets/math.jpeg",
-                      likes: 1200,
                       rating: 4.9,
                       totalVisits: 1000,
                       createdAt: '2023-07-01',
@@ -181,7 +180,6 @@ class _HomePageState extends State<HomePage> {
                       description:
                       'Explore the wonders of science and expand your knowledge.',
                       image: "assets/science.jpeg",
-                      likes: 972,
                       rating: 4.7,
                       totalVisits: 750,
                       createdAt: '2023-02-20',
@@ -275,7 +273,6 @@ class _HomePageState extends State<HomePage> {
     required String title,
     required String description,
     required String image,
-    required int likes,
     required double rating,
     required int totalVisits,
     required String createdAt,
@@ -350,10 +347,6 @@ class _HomePageState extends State<HomePage> {
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
-                    Text(
-                      '$likes Likes',
-                      style: TextStyle(color: Colors.grey[400]),
                     ),
                   ],
                 ),
