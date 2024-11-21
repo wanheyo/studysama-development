@@ -61,11 +61,11 @@ class ProfilePage extends StatelessWidget {
 
                         // Follower and post
                         Column(
-                          mainAxisSize: MainAxisSize.min, // Minimal vertical space usage
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             // Row for Post and Followers
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center, // Center align horizontally
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 // Column for Posts
                                 Column(
@@ -80,7 +80,7 @@ class ProfilePage extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      '10', // Replace with actual post count
+                                      '10',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 25,
@@ -90,7 +90,7 @@ class ProfilePage extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(width: 40), // Space between Post and Followers
+                                const SizedBox(width: 40),
 
                                 // Column for Followers
                                 Column(
@@ -105,7 +105,7 @@ class ProfilePage extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      '120', // Replace with actual follower count
+                                      '120',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 25,
@@ -117,7 +117,7 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 20), // Space between Row and Button
+                            const SizedBox(height: 70),
 
                             // Edit Profile Button
                             ElevatedButton(
@@ -125,10 +125,10 @@ class ProfilePage extends StatelessWidget {
                                 // Add the edit profile action here
                               },
                               style: ElevatedButton.styleFrom(
-                                foregroundColor: AppColors.primary, // Text color
-                                backgroundColor: Colors.white, // Button background color
+                                foregroundColor: AppColors.primary,
+                                backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8), // Rounded corners
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                               child: Text(
