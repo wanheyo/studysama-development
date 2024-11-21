@@ -117,33 +117,62 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 70),
 
-                            // Edit Profile Button
-                            ElevatedButton(
-                              onPressed: () {
-                                // Add the edit profile action here
-                              },
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: AppColors.primary,
-                                backgroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                            Column(
+                              children:[
+                                const SizedBox(height: 70),
+
+                                // Edit Profile Button
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Add the edit profile action here
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Edit Profile',
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                'Edit Profile',
-                                style: TextStyle(
-                                  fontFamily: 'Montserrat',
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
 
-
+                            Column(
+                              children:[
+                                const SizedBox(height: 70),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Add the edit profile action here
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Share Profile',
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                              ]
+                            ),
 
                         Spacer(),
 
