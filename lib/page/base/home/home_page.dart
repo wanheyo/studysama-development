@@ -189,12 +189,14 @@ class _HomePageState extends State<HomePage> {
                           title: 'MATH 101',
                           subtitle: 'understand basic mathematics concepts',
                           image: "assets/math.jpeg", // Math image
+                          rating: 4.9,
                         ),
                         SizedBox(height: 10),
                         popularLessonCard(
                           title: 'SCIENCE EXPLORATION',
                           subtitle: 'explore interesting science topics',
                           image: "assets/science.jpeg", // Science image
+                          rating: 4.7,
                         ),
                       ],
                     ),
@@ -262,8 +264,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Popular Lesson Card
-  Widget popularLessonCard({required String title, required String subtitle, required String image}) {
+  // Widget for Popular Lesson Card with Rating
+  Widget popularLessonCard({
+    required String title,
+    required String subtitle,
+    required String image,
+    required double rating,
+  }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -309,6 +316,27 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
+            ),
+          ),
+          // Rating Display
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.star,
+                  color: Colors.yellow,
+                  size: 24,
+                ),
+                Text(
+                  rating.toString(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
