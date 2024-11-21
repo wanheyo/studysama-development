@@ -51,9 +51,19 @@ class ProfilePage extends StatelessWidget {
                                 fontFamily: 'Montserrat',
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 21,
                               ),
                               overflow: TextOverflow.ellipsis, // kalau nama panjang
+                            ),
+                            Text(
+                              'do the rest Allah do the BEST',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                //fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                              overflow: TextOverflow.ellipsis, // kalau text panjang
                             ),
                           ],
                         ),
@@ -122,7 +132,7 @@ class ProfilePage extends StatelessWidget {
 
                             const SizedBox(height: 20),
 
-                            // Row for Edit Profile and Share Profile Buttons
+                            // button
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -152,7 +162,7 @@ class ProfilePage extends StatelessWidget {
                                 const SizedBox(width: 20),
                                 ElevatedButton(
                                   onPressed: () {
-                                    // Add the share profile action here
+                                    // coding nk connect nnti
                                   },
                                   style: ElevatedButton.styleFrom(
                                     foregroundColor: AppColors.primary,
@@ -170,6 +180,7 @@ class ProfilePage extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+
                               ],
                             ),
                           ],
@@ -177,7 +188,7 @@ class ProfilePage extends StatelessWidget {
 
                         Spacer(),
 
-                        // Badge Frame
+                        // Badge
                         Container(
                           width: 100,
                           height: 70,
@@ -199,7 +210,7 @@ class ProfilePage extends StatelessWidget {
                           ),
                         ),
                       ],
-                        ),
+                      ),
 
                     ),
                   ),
