@@ -112,36 +112,38 @@ class ProfilePage extends StatelessWidget {
                                 ],
                             ),
 
+                            const SizedBox(width: 40), // Space between columns
+
+                            // Edit Profile Button as a separate column
                             Column(
                               mainAxisSize: MainAxisSize.min,
-
                               children: [
-                              const SizedBox(height: 20),
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Add the edit profile action here
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Edit Profile',
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
 
-                              // edit button
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Add the edit profile action here
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  foregroundColor: AppColors.primary, backgroundColor: Colors.white, // Text color
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8), // Rounded corners
-                                  ),
-                                ),
-                                child: Text(
-                                  'Edit Profile',
-                                  style: TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ),
-                              ],
-                            ),
-                              ],
-                            ),
 
 
                         Spacer(),
