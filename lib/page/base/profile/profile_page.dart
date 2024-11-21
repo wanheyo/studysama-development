@@ -27,13 +27,14 @@ class ProfilePage extends StatelessWidget {
                 flex: 4,
                 child: Container(
                   color: AppColors.primary,
-                  //child: Padding(
-                   // padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                  child: Padding(
+                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // Profile Image and Username in a Column on the left
                         Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             CircleAvatar(
                               radius: 70, // Size of the profile image
@@ -129,7 +130,7 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ],
                     ),
-                  //),
+                  ),
                 ),
               ),
               Expanded(
