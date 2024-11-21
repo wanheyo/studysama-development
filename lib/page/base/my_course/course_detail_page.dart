@@ -424,6 +424,38 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                     child: const Text("Leave Course"),
                   ),
                 ),
+              if(widget.course.role_id == null)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageCoursePage(
+                            course: widget.course,
+                            onCourseUpdated: (updatedCourse) {
+                              setState(() {
+                                widget.course = updatedCourse; // Update the course data
+                                initializeData(); // Refresh lessons or other related data
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: const Text("Join Course"),
+                  ),
+                ),
             ],
           ),
         ),
