@@ -111,7 +111,7 @@ class ProfilePage extends StatelessWidget {
                                   ),
                           ],
                         ),
-                  ),
+
                             const SizedBox(height: 20),
                             // edit button
                             ElevatedButton(
