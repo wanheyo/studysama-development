@@ -55,29 +55,13 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
 
-
+                        // Spacer to center the followers and button
+                        Spacer(),
 
                         // Followers Count
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                          Text(
-                          'Post',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 20,
-                            fontFamily: 'Montserrat',
-                          ),
-                        ),
-                      Text(
-                        '10', // Replace with actual follower count
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Montserrat',
-                        ),
-                      ),
                             // Followers label and count
                             Text(
                               'Followers',
@@ -97,7 +81,9 @@ class ProfilePage extends StatelessWidget {
                               ),
                             ),
 
-                            Spacer(),// Spacer to center the followers and button
+
+
+
                             const SizedBox(height: 20), // Spacing between count and button
                             // Edit Profile button below followers count
                             ElevatedButton(
