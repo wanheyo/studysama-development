@@ -109,10 +109,10 @@ class ProfilePage extends StatelessWidget {
                                       fontFamily: 'Montserrat',
                                     ),
                                   ),
-                          ],
-                        ),
+
 
                             const SizedBox(height: 20),
+
                             // edit button
                             ElevatedButton(
                               onPressed: () {
@@ -133,6 +133,9 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            ],
+                            ),
+
                           ],
                         ),
 
