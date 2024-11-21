@@ -35,9 +35,15 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('Error loading username: $e');
       setState(() {
-        isLoading = false);
+        isLoading = false;
       });
     }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
   }
 
   @override
@@ -181,7 +187,7 @@ class _HomePageState extends State<HomePage> {
                       rating: 4.6,
                       totalVisits: 750,
                       createdAt: '2023-02-20',
-                      updatedAt: '2024-11-19',
+                      updatedAt: '2024-10-19',
                     ),
                   ],
                 ),
