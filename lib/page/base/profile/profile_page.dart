@@ -58,7 +58,7 @@ class ProfilePage extends StatelessWidget {
                         // Spacer to center the followers and button
                         Spacer(),
 
-                        // Followers Count and Edit Profile button in the center
+                        // Followers Count
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -80,7 +80,30 @@ class ProfilePage extends StatelessWidget {
                                 fontFamily: 'Montserrat',
                               ),
                             ),
-                            const SizedBox(height: 8), // Spacing between count and button
+
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Followers label and count
+                                Text(
+                                  'Post',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 20,
+                                    fontFamily: 'Montserrat',
+                                  ),
+                                ),
+                                Text(
+                                  '10', // Replace with actual follower count
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Montserrat',
+                                  ),
+                                ),
+
+                            const SizedBox(height: 20), // Spacing between count and button
                             // Edit Profile button below followers count
                             ElevatedButton(
                               onPressed: () {
@@ -109,8 +132,8 @@ class ProfilePage extends StatelessWidget {
 
                         // Badge Frame on the right side
                         Container(
-                          width: 50, // Width of the badge frame
-                          height: 50, // Height of the badge frame
+                          width: 100, // Width of the badge frame
+                          height: 70, // Height of the badge frame
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: Colors.white, // Border color for badge frame
@@ -122,17 +145,20 @@ class ProfilePage extends StatelessWidget {
                             child: Text(
                               'badge', // Placeholder for badge (can replace with an icon or image)
                               style: TextStyle(
-                                fontSize: 24,
+                                fontSize: 17,
                                 color: Colors.white,
                               ),
                             ),
                           ),
                         ),
                       ],
+                        ),
+                    ],
                     ),
                   ),
                 ),
               ),
+
               Expanded(
                 flex: 5,
                 child: Container(
