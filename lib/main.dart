@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
 
         '/': (context) => BasePage(), //start page
 
-        '/': (context) => LoginPage(),
+       // '/': (context) => LoginPage(),
         //tukar jadi BasePage() kalau nak test run tanpa login
 
         '/home': (context) => BasePage(),
