@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('Error loading username: $e');
       setState(() {
-        isLoading = false);
+        isLoading = false;
       });
     }
 
@@ -173,8 +173,8 @@ class _HomePageState extends State<HomePage> {
                     popularLessonCard(
                       title: 'MATH',
                       image: "assets/math.jpeg",
-                      likes: 450,
-                      rating: 4.8,
+                      likes: 1200,
+                      rating: 4.9,
                       totalVisits: 1000,
                       createdAt: '2023-07-01',
                       updatedAt: '2024-11-20',
@@ -183,8 +183,8 @@ class _HomePageState extends State<HomePage> {
                     popularLessonCard(
                       title: 'SCIENCE',
                       image: "assets/science.jpeg",
-                      likes: 320,
-                      rating: 4.6,
+                      likes: 972,
+                      rating: 4.7,
                       totalVisits: 750,
                       createdAt: '2023-02-20',
                       updatedAt: '2024-11-19',
