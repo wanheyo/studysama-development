@@ -225,11 +225,11 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ],
                         ),
-
-                    ),
+                    ],
                   ),
                 ),
-
+                ),
+              ),
 
               Expanded(
                 flex: 5,
