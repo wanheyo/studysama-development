@@ -59,56 +59,32 @@ class ProfilePage extends StatelessWidget {
                         Spacer(),
 
                         // Followers Count
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center, // Center align the row
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Posts Section
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Post',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 20,
-                                    fontFamily: 'Montserrat',
-                                  ),
-                                ),
-                                Text(
-                                  '10', // Replace with actual post count
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Montserrat',
-                                  ),
-                                ),
-                              ],
+                            // Followers label and count
+                            Text(
+                              'Followers',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 20,
+                                fontFamily: 'Montserrat',
+                              ),
                             ),
-                            const SizedBox(width: 24), // Space between "Posts" and "Followers"
+                            Text(
+                              '120', // Replace with actual follower count
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Montserrat',
+                              ),
+                            ),
 
-                            // Followers Section
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Followers',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 20,
-                                    fontFamily: 'Montserrat',
-                                  ),
-                                ),
-                                Text(
-                                  '120', // Replace with actual follower count
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Montserrat',
-                                  ),
-                                ),
-                                const SizedBox(height: 20), // Spacing between count and button
+
+
+
+                            const SizedBox(height: 20), // Spacing between count and button
                             // Edit Profile button below followers count
                             ElevatedButton(
                               onPressed: () {
@@ -156,13 +132,13 @@ class ProfilePage extends StatelessWidget {
                             ),
                           ),
                         ),
-                          ],
+                      ],
                         ),
-                  ],
+
                     ),
+                  ),
                 ),
-                ),
-              ),
+
 
               Expanded(
                 flex: 5,
