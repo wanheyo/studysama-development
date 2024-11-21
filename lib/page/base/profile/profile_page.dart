@@ -117,11 +117,10 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-
+                            const SizedBox(height: 70),
                             Column(
+                              mainAxisSize: MainAxisSize.min,
                               children:[
-                                const SizedBox(height: 70),
-
                                 // Edit Profile Button
                                 ElevatedButton(
                                   onPressed: () {
@@ -147,8 +146,9 @@ class ProfilePage extends StatelessWidget {
                             ),
 
                             Column(
+                              mainAxisSize: MainAxisSize.min,
                               children:[
-                                const SizedBox(height: 70),
+
                                 ElevatedButton(
                                   onPressed: () {
                                     // Add the edit profile action here
