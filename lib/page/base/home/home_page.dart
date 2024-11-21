@@ -45,127 +45,164 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Custom Header Section
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[900],
-                  borderRadius: BorderRadius.circular(16),
+        child: SingleChildScrollView( // Make the body scrollable
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Custom Header Section
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[900],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        "assets/logo.jpg", // Replace with your actual logo path
+                        height: 50,
+                        width: 50,
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'STUDYSAMA',
+                          style: TextStyle(
+                            color: Colors.purple,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.menu, color: Colors.white),
+                        onPressed: () {
+                          // Handle menu action
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Image.asset(
-                      "assets/logo.jpg", // Replace with your actual logo path
-                      height: 50,
-                      width: 50,
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'STUDYSAMA',
+                SizedBox(height: 20),
+
+                // Welcome Section in a Bigger Horizontal Box
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20.0),
+                  decoration: BoxDecoration(
+                    color: Colors.purple[800],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'WELCOME TO STUDYSAMA!',
                         style: TextStyle(
-                          color: Colors.purple,
-                          fontSize: 24,
+                          color: Colors.white,
+                          fontSize: 28, // Bigger text
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.menu, color: Colors.white),
-                      onPressed: () {
-                        // Handle menu action
-                      },
-                    ),
-                  ],
+                      SizedBox(height: 10),
+                      Text(
+                        'where you can learn a lot of new things.',
+                        style: TextStyle(
+                          color: Colors.grey[200],
+                          fontSize: 18, // Bigger description
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
+                SizedBox(height: 20),
 
-              // Welcome Section in a Colored Box
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.purple[800],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                // Lessons Section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'WELCOME TO STUDYSAMA!',
+                      'LESSONS',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
+                        color: Colors.purple,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      'where you can learn a lot of new things.',
-                      style: TextStyle(
-                        color: Colors.grey[200],
-                        fontSize: 16,
+                    TextButton(
+                      onPressed: () {
+                        // Navigate to view more page
+                      },
+                      child: Text(
+                        'View More',
+                        style: TextStyle(color: Colors.purple),
                       ),
                     ),
                   ],
                 ),
-              ),
-              SizedBox(height: 20),
-
-              // Lessons Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'LESSONS',
-                    style: TextStyle(
-                      color: Colors.purple,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                SizedBox(height: 10),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      lessonCard(
+                        title: 'RECIPE',
+                        subtitle: 'discover new recipes',
+                        image: "assets/recipe.jpeg", // Correct path
+                      ),
+                      SizedBox(width: 16),
+                      lessonCard(
+                        title: 'CODING',
+                        subtitle: 'learn new coding',
+                        image: "assets/coding.jpeg", // Correct path
+                      ),
+                      SizedBox(width: 16),
+                      lessonCard(
+                        title: 'LANGUAGE',
+                        subtitle: 'improve language skills',
+                        image: "assets/language.png", // Correct path
+                      ),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to view more page
-                    },
-                    child: Text(
-                      'View More',
-                      style: TextStyle(color: Colors.purple),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    lessonCard(
-                      title: 'RECIPE',
-                      subtitle: 'discover new recipes',
-                      image: "assets/recipe.jpeg", // Correct path
-                    ),
-                    SizedBox(width: 16),
-                    lessonCard(
-                      title: 'CODING',
-                      subtitle: 'learn new coding',
-                      image: "assets/coding.jpeg", // Correct path
-                    ),
-                    SizedBox(width: 16),
-                    lessonCard(
-                      title: 'LANGUAGE',
-                      subtitle: 'improve language skills',
-                      image: "assets/language.png", // Correct path
-                    ),
-                  ],
                 ),
-              ),
-            ],
+                SizedBox(height: 20),
+
+                // Most Popular Section
+                Text(
+                  'MOST POPULAR',
+                  style: TextStyle(
+                    color: Colors.purple,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Container(
+                  height: 200, // Set a fixed height for vertical scrolling
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
+                      children: [
+                        newLessonCard(
+                          title: 'MATH 101',
+                          subtitle: 'understand basic mathematics concepts',
+                          image: "assets/math.png", // Correct path
+                        ),
+                        SizedBox(height: 10),
+                        newLessonCard(
+                          title: 'SCIENCE EXPLORATION',
+                          subtitle: 'explore interesting science topics',
+                          image: "assets/science.png", // Correct path
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20), // To avoid overflow at the bottom
+              ],
+            ),
           ),
         ),
       ),
@@ -218,6 +255,60 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget for New Lesson Card
+  Widget newLessonCard({required String title, required String subtitle, required String image}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.grey[800],
+      ),
+      child: Row(
+        children: [
+          // New Lesson image
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(10),
+              bottomLeft: Radius.circular(10),
+            ),
+            child: Image.asset(
+              image,
+              height: 100,
+              width: 100,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.purple,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
