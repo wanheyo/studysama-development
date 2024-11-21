@@ -175,7 +175,7 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
 
-                        Spacer(),
+                        Spacer(),// space
 
                         // Badge Frame
                         Container(
