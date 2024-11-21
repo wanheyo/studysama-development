@@ -166,51 +166,6 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildMyCoursesTab(List<Course> courses, String emptyMessage) {
-    return Column(
-      children: [
-        _buildSearchBar(),
-        _buildCreateCourseButton(),
-        Expanded(
-          child: ListView.builder(
-            itemCount: 5, // Replace with your course count
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text('Course ${index + 1}', style: const TextStyle(fontFamily: 'Montserrat')),
-                subtitle: Text('Description of Course ${index + 1}'),
-                onTap: () {
-                  // Navigate to course details
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildJoinedCoursesTab(List<Course> courses, String emptyMessage) {
-    return Column(
-      children: [
-        _buildSearchBar(),
-        Expanded(
-          child: ListView.builder(
-            itemCount: 3, // Replace with your joined course count
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text('Joined Course ${index + 1}', style: const TextStyle(fontFamily: 'Montserrat')),
-                subtitle: Text('Description of Joined Course ${index + 1}'),
-                onTap: () {
-                  // Navigate to joined course details
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -235,133 +190,151 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
   Widget _buildCreateCourseButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: ElevatedButton.icon(
-        onPressed: () {
-          // Navigate to create course page
-          Navigator.push(context, MaterialPageRoute(builder: (context) => CreateCoursePage()),);
-        },
-        icon: const Icon(Icons.add),
-        label: const Text(
-          "Add New Course",
-          style: TextStyle(fontFamily: 'Montserrat'),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () async {
+            // Navigate to CreateCoursePage with a callback
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CreateCoursePage(
+                  onCourseCreated: fetchCourses, // Pass the fetchCourses function
+                ),
+              ),
+            );
+          },
+          icon: const Icon(Icons.add),
+          label: const Text(
+            "Add New Course",
+            style: TextStyle(fontFamily: 'Montserrat'),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          ),
         ),
       ),
     );
   }
 
+
   Widget _buildCoursesTab(List<Course> courses, String emptyMessage, bool isCreatedCourses) {
-    return Column(
-      children: [
-        _buildSearchBar(),
-        // Show "Create Course" button only for Created Courses
-        if (isCreatedCourses) _buildCreateCourseButton(),
-        // Courses List
-        Expanded(
-          child: courses.isEmpty
-              ? Center(
-            child: Text(
-              emptyMessage,
-              style: TextStyle(fontFamily: 'Montserrat'),
-            ),
-          )
-              : ListView.builder(
-            itemCount: courses.length,
-            itemBuilder: (context, index) {
-              final course = courses[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => CourseDetailPage(course: course,)),);
-                },
-                child: Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Course Title
-                        Text(
-                          course.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            fontFamily: 'Montserrat',
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        // Total Joined and Rating
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Total joined: ${course.totalJoined}",
-                              style: const TextStyle(fontFamily: 'Montserrat'),
+    return RefreshIndicator(
+      onRefresh: initializeData,
+      child: Column(
+        children: [
+          _buildSearchBar(),
+          // Show "Create Course" button only for Created Courses
+          if (isCreatedCourses) _buildCreateCourseButton(),
+          // Courses List
+          Expanded(
+            child: courses.isEmpty
+                ? Center(
+              child: Text(
+                emptyMessage,
+                style: TextStyle(fontFamily: 'Montserrat'),
+              ),
+            )
+                : ListView.builder(
+              itemCount: courses.length,
+              itemBuilder: (context, index) {
+                final course = courses[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => CourseDetailPage(course: course,))).then((_) {
+                      // Refresh the courses when returning from CreateCoursePage
+                      initializeData();
+                    });;
+
+                  },
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Course Title
+                          Text(
+                            course.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              fontFamily: 'Montserrat',
                             ),
-                            Text(
-                              "Rating: ${course.averageRating.toStringAsFixed(1)}",
-                              style: const TextStyle(fontFamily: 'Montserrat'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        // Created Date
-                        Text(
-                          "Created on: ${course.createdAt}", // Assume course.createdDate is in a formatted string
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            fontFamily: 'Montserrat',
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        // Join Button
-                        Align(
-                          alignment: Alignment.centerRight,
-                          // child: ElevatedButton(
-                          //   onPressed: course.role_id == 1 || course.role_id == 2
-                          //       ? null // Disable button for the creator
-                          //       // : course.role_id == 3
-                          //       // ? null // Disable button if already joined
-                          //       : () {
-                          //     // Handle join action
-                          //   },
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: course.role_id == 3
-                          //         ? Colors.grey // Disable color for joined courses
-                          //         : AppColors.primary, // Primary color for joinable courses
-                          //     textStyle: const TextStyle(
-                          //       fontFamily: 'Montserrat',
-                          //       fontWeight: FontWeight.bold,
-                          //     ),
-                          //   ),
-                          //   child: Text(
-                          //     course.role_id == 1 || course.role_id == 2
-                          //         ? "Creator"
-                          //         : course.role_id == 3
-                          //         ? "Joined"
-                          //         : "Join",
-                          //   ),
-                          // ),
-                        ),
-                      ],
+                          const SizedBox(height: 5),
+                          // Total Joined and Rating
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Total joined: ${course.totalJoined}",
+                                style: const TextStyle(fontFamily: 'Montserrat'),
+                              ),
+                              Text(
+                                "Rating: ${course.averageRating.toStringAsFixed(1)}",
+                                style: const TextStyle(fontFamily: 'Montserrat'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          // Created Date
+                          Text(
+                            "Created on: ${course.createdAt}", // Assume course.createdDate is in a formatted string
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontFamily: 'Montserrat',
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          // Join Button
+                          Align(
+                            alignment: Alignment.centerRight,
+                            // child: ElevatedButton(
+                            //   onPressed: course.role_id == 1 || course.role_id == 2
+                            //       ? null // Disable button for the creator
+                            //       // : course.role_id == 3
+                            //       // ? null // Disable button if already joined
+                            //       : () {
+                            //     // Handle join action
+                            //   },
+                            //   style: ElevatedButton.styleFrom(
+                            //     backgroundColor: course.role_id == 3
+                            //         ? Colors.grey // Disable color for joined courses
+                            //         : AppColors.primary, // Primary color for joinable courses
+                            //     textStyle: const TextStyle(
+                            //       fontFamily: 'Montserrat',
+                            //       fontWeight: FontWeight.bold,
+                            //     ),
+                            //   ),
+                            //   child: Text(
+                            //     course.role_id == 1 || course.role_id == 2
+                            //         ? "Creator"
+                            //         : course.role_id == 3
+                            //         ? "Joined"
+                            //         : "Join",
+                            //   ),
+                            // ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

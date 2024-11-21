@@ -9,6 +9,9 @@ import '../../../models/user.dart';
 import '../../../services/api_service.dart';
 
 class CreateCoursePage extends StatefulWidget {
+  final VoidCallback onCourseCreated; // Callback to refresh courses
+  const CreateCoursePage({required this.onCourseCreated, Key? key}) : super(key: key);
+
   @override
   _CreateCoursePageState createState() => _CreateCoursePageState();
 }
@@ -22,20 +25,6 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
   User? user;
   int user_id = 0;
   String token = "";
-
-  @override
-  void initState() {
-    super.initState();
-    loadUser();
-  }
-
-  @override
-  void dispose() {
-    // Dispose controllers when the widget is removed
-    nameController.dispose();
-    descriptionController.dispose();
-    super.dispose();
-  }
 
   Future<void> loadUser() async {
     try {
@@ -86,6 +75,7 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
           ),
         ),
       );
+      widget.onCourseCreated(); // Notify parent to refresh
       Navigator.pop(context); // Navigate back to the previous page
 
     } catch (e) {
@@ -100,6 +90,20 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
         context.loaderOverlay.hide();
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadUser();
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers when the widget is removed
+    nameController.dispose();
+    descriptionController.dispose();
+    super.dispose();
   }
 
   @override

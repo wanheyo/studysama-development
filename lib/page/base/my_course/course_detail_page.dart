@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:studysama/page/base/my_course/manage_course_page.dart';
 import '../../../models/course.dart';
 import '../../../models/course.dart';
 import '../../../models/lesson.dart';
@@ -9,8 +11,7 @@ import '../../../services/api_service.dart';
 import '../../../utils/colors.dart';
 
 class CourseDetailPage extends StatefulWidget {
-  final Course course;
-
+  Course course;
   CourseDetailPage({required this.course});
 
   @override
@@ -19,22 +20,14 @@ class CourseDetailPage extends StatefulWidget {
 
 class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final TextEditingController nameController = TextEditingController();
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
 
   List<Lesson> lessons = [];
   String token = "";
   bool isGrid = false; // Toggle state for grid or list view in lessons
-
-
-  // final List<Map<String, String>> lessons = [
-  //   {"title": "Lesson 1", "desc": "Introduction to Flutter"},
-  //   {"title": "Lesson 2", "desc": "State Management Basics"},
-  //   {"title": "Lesson 3", "desc": "Building Responsive UIs"},
-  //   {"title": "Lesson 4", "desc": "Understanding Navigation"},
-  //   {"title": "Lesson 5", "desc": "Using REST APIs"},
-  //   // {"title": "Lesson 6", "desc": "Animations in Flutter"},
-  // ];
-
 
   @override
   void initState() {
@@ -52,6 +45,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  String formatDate(DateTime date) {
+    final DateFormat dateFormat = DateFormat("dd/MM/yyyy hh:mm a");
+    return dateFormat.format(date);
   }
 
   Future<void> loadUser() async {
@@ -79,7 +77,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     });
 
     int course_id = widget.course.id;
-    print('course_id:' + course_id.toString() + " | token: " + token);
+    //print("course_id: " + course_id.toString());
     try {
       final data = await apiService.index_lesson_course(token, course_id);
       setState(() {
@@ -91,6 +89,48 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       setState(() {
         print("Response: " + e.toString());
       });
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> _createLesson() async {
+    // if (!_formKey.currentState!.validate()) {
+    //   return; // Exit if the form is invalid
+    // }
+
+    String name = nameController.text.trim();
+    print("Course id: " + widget.course.id.toString() + " | name: " + name);
+
+    // Perform course creation logic here
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    try {
+      // Call the API
+      await apiService.lesson_store(token, name, widget.course.id);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Lesson "$name" created successfully',
+          ),
+        ),
+      );
+      print("Lesson successa ");
+      //widget.onCourseCreated(); // Notify parent to refresh
+      Navigator.pop(context); // Navigate back to the previous page
+
+    } catch (e) {
+      // Extract meaningful error messages if available
+      final errorMsg = e.toString().replaceFirst('Exception: ', '\n');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lesson creation failed: $errorMsg\n')),
+      );
+      print(errorMsg);
     } finally {
       setState(() {
         context.loaderOverlay.hide();
@@ -144,74 +184,250 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   // About Tab
   Widget _buildAboutTab(Course course) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              course.name,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Montserrat',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+              // First Card: Title, Description
+              Card(
+                margin: const EdgeInsets.only(bottom: 16.0),
+                elevation: 0, // No shadow
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          course.name,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        const Text(
+                          "Description:",
+                          style: TextStyle(
+                            fontSize: 16,
+                            // fontWeight: FontWeight.bold,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          course.desc ?? "No description available.",
+                          style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              course.desc ?? "No description available.",
-              style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "Total Joined: ${course.totalJoined}",
-              style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              "Total Visits: ${course.totalVisit}",
-              style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              "Average Rating: ${course.averageRating.toStringAsFixed(1)}",
-              style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              "Status: ${course.status == 1 ? 'Active' : 'Inactive'}",
-              style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              "Created At: ${course.createdAt.toLocal()}",
-              style: const TextStyle(fontSize: 14, fontFamily: 'Montserrat', color: Colors.grey),
-            ),
-            Text(
-              "Updated At: ${course.updatedAt.toLocal()}",
-              style: const TextStyle(fontSize: 14, fontFamily: 'Montserrat', color: Colors.grey),
-            ),
-          ],
+
+              // Second Card: Total Joined, Average Rating
+              Card(
+                margin: const EdgeInsets.only(bottom: 16.0),
+                elevation: 0, // No shadow
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Total Joined and Average Rating Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between title-value pairs
+                          children: [
+                            // Total Joined Column
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  "Total Joined",
+                                  style: TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  "${course.totalJoined}",
+                                  style: const TextStyle(fontSize: 20, fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            // Average Rating Column
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  "Average Rating",
+                                  style: TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  "${course.averageRating.toStringAsFixed(1)}",
+                                  style: const TextStyle(fontSize: 20, fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Third Card: Status, Created At, Updated At
+              Card(
+                margin: const EdgeInsets.only(bottom: 16.0),
+                elevation: 0, // No shadow
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Status Section
+                        Row(
+                          children: [
+                            Text(
+                              "Status: ${course.status == 1 ? 'Public' : course.status == 2 ? 'Private' : 'Deleted'}",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: 'Montserrat',
+                                color: course.status == 0 ? Colors.red : Colors.black, // Red for deleted, black for others
+                              ),
+                            ),
+                            if (course.status == 1) // Show the lock icon only if the status is Private
+                              const Padding(
+                                padding: EdgeInsets.only(left: 5.0), // Optional: adds some space between text and icon
+                                child: Icon(
+                                  FontAwesomeIcons.globe,
+                                  size: 14, // Adjust size as needed
+                                  color: Colors.grey, // You can change the color as per your need
+                                ),
+                              ),
+                            if (course.status == 2) // Show the lock icon only if the status is Private
+                              const Padding(
+                                padding: EdgeInsets.only(left: 5.0), // Optional: adds some space between text and icon
+                                child: Icon(
+                                  FontAwesomeIcons.lock,
+                                  size: 14, // Adjust size as needed
+                                  color: Colors.grey, // You can change the color as per your need
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 5),
+
+                        // Created At and Updated At Sections
+                        Text(
+                          "Created At: ${formatDate(course.createdAt.toLocal())}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Montserrat',
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          "Updated At: ${formatDate(course.updatedAt.toLocal())}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Montserrat',
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Fourth Card: Manage Course Button
+              if(widget.course.role_id == 1)
+                SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ManageCoursePage(
+                          course: widget.course,
+                          onCourseUpdated: (updatedCourse) {
+                            setState(() {
+                              widget.course = updatedCourse; // Update the course data
+                              initializeData(); // Refresh lessons or other related data
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontFamily: 'Montserrat',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  child: const Text("Manage Course"),
+                ),
+              ),
+              if(widget.course.role_id == 3)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageCoursePage(
+                            course: widget.course,
+                            onCourseUpdated: (updatedCourse) {
+                              setState(() {
+                                widget.course = updatedCourse; // Update the course data
+                                initializeData(); // Refresh lessons or other related data
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: const Text("Leave Course"),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
-      // persistentFooterButtons: [
-      //   ElevatedButton(
-      //     onPressed: () {},
-      //     style: ElevatedButton.styleFrom(
-      //       padding: const EdgeInsets.symmetric(vertical: 16),
-      //     ),
-      //     child: Center(
-      //       child: const Text(
-      //         'Create Course',
-      //         style: TextStyle(
-      //           fontFamily: 'Montserrat',
-      //           fontWeight: FontWeight.bold,
-      //           fontSize: 16,
-      //         ),
-      //       ),
-      //     ),
-      //   ),
-      // ],
     );
   }
 
@@ -238,34 +454,38 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
             ),
           ),
 
-          // List or Grid View of Lessons
+          // Lessons List/Grid
           Expanded(
-            child: lessons.isEmpty
-                ? Center(
-              child: Text(
-                "No created lesson found.",
-                style: TextStyle(fontFamily: 'Montserrat'),
-              ),
-            ) : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: !isGrid
-                  ? GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Two columns for grid view
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 3 / 2, // Adjust for better layout
+            child: RefreshIndicator(
+              onRefresh: initializeData,
+              child: lessons.isEmpty
+                  ? Center(
+                child: Text(
+                  "No created lesson found.",
+                  style: TextStyle(fontFamily: 'Montserrat'),
                 ),
-                itemCount: lessons.length,
-                itemBuilder: (context, index) {
-                  return _buildLessonCard(lessons, index);
-                },
               )
-                  : ListView.builder(
-                itemCount: lessons.length,
-                itemBuilder: (context, index) {
-                  return _buildLessonCard(lessons, index);
-                },
+                  : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: !isGrid
+                    ? GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 3 / 2,
+                  ),
+                  itemCount: lessons.length,
+                  itemBuilder: (context, index) {
+                    return _buildLessonCard(lessons, index);
+                  },
+                )
+                    : ListView.builder(
+                  itemCount: lessons.length,
+                  itemBuilder: (context, index) {
+                    return _buildLessonCard(lessons, index);
+                  },
+                ),
               ),
             ),
           ),
@@ -275,11 +495,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       // Floating Action Button to add a new folder
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Show a dialog or navigate to a new screen to add a folder
           _showAddFolderDialog(context);
         },
-        child: Icon(FontAwesomeIcons.plus, color: Colors.white,),
-        backgroundColor: AppColors.primary, // Your custom color
+        child: Icon(
+          FontAwesomeIcons.plus,
+          color: Colors.white,
+        ),
+        backgroundColor: AppColors.primary,
         tooltip: 'Add New Folder',
       ),
     );
@@ -287,7 +509,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
 // Function to show a dialog for adding a folder
   void _showAddFolderDialog(BuildContext context) {
-    final TextEditingController _controller = TextEditingController();
+    //final TextEditingController _controller = TextEditingController();
 
     showDialog(
       context: context,
@@ -295,23 +517,24 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         return AlertDialog(
           title: Text('Add New Lesson'),
           content: TextField(
-            controller: _controller,
+            controller: nameController,
             decoration: InputDecoration(labelText: 'Lesson Name'),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                // Logic to add the folder goes here
-                // You can store the new folder in a state or database
-                Navigator.pop(context);
-              },
-              child: Text('Save'),
-            ),
-            TextButton(
-              onPressed: () {
                 Navigator.pop(context); // Close the dialog
               },
               child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Logic to add the folder goes here
+                // You can store the new folder in a state or database
+                _createLesson();
+                initializeData();
+              },
+              child: Text('Save'),
             ),
           ],
         );
