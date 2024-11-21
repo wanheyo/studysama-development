@@ -55,8 +55,7 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
 
-                        // Spacer to center the followers and button
-                        Spacer(),
+
 
                         // Followers Count
                         Column(
@@ -98,9 +97,7 @@ class ProfilePage extends StatelessWidget {
                               ),
                             ),
 
-
-
-
+                            Spacer(),// Spacer to center the followers and button
                             const SizedBox(height: 20), // Spacing between count and button
                             // Edit Profile button below followers count
                             ElevatedButton(
