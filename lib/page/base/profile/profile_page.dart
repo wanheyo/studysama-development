@@ -32,17 +32,19 @@ class ProfilePage extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        // Spacer to maintain center alignment
+                        Spacer(),
                         // Profile Image and Username in a Column on the left
                         Column(
                           children: [
                             CircleAvatar(
-                              radius: 40, // Size of the profile image
+                              radius: 70, // Size of the profile image
                               backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
                               backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
                             ),
                             const SizedBox(height: 8), // Space between image and username
                             Text(
-                              'Username', // Replace with the actual username
+                              '@ayunies', // Replace with the actual username
                               style: TextStyle(
                                 fontFamily: 'Montserrat',
                                 fontWeight: FontWeight.bold,
@@ -66,7 +68,7 @@ class ProfilePage extends StatelessWidget {
                               'Followers',
                               style: TextStyle(
                                 color: Colors.white70,
-                                fontSize: 14,
+                                fontSize: 20,
                                 fontFamily: 'Montserrat',
                               ),
                             ),
@@ -74,7 +76,7 @@ class ProfilePage extends StatelessWidget {
                               '120', // Replace with actual follower count
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 16,
+                                fontSize: 25,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Montserrat',
                               ),
@@ -119,7 +121,7 @@ class ProfilePage extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              '🎖️', // Placeholder for badge (can replace with an icon or image)
+                              'badge', // Placeholder for badge (can replace with an icon or image)
                               style: TextStyle(
                                 fontSize: 24,
                                 color: Colors.white,
