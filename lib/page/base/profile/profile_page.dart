@@ -61,10 +61,11 @@ class ProfilePage extends StatelessWidget {
 
                         // Follower and post
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
 
                             Column( //column for total post
-                              mainAxisSize: MainAxisSize.min,
+                          mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   'Post',
@@ -85,6 +86,9 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ],
                             ),
+
+                    const SizedBox(width: 40),
+
                             Column( //ni untuk followers
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -107,9 +111,7 @@ class ProfilePage extends StatelessWidget {
                                   ),
                           ],
                         ),
-
-                            Spacer(),
-
+                  ),
                             const SizedBox(height: 20),
                             // edit button
                             ElevatedButton(
