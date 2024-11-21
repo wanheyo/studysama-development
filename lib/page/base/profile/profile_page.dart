@@ -84,8 +84,7 @@ class ProfilePage extends StatelessWidget {
                                     fontFamily: 'Montserrat',
                                   ),
                                 ),
-                              ],
-                            ),
+
 
                     const SizedBox(width: 40),
 
@@ -132,6 +131,8 @@ class ProfilePage extends StatelessWidget {
                                   color: AppColors.primary,
                                 ),
                               ),
+                            ),
+                                ],
                             ),
                             ],
                             ),
