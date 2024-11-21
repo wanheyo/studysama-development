@@ -84,7 +84,8 @@ class ProfilePage extends StatelessWidget {
                                     fontFamily: 'Montserrat',
                                   ),
                                 ),
-
+                              ],
+                            ),
 
                     const SizedBox(width: 40),
 
@@ -108,37 +109,40 @@ class ProfilePage extends StatelessWidget {
                                       fontFamily: 'Montserrat',
                                     ),
                                   ),
-
-
-                            const SizedBox(height: 20),
-
-                            // edit button
-                            ElevatedButton(
-                              onPressed: () {
-                                // Add the edit profile action here
-                              },
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: AppColors.primary, backgroundColor: Colors.white, // Text color
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8), // Rounded corners
-                                ),
-                              ),
-                              child: Text(
-                                'Edit Profile',
-                                style: TextStyle(
-                                  fontFamily: 'Montserrat',
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
                                 ],
                             ),
-                            ],
+
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+
+                              children: [
+                              const SizedBox(height: 20),
+
+                              // edit button
+                              ElevatedButton(
+                                onPressed: () {
+                                  // Add the edit profile action here
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: AppColors.primary, backgroundColor: Colors.white, // Text color
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8), // Rounded corners
+                                  ),
+                                ),
+                                child: Text(
+                                  'Edit Profile',
+                                  style: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                              ],
+                            ),
+                              ],
                             ),
 
-                          ],
-                        ),
 
                         Spacer(),
 
