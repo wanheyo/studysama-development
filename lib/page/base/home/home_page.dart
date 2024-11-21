@@ -43,178 +43,153 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.purple,
+        title: Row(
+          children: [
+            Image.asset(
+              "assets/logo.jpg", // Replace with your logo path
+              height: 40,
+              width: 40,
+            ),
+            SizedBox(width: 10),
+            Text('STUDYSAMA'),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              // Handle menu action
+            },
+          )
+        ],
+      ),
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Custom Header Section
-                Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[900],
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Image.asset(
-                        "assets/logo.jpg", // Replace with your actual logo path
-                        height: 50,
-                        width: 50,
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'STUDYSAMA',
-                          style: TextStyle(
-                            color: Colors.purple,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.menu, color: Colors.white),
-                        onPressed: () {
-                          // Handle menu action
-                        },
-                      ),
-                    ],
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Section
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                SizedBox(height: 20),
-
-                // Welcome Section in a Bigger Horizontal Box
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20.0),
-                  decoration: BoxDecoration(
-                    color: Colors.purple[800],
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'WELCOME TO STUDYSAMA!',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 28, // Bigger text
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'where you can learn a lot of new things.',
-                        style: TextStyle(
-                          color: Colors.grey[200],
-                          fontSize: 18, // Bigger description
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-
-                // Lessons Section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'LESSONS',
+                      'WELCOME TO STUDYSAMA!',
                       style: TextStyle(
-                        color: Colors.purple,
-                        fontSize: 20,
+                        color: Colors.white,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        // Navigate to view more page
-                      },
-                      child: Text(
-                        'View More',
-                        style: TextStyle(color: Colors.purple),
+                    SizedBox(height: 8),
+                    Text(
+                      'where you can learn a lot of new things.',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 16,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      lessonCard(
-                        title: 'RECIPE',
-                        subtitle: 'discover new recipes',
-                        image: "assets/recipe.jpeg", // Correct path
-                      ),
-                      SizedBox(width: 16),
-                      lessonCard(
-                        title: 'CODING',
-                        subtitle: 'learn new coding',
-                        image: "assets/coding.jpeg", // Correct path
-                      ),
-                      SizedBox(width: 16),
-                      lessonCard(
-                        title: 'LANGUAGE',
-                        subtitle: 'improve language skills',
-                        image: "assets/language.png", // Correct path
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
+              ),
+              SizedBox(height: 20),
 
-                // Most Popular Section
-                Text(
-                  'MOST POPULAR LESSONS',
-                  style: TextStyle(
-                    color: Colors.purple,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+              // Lessons Section
+              Text(
+                'LESSONS',
+                style: TextStyle(
+                  color: Colors.purple,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-                SizedBox(height: 10),
-                Container(
-                  height: 200, // Set a fixed height for vertical scrolling
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Column(
-                      children: [
-                        popularLessonCard(
-                          title: 'MATH 101',
-                          subtitle: 'understand basic mathematics concepts',
-                          image: "assets/math.jpeg", // Math image
-                          rating: 4.9,
-                        ),
-                        SizedBox(height: 10),
-                        popularLessonCard(
-                          title: 'SCIENCE EXPLORATION',
-                          subtitle: 'explore interesting science topics',
-                          image: "assets/science.jpeg", // Science image
-                          rating: 4.7,
-                        ),
-                      ],
+              ),
+              SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    lessonCard(
+                      title: 'RECIPE',
+                      subtitle: 'Discover new recipes',
+                      image: "assets/recipe.jpeg",
+                      totalVisits: 120,
+                      createdAt: '2024-01-01',
+                      updatedAt: '2024-11-21',
                     ),
-                  ),
+                    SizedBox(width: 16),
+                    lessonCard(
+                      title: 'CODING',
+                      subtitle: 'Learn new coding',
+                      image: "assets/coding.jpeg",
+                      totalVisits: 350,
+                      createdAt: '2023-05-12',
+                      updatedAt: '2024-10-15',
+                    ),
+                  ],
                 ),
-                SizedBox(height: 20), // To avoid overflow at the bottom
-              ],
-            ),
+              ),
+              SizedBox(height: 20),
+
+              // Most Popular Section
+              Text(
+                'MOST POPULAR LESSONS',
+                style: TextStyle(
+                  color: Colors.purple,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Expanded(
+                child: ListView(
+                  children: [
+                    popularLessonCard(
+                      title: 'MATH',
+                      image: "assets/math.jpeg",
+                      totalVisits: 500,
+                      rating: 4.9,
+                      createdAt: '2022-08-10',
+                      updatedAt: '2024-11-18',
+                    ),
+                    SizedBox(height: 16),
+                    popularLessonCard(
+                      title: 'SCIENCE',
+                      image: "assets/science.jpeg",
+                      totalVisits: 450,
+                      rating: 4.8,
+                      createdAt: '2023-01-20',
+                      updatedAt: '2024-10-10',
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // Widget for Lesson Card
-  Widget lessonCard({required String title, required String subtitle, required String image}) {
+  // Widget for Horizontal Lesson Card
+  Widget lessonCard({
+    required String title,
+    required String subtitle,
+    required String image,
+    required int totalVisits,
+    required String createdAt,
+    required String updatedAt,
+  }) {
     return Container(
-      width: 150,
+      width: 200,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.grey[900],
@@ -231,7 +206,7 @@ class _HomePageState extends State<HomePage> {
             child: Image.asset(
               image,
               height: 100,
-              width: 150,
+              width: 200,
               fit: BoxFit.cover,
             ),
           ),
@@ -256,6 +231,19 @@ class _HomePageState extends State<HomePage> {
                     fontSize: 14,
                   ),
                 ),
+                SizedBox(height: 10),
+                Text(
+                  'Visits: $totalVisits',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                ),
+                Text(
+                  'Created: $createdAt',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                ),
+                Text(
+                  'Updated: $updatedAt',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -264,83 +252,74 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Popular Lesson Card with Rating
+  // Widget for Popular Lesson Card
   Widget popularLessonCard({
     required String title,
-    required String subtitle,
     required String image,
+    required int totalVisits,
     required double rating,
+    required String createdAt,
+    required String updatedAt,
   }) {
     return Container(
-      width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[800],
+        color: Colors.grey[900],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Popular Lesson image
           ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10),
-              bottomLeft: Radius.circular(10),
-            ),
+            borderRadius: BorderRadius.circular(10),
             child: Image.asset(
               image,
-              height: 100,
-              width: 100,
+              height: 80,
+              width: 80,
               fit: BoxFit.cover,
             ),
           ),
+          SizedBox(width: 16),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.purple,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Rating Display
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.star,
-                  color: Colors.yellow,
-                  size: 24,
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.purple,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Text(
-                  rating.toString(),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
+                  'Visits: $totalVisits',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                ),
+                Text(
+                  'Created: $createdAt',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                ),
+                Text(
+                  'Updated: $updatedAt',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
                 ),
               ],
             ),
           ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.star, color: Colors.amber, size: 16),
+              SizedBox(height: 4),
+              Text(
+                rating.toString(),
+                style: TextStyle(color: Colors.white, fontSize: 14),
+              ),
+            ],
+          ),
         ],
       ),
+      padding: EdgeInsets.all(8),
     );
   }
 }
