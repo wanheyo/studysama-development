@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 import '../../../utils/colors.dart';
+import 'edit_profile.dart';
 
 class ProfilePage extends StatelessWidget {
   get headingTextStyle9 => null;
@@ -117,75 +119,25 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            Column(
-                              mainAxisSize: MainAxisSize.min, // Minimal vertical space usage
+
+                            const SizedBox(height: 20),
+
+                            // Row for Edit Profile and Share Profile Buttons
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Row for Post and Followers
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center, // Center align horizontally
-                                  children: [
-                                    // Column for Posts
-                                    Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'Post',
-                                          style: TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 20,
-                                            fontFamily: 'Montserrat',
-                                          ),
-                                        ),
-                                        Text(
-                                          '10', // Replace with actual post count
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 25,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Montserrat',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 40), // Space between Post and Followers
-
-                                    // Column for Followers
-                                    Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'Followers',
-                                          style: TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 20,
-                                            fontFamily: 'Montserrat',
-                                          ),
-                                        ),
-                                        Text(
-                                          '120', // Replace with actual follower count
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 25,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Montserrat',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20), // Space between Row and Button
-
-                                // Edit Profile Button
                                 ElevatedButton(
                                   onPressed: () {
-                                    // Add the edit profile action here
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => EditProfilePage()),
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    foregroundColor: AppColors.primary, // Text color
-                                    backgroundColor: Colors.white, // Button background color
+                                    foregroundColor: AppColors.primary,
+                                    backgroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8), // Rounded corners
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
                                   child: Text(
@@ -197,10 +149,33 @@ class ProfilePage extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                const SizedBox(width: 20),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Add the share profile action here
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Share Profile',
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
+                          ],
+                        ),
 
-                            Spacer(),
+                        Spacer(),
 
                         // Badge Frame
                         Container(
@@ -225,11 +200,11 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ],
                         ),
-                    ],
+
+                    ),
                   ),
                 ),
-                ),
-              ),
+
 
               Expanded(
                 flex: 5,
