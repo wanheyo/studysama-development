@@ -32,60 +32,85 @@ class ProfilePage extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Profile Image and Username in a Column on the left
+                        // Profile Image
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             CircleAvatar(
                               radius: 70, // Size of the profile image
-                              backgroundImage: AssetImage('assets/profile_image.png'), // Replace with your image path
-                              backgroundColor: Colors.white, // Optional: add a background color if the image has transparency
+                              backgroundImage: AssetImage('assets/profile_image.png'),
+                              backgroundColor: Colors.white, //
                             ),
-                            const SizedBox(height: 8), // Space between image and username
+                            const SizedBox(height: 10),
+                            //username
                             Text(
-                              '@ayunies', // Replace with the actual username
+                              '@ayunies',
                               style: TextStyle(
                                 fontFamily: 'Montserrat',
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                                 fontSize: 18,
                               ),
-                              overflow: TextOverflow.ellipsis, // To handle long usernames
+                              overflow: TextOverflow.ellipsis, // kalau nama panjang
                             ),
                           ],
                         ),
 
-                        // Spacer to center the followers and button
+
                         Spacer(),
 
-                        // Followers Count
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
+                        // Follower and post
+                        Row(
                           children: [
-                            // Followers label and count
-                            Text(
-                              'Followers',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 20,
-                                fontFamily: 'Montserrat',
-                              ),
+
+                            Column( //column for total post
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Post',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 20,
+                                    fontFamily: 'Montserrat',
+                                  ),
+                                ),
+                                Text(
+                                  '10',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Montserrat',
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              '120', // Replace with actual follower count
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Montserrat',
-                              ),
-                            ),
+                            Column( //ni untuk followers
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Followers',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 20,
+                                      fontFamily: 'Montserrat',
+                                    ),
+                                  ),
+                                  Text(
+                                    '120',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Montserrat',
+                                    ),
+                                  ),
+                          ],
+                        ),
 
 
-
-
-                            const SizedBox(height: 20), // Spacing between count and button
-                            // Edit Profile button below followers count
+                            const SizedBox(height: 20),
+                            // edit button
                             ElevatedButton(
                               onPressed: () {
                                 // Add the edit profile action here
@@ -108,23 +133,22 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
 
-                        // Spacer to maintain center alignment
                         Spacer(),
 
-                        // Badge Frame on the right side
+                        // Badge Frame
                         Container(
-                          width: 100, // Width of the badge frame
-                          height: 70, // Height of the badge frame
+                          width: 100,
+                          height: 70,
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Colors.white, // Border color for badge frame
+                              color: Colors.white,
                               width: 2,
                             ),
-                            borderRadius: BorderRadius.circular(8), // Rounded corners
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
                             child: Text(
-                              'badge', // Placeholder for badge (can replace with an icon or image)
+                              'badge',
                               style: TextStyle(
                                 fontSize: 17,
                                 color: Colors.white,
