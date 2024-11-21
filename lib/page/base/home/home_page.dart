@@ -1,6 +1,4 @@
-
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,7 +30,7 @@ class _HomePageState extends State<HomePage> {
         user = User.fromJson(userMap);
       }
       setState(() {
-        username = user!.username;
+        username = user?.username;
         isLoading = false;
       });
     } catch (e) {
@@ -45,36 +43,146 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.purple,
+        title: Row(
+          children: [
+            Image.asset(
+              "C:UsersUserDownloadsWhatsApp Image 2024-11-21 at 12.37.09_75ec983b.jpg", // Replace with your logo path
+              height: 40,
+              width: 40,
+            ),
+            SizedBox(width: 10),
+            Text('STUDYSAMA'),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              // Handle menu action
+            },
+          )
+        ],
+      ),
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Section
+              Text(
+                'WELCOME TO STUDYSAMA!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'where you can learn a lot of new things.',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Horizontal Scrolling for Lessons
+              Text(
+                'LESSONS',
+                style: TextStyle(
+                  color: Colors.purple,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    lessonCard(
+                      title: 'RECIPE',
+                      subtitle: 'discover new recipes',
+                      image: "C:UsersUserDownloadsdownload.jpeg", // Replace with your image path
+                    ),
+                    SizedBox(width: 16),
+                    lessonCard(
+                      title: 'CODING',
+                      subtitle: 'learn new coding',
+                      image: "C:UsersUserDownloadscoding.jpeg", // Replace with your image path
+                    ),
+                    SizedBox(width: 16),
+                    lessonCard(
+                      title: 'LANGUAGE',
+                      subtitle: 'improve language skills',
+                      image: "C:UsersUserDownloadslanguage.png", // Replace with your image path
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Widget for Lesson Card
+  Widget lessonCard({required String title, required String subtitle, required String image}) {
+    return Container(
+      width: 150,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.grey[900],
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.home, size: 100, color: Colors.blue),
-          SizedBox(height: 20),
-          if (isLoading)
-            CircularProgressIndicator()
-          else
-            Column(
+          // Lesson image
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            child: Image.asset(
+              image,
+              height: 100,
+              width: 150,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Welcome to StudySama! Hi',
-                  style: TextStyle(fontFamily: 'Montserrat', fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  username != null
-                      ? 'Hello, $username!'
-                      : 'User not found',
+                  title,
                   style: TextStyle(
+                    color: Colors.purple,
                     fontSize: 18,
-                    color: username != null ? Colors.blue : Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
                   ),
                 ),
               ],
             ),
+          ),
         ],
       ),
     );
   }
 }
-
