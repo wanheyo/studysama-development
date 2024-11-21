@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../models/user.dart';
-import '../../../utils/user_data_util.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -49,7 +48,7 @@ class _HomePageState extends State<HomePage> {
         title: Row(
           children: [
             Image.asset(
-              "C:UsersUserDownloadsWhatsApp Image 2024-11-21 at 12.37.09_75ec983b.jpg", // Replace with your logo path
+              "assets/logo.jpg", // Replace with your actual logo path
               height: 40,
               width: 40,
             ),
@@ -92,14 +91,28 @@ class _HomePageState extends State<HomePage> {
               ),
               SizedBox(height: 20),
 
-              // Horizontal Scrolling for Lessons
-              Text(
-                'LESSONS',
-                style: TextStyle(
-                  color: Colors.purple,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              // Lessons Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'LESSONS',
+                    style: TextStyle(
+                      color: Colors.purple,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to view more page
+                    },
+                    child: Text(
+                      'View More',
+                      style: TextStyle(color: Colors.purple),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 10),
               SingleChildScrollView(
@@ -109,19 +122,19 @@ class _HomePageState extends State<HomePage> {
                     lessonCard(
                       title: 'RECIPE',
                       subtitle: 'discover new recipes',
-                      image: "C:UsersUserDownloadsdownload.jpeg", // Replace with your image path
+                      image: "assets/recipe.jpeg", // Correct path
                     ),
                     SizedBox(width: 16),
                     lessonCard(
                       title: 'CODING',
                       subtitle: 'learn new coding',
-                      image: "C:UsersUserDownloadscoding.jpeg", // Replace with your image path
+                      image: "assets/coding.jpeg", // Correct path
                     ),
                     SizedBox(width: 16),
                     lessonCard(
                       title: 'LANGUAGE',
                       subtitle: 'improve language skills',
-                      image: "C:UsersUserDownloadslanguage.png", // Replace with your image path
+                      image: "assets/language.png", // Correct path
                     ),
                   ],
                 ),
