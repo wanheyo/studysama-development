@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:studysama/page/base/base_page.dart';
 import 'package:studysama/page/base/home/home_page.dart';
 import 'package:studysama/page/auth/login_page.dart';
-import 'package:studysama/page/base/profile/profile_page.dart';
 import 'package:studysama/theme/app_theme.dart';
 import 'package:studysama/utils/colors.dart';
 
@@ -32,9 +31,7 @@ class MyApp extends StatelessWidget {
       //home: LoginPage(),
       initialRoute: '/',
       routes: {
-        '/': (context) => LoginPage(),
-        //tukar jadi BasePage() kalau nak test run tanpa login
-
+        '/': (context) => LoginPage(), //start page
         '/home': (context) => BasePage(),
       }
     );
