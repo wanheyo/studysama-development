@@ -60,58 +60,63 @@ class ProfilePage extends StatelessWidget {
                         Spacer(),
 
                         // Follower and post
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        Column(
+                          mainAxisSize: MainAxisSize.min, // Minimal vertical space usage
                           children: [
-
-                            Column( //column for total post
-                          mainAxisSize: MainAxisSize.min,
+                            // Row for Post and Followers
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center, // Center align horizontally
                               children: [
-                                Text(
-                                  'Post',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 20,
-                                    fontFamily: 'Montserrat',
-                                  ),
+                                // Column for Posts
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Post',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 20,
+                                        fontFamily: 'Montserrat',
+                                      ),
+                                    ),
+                                    Text(
+                                      '10', // Replace with actual post count
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Montserrat',
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  '10',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Montserrat',
-                                  ),
+                                const SizedBox(width: 40), // Space between Post and Followers
+
+                                // Column for Followers
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Followers',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 20,
+                                        fontFamily: 'Montserrat',
+                                      ),
+                                    ),
+                                    Text(
+                                      '120', // Replace with actual follower count
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Montserrat',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-
-                    const SizedBox(width: 40),
-
-                            Column( //ni untuk followers
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Followers',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 20,
-                                      fontFamily: 'Montserrat',
-                                    ),
-                                  ),
-                                  Text(
-                                    '120',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Montserrat',
-                                    ),
-                                  ),
-                                ],
-                            ),
-
                             const SizedBox(height: 20), // Space between Row and Button
 
                             // Edit Profile Button
