@@ -131,7 +131,7 @@ class _HomePageState extends State<HomePage> {
                       subtitle: 'Learn new coding',
                       image: "assets/coding.jpeg",
                       totalVisits: 350,
-                      createdAt: '2023-05-12',
+                      createdAt: '2023-02-12',
                       updatedAt: '2024-10-15',
                     ),
                   ],
