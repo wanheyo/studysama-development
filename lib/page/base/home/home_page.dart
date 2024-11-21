@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('Error loading username: $e');
       setState(() {
-        isLoading = false;
+        isLoading = false);
       });
     }
   }
@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
                   padding: EdgeInsets.all(16),
                   margin: EdgeInsets.only(bottom: 20),
                   decoration: BoxDecoration(
-                    color: Colors.grey[800],
+                    color: Colors.purple,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -97,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                       Text(
                         'Where you can learn a lot of new things.',
                         style: TextStyle(
-                          color: Colors.grey[400],
+                          color: Colors.white70,
                           fontSize: 18, // Adjusted font size for description
                         ),
                       ),
@@ -123,7 +123,7 @@ class _HomePageState extends State<HomePage> {
                         title: 'RECIPE',
                         subtitle: 'Discover new recipes',
                         image: "assets/recipe.jpeg",
-                        totalVisits: 261,
+                        totalVisits: 120,
                         createdAt: '2024-01-01',
                         updatedAt: '2024-11-21',
                       ),
@@ -141,7 +141,7 @@ class _HomePageState extends State<HomePage> {
                         title: 'LANGUAGE',
                         subtitle: 'Improve language skills',
                         image: "assets/language.png",
-                        totalVisits: 553,
+                        totalVisits: 200,
                         createdAt: '2024-03-10',
                         updatedAt: '2024-11-20',
                       ),
@@ -167,15 +167,21 @@ class _HomePageState extends State<HomePage> {
                     popularLessonCard(
                       title: 'MATH',
                       image: "assets/math.jpeg",
-                      likes: 1200,
-                      rating: 4.9,
+                      likes: 450,
+                      rating: 4.8,
+                      totalVisits: 1000,
+                      createdAt: '2023-07-11',
+                      updatedAt: '2024-11-20',
                     ),
                     SizedBox(height: 10),
                     popularLessonCard(
                       title: 'SCIENCE',
                       image: "assets/science.jpeg",
-                      likes: 976,
-                      rating: 4.7,
+                      likes: 320,
+                      rating: 4.6,
+                      totalVisits: 750,
+                      createdAt: '2023-02-20',
+                      updatedAt: '2024-11-19',
                     ),
                   ],
                 ),
@@ -266,59 +272,77 @@ class _HomePageState extends State<HomePage> {
     required String image,
     required int likes,
     required double rating,
+    required int totalVisits,
+    required String createdAt,
+    required String updatedAt,
   }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.grey[900],
       ),
-      child: Row(
+      child: Column(
         children: [
-          // Lesson Image
-          ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10),
-              bottomLeft: Radius.circular(10),
-            ),
-            child: Image.asset(
-              image,
-              height: 80,
-              width: 80,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.purple,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    '$likes Likes',
-                    style: TextStyle(color: Colors.grey[400]),
-                  ),
-                ],
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  bottomLeft: Radius.circular(10),
+                ),
+                child: Image.asset(
+                  image,
+                  height: 80,
+                  width: 80,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: Colors.purple,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '$likes Likes',
+                        style: TextStyle(color: Colors.grey[400]),
+                      ),
+                      Text(
+                        '⭐ $rating',
+                        style: TextStyle(color: Colors.amber),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 10.0),
-            child: Text(
-              '⭐ $rating',
-              style: TextStyle(
-                color: Colors.amber,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total Visits: $totalVisits',
+                  style: TextStyle(color: Colors.grey[500]),
+                ),
+                Text(
+                  'Created: $createdAt',
+                  style: TextStyle(color: Colors.grey[500]),
+                ),
+                Text(
+                  'Updated: $updatedAt',
+                  style: TextStyle(color: Colors.grey[500]),
+                ),
+              ],
             ),
           ),
         ],
