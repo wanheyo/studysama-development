@@ -11,6 +11,7 @@ class User {
   final int totalFollower;
   final String averageRating;
   final String? socialLink;
+  final String? image;
   final int verificationStatus;
   final int status;
 
@@ -27,6 +28,7 @@ class User {
     required this.totalFollower,
     required this.averageRating,
     this.socialLink,
+    this.image,
     required this.verificationStatus,
     required this.status,
   });
@@ -45,6 +47,7 @@ class User {
       totalFollower: json['total_follower'],
       averageRating: json['average_rating'],
       socialLink: json['social_link'],
+      image: json['image'],
       verificationStatus: json['verification_status'],
       status: json['status'],
     );

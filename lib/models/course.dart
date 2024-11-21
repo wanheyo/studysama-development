@@ -7,6 +7,7 @@ class Course {
   final int totalVisit;
   final int totalJoined;
   final double averageRating;
+  final String? image;
   final int status;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -19,6 +20,7 @@ class Course {
     this.totalVisit = 0,
     this.totalJoined = 0,
     this.averageRating = 5.0,
+    this.image,
     this.status = 1,
     required this.createdAt,
     required this.updatedAt,
@@ -36,6 +38,7 @@ class Course {
       averageRating: json['average_rating'] is String
           ? double.parse(json['average_rating'] as String)
           : (json['average_rating'] as num).toDouble(),
+      image: json['image'] as String?,
       status: json['status'] as int,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -53,6 +56,7 @@ class Course {
       'total_visit': totalVisit,
       'total_joined': totalJoined,
       'average_rating': averageRating,
+      'image': image,
       'status': status,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
