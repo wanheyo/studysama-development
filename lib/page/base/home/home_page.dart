@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: SingleChildScrollView( // Make the body scrollable
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -171,7 +171,7 @@ class _HomePageState extends State<HomePage> {
 
                 // Most Popular Section
                 Text(
-                  'MOST POPULAR',
+                  'MOST POPULAR LESSONS',
                   style: TextStyle(
                     color: Colors.purple,
                     fontSize: 20,
@@ -185,16 +185,16 @@ class _HomePageState extends State<HomePage> {
                     scrollDirection: Axis.vertical,
                     child: Column(
                       children: [
-                        newLessonCard(
+                        popularLessonCard(
                           title: 'MATH 101',
                           subtitle: 'understand basic mathematics concepts',
-                          image: "assets/math.png", // Correct path
+                          image: "assets/math.jpeg", // Math image
                         ),
                         SizedBox(height: 10),
-                        newLessonCard(
+                        popularLessonCard(
                           title: 'SCIENCE EXPLORATION',
                           subtitle: 'explore interesting science topics',
-                          image: "assets/science.png", // Correct path
+                          image: "assets/science.jpeg", // Science image
                         ),
                       ],
                     ),
@@ -262,8 +262,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for New Lesson Card
-  Widget newLessonCard({required String title, required String subtitle, required String image}) {
+  // Widget for Popular Lesson Card
+  Widget popularLessonCard({required String title, required String subtitle, required String image}) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -272,7 +272,7 @@ class _HomePageState extends State<HomePage> {
       ),
       child: Row(
         children: [
-          // New Lesson image
+          // Popular Lesson image
           ClipRRect(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(10),
