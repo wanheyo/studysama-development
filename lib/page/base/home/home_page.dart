@@ -43,28 +43,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.purple,
-        title: Row(
-          children: [
-            Image.asset(
-              "assets/logo.jpg", // Replace with your actual logo path
-              height: 40,
-              width: 40,
-            ),
-            SizedBox(width: 10),
-            Text('STUDYSAMA'),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              // Handle menu action
-            },
-          )
-        ],
-      ),
       backgroundColor: Colors.black,
       body: SafeArea(
         child: Padding(
@@ -72,21 +50,69 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Section
-              Text(
-                'WELCOME TO STUDYSAMA!',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+              // Custom Header Section
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      "assets/logo.jpg", // Replace with your actual logo path
+                      height: 50,
+                      width: 50,
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'STUDYSAMA',
+                        style: TextStyle(
+                          color: Colors.purple,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.menu, color: Colors.white),
+                      onPressed: () {
+                        // Handle menu action
+                      },
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 8),
-              Text(
-                'where you can learn a lot of new things.',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
+              SizedBox(height: 20),
+
+              // Welcome Section in a Colored Box
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.purple[800],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'WELCOME TO STUDYSAMA!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'where you can learn a lot of new things.',
+                      style: TextStyle(
+                        color: Colors.grey[200],
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(height: 20),
