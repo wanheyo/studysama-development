@@ -62,6 +62,23 @@ class ProfilePage extends StatelessWidget {
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                          Text(
+                          'Post',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 20,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                      Text(
+                        '10', // Replace with actual follower count
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Montserrat',
+                        ),
+                      ),
                             // Followers label and count
                             Text(
                               'Followers',
@@ -81,27 +98,8 @@ class ProfilePage extends StatelessWidget {
                               ),
                             ),
 
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Followers label and count
-                                Text(
-                                  'Post',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 20,
-                                    fontFamily: 'Montserrat',
-                                  ),
-                                ),
-                                Text(
-                                  '10', // Replace with actual follower count
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Montserrat',
-                                  ),
-                                ),
+
+
 
                             const SizedBox(height: 20), // Spacing between count and button
                             // Edit Profile button below followers count
@@ -153,11 +151,11 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ],
                         ),
-                    ],
+
                     ),
                   ),
                 ),
-              ),
+
 
               Expanded(
                 flex: 5,
