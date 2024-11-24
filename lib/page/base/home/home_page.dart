@@ -119,9 +119,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
 
-                // Lessons Section
+                // Courses Section
                 Text(
-                  'Lessons',
+                  'Courses',
                   style: TextStyle(
                     color: Colors.purple,
                     fontSize: 20,
@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      lessonCard(
+                      courseCard(
                         title: 'RECIPE',
                         subtitle: 'Discover new recipes',
                         image: "assets/recipe.jpeg",
@@ -142,7 +142,7 @@ class _HomePageState extends State<HomePage> {
                         updated: '2024-11-21',
                       ),
                       SizedBox(width: 16),
-                      lessonCard(
+                      courseCard(
                         title: 'CODING',
                         subtitle: 'Learn new coding',
                         image: "assets/coding.jpeg",
@@ -151,10 +151,10 @@ class _HomePageState extends State<HomePage> {
                         updated: '2024-10-15',
                       ),
                       SizedBox(width: 16),
-                      lessonCard(
-                        title: 'SCIENCE',
-                        subtitle: 'Explore the wonders of science',
-                        image: "assets/science.jpeg",
+                      courseCard(
+                        title: 'LANGUAGE',
+                        subtitle: 'Master a new language',
+                        image: "assets/language.jpeg",
                         totalJoined: 200,
                         started: '2024-03-10',
                         updated: '2024-11-20',
@@ -164,9 +164,9 @@ class _HomePageState extends State<HomePage> {
                 ),
                 SizedBox(height: 20),
 
-                // Most Popular Section
+                // Most Popular Courses Section
                 Text(
-                  'Most Popular Lessons',
+                  'Most Popular Courses',
                   style: TextStyle(
                     color: Colors.purple,
                     fontSize: 20,
@@ -178,15 +178,26 @@ class _HomePageState extends State<HomePage> {
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   children: [
-                    popularLessonCard(
+                    popularCourseCard(
                       title: 'MATH',
                       description:
                       'Master mathematical concepts and sharpen your problem-solving skills.',
                       image: "assets/math.jpeg",
                       rating: 4.9,
                       totalJoined: 1000,
-                      started: '2023-07-02',
+                      started: '2023-07-01',
                       updated: '2024-11-20',
+                    ),
+                    SizedBox(height: 10),
+                    popularCourseCard(
+                      title: 'SCIENCE',
+                      description:
+                      'Explore the wonders of science and technology.',
+                      image: "assets/science.jpeg",
+                      rating: 4.8,
+                      totalJoined: 950,
+                      started: '2023-06-01',
+                      updated: '2024-11-19',
                     ),
                   ],
                 ),
@@ -198,8 +209,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Lesson Card
-  Widget lessonCard({
+  // Widget for Course Card
+  Widget courseCard({
     required String title,
     required String subtitle,
     required String image,
@@ -271,8 +282,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Popular Lesson Card
-  Widget popularLessonCard({
+  // Widget for Popular Course Card
+  Widget popularCourseCard({
     required String title,
     required String description,
     required String image,
@@ -339,8 +350,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0, top: 10.0),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Column(
                   children: [
                     Icon(Icons.star, color: Colors.orange, size: 20),
