@@ -185,7 +185,7 @@ class _HomePageState extends State<HomePage> {
                       image: "assets/math.jpeg",
                       rating: 4.9,
                       totalJoined: 1000,
-                      createdAt: '2023-07-01',
+                      createdAt: '2023-07-02',
                       updatedAt: '2024-11-20',
                     ),
                   ],
