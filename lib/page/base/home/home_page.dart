@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../models/user.dart';
+import '../../../utils/colors.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -44,7 +45,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.purple, // Purple header
+        backgroundColor: AppColors.primary, // Purple header
         title: Row(
           children: [
             Image.asset(
@@ -93,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                   padding: EdgeInsets.all(16),
                   margin: EdgeInsets.only(bottom: 20),
                   decoration: BoxDecoration(
-                    color: Colors.purple,
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -123,7 +124,7 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   'Courses',
                   style: TextStyle(
-                    color: Colors.purple,
+                    color: AppColors.primary,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -168,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   'Most Popular Courses',
                   style: TextStyle(
-                    color: Colors.purple,
+                    color: AppColors.primary,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -247,7 +248,7 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   title,
                   style: TextStyle(
-                    color: Colors.purple,
+                    color: AppColors.primary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -323,7 +324,7 @@ class _HomePageState extends State<HomePage> {
                       Text(
                         title,
                         style: TextStyle(
-                          color: Colors.purple,
+                          color: AppColors.primary,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
