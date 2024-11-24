@@ -9,6 +9,7 @@ import '../../../models/course.dart';
 import '../../../models/lesson.dart';
 import '../../../services/api_service.dart';
 import '../../../utils/colors.dart';
+import 'lesson_page.dart';
 
 class CourseDetailPage extends StatefulWidget {
   Course course;
@@ -570,7 +571,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       ),
 
       // Floating Action Button to add a new folder
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isTutor ?
+      FloatingActionButton(
         onPressed: () {
           _showAddFolderDialog(context);
         },
@@ -580,7 +582,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         ),
         backgroundColor: AppColors.primary,
         tooltip: 'Add New Folder',
-      ),
+      ): null,
     );
   }
 
@@ -620,41 +622,52 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   }
 
   Widget _buildLessonCard(List<Lesson> lessons, int index) {
-    return ClipPath(
-      clipper: FolderClipper(), // Custom clipper for folder shape
-      child: Card(
-        elevation: 4,
-        //color: AppColors.accent, // Folder-like color
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Title with Ellipsis
-              Text(
-                lessons[index].name ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+    return GestureDetector(
+      onTap: () {
+        // Navigate to the LessonResourcePage with the lesson's details
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LessonPage(lesson: lessons[index]),
+          ),
+        );
+      },
+      child: ClipPath(
+        clipper: FolderClipper(), // Custom clipper for folder shape
+        child: Card(
+          elevation: 4,
+          //color: AppColors.accent, // Folder-like color
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Title with Ellipsis
+                Text(
+                  lessons[index].name ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
+                const SizedBox(height: 4),
 
-              // Description with Ellipsis
-              Text(
-                lessons[index].description ?? '',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 14,
+                // Description with Ellipsis
+                Text(
+                  lessons[index].description ?? '',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
