@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../models/user.dart';
+import '../../../utils/colors.dart'; // Import AppColors for consistent styling
 
 class HomePage extends StatefulWidget {
   @override
@@ -44,7 +45,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.purple, // Purple header
+        backgroundColor: AppColors.primary, // Same color as BasePage
+        foregroundColor: Colors.white,
         title: Row(
           children: [
             Image.asset(
@@ -53,7 +55,13 @@ class _HomePageState extends State<HomePage> {
               width: 40,
             ),
             SizedBox(width: 10),
-            Text('STUDYSAMA'),
+            Text(
+              'StudySama',
+              style: TextStyle(
+                fontFamily: 'Montserrat', // Consistent font
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         actions: [
@@ -79,7 +87,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      backgroundColor: Colors.grey[100], // Original background
+      backgroundColor: AppColors.background, // Background color for consistency
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -93,7 +101,7 @@ class _HomePageState extends State<HomePage> {
                   padding: EdgeInsets.all(16),
                   margin: EdgeInsets.only(bottom: 20),
                   decoration: BoxDecoration(
-                    color: Colors.purple,
+                    color: AppColors.primary, // Consistent color
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -105,6 +113,7 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'Montserrat', // Consistent font
                         ),
                       ),
                       SizedBox(height: 10),
@@ -113,6 +122,7 @@ class _HomePageState extends State<HomePage> {
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: 16,
+                          fontFamily: 'Montserrat',
                         ),
                       ),
                     ],
@@ -123,9 +133,10 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   'Courses',
                   style: TextStyle(
-                    color: Colors.purple,
+                    color: AppColors.primary,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
                   ),
                 ),
                 SizedBox(height: 10),
@@ -168,9 +179,10 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   'Most Popular Courses',
                   style: TextStyle(
-                    color: Colors.purple,
+                    color: AppColors.primary,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
                   ),
                 ),
                 SizedBox(height: 10),
@@ -222,7 +234,7 @@ class _HomePageState extends State<HomePage> {
       width: 150,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
+        color: AppColors.cardBackground, // Consistent card background color
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,9 +259,10 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   title,
                   style: TextStyle(
-                    color: Colors.purple,
+                    color: AppColors.primary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
                   ),
                 ),
                 SizedBox(height: 4),
@@ -258,6 +271,7 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
+                    fontFamily: 'Montserrat',
                   ),
                 ),
                 Divider(color: Colors.grey[400]),
@@ -295,7 +309,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[200],
+        color: AppColors.cardBackground, // Consistent card background color
       ),
       child: Column(
         children: [
@@ -323,28 +337,33 @@ class _HomePageState extends State<HomePage> {
                       Text(
                         title,
                         style: TextStyle(
-                          color: Colors.purple,
+                          color: AppColors.primary,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'Montserrat',
                         ),
                       ),
-                      SizedBox(height: 5),
+                      SizedBox(height: 4),
                       Text(
                         description,
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                          fontFamily: 'Montserrat',
+                        ),
                       ),
-                      SizedBox(height: 5),
+                      Divider(color: Colors.grey[400]),
                       Text(
                         'Total Joined: $totalJoined',
-                        style: TextStyle(color: Colors.grey[700]),
+                        style: TextStyle(color: Colors.grey[700], fontSize: 12),
                       ),
                       Text(
                         'Started: $started',
-                        style: TextStyle(color: Colors.grey[700]),
+                        style: TextStyle(color: Colors.grey[700], fontSize: 12),
                       ),
                       Text(
                         'Updated: $updated',
-                        style: TextStyle(color: Colors.grey[700]),
+                        style: TextStyle(color: Colors.grey[700], fontSize: 12),
                       ),
                     ],
                   ),
