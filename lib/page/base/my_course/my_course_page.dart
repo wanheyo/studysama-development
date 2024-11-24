@@ -84,7 +84,7 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
 
     // print('token: ' + token);
     try {
-      final data = await apiService.index_user_course(token);
+      final data = await apiService.index_course(token);
       setState(() {
         createdCourses = (data['created_course'] as List)
             .map((json) => Course.fromJson(json))

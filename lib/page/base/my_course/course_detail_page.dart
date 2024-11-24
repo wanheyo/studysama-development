@@ -26,8 +26,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   final ApiService apiService = ApiService();
 
   List<Lesson> lessons = [];
+  bool isTutor = false;
+  bool isStudent = false;
   String token = "";
   bool isGrid = false; // Toggle state for grid or list view in lessons
+
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
   Future<void> initializeData() async {
     await loadUser();
+    fetchUserCourse();
     fetchLessons();
   }
 
@@ -67,6 +71,31 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       print('Error loading user: $e');
       setState(() {
         // context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> fetchUserCourse() async {
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    int course_id = widget.course.id;
+    //print("course_id: " + course_id.toString());
+    try {
+      final data = await apiService.index_user_course(token, course_id);
+      setState(() {
+        // Extract boolean values from the response
+        isTutor = data['is_user_tutor'] ?? false;
+        isStudent = data['is_user_student'] ?? false;
+      });
+    } catch (e) {
+      setState(() {
+        print("Response: " + e.toString());
+      });
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
       });
     }
   }
@@ -131,6 +160,48 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         SnackBar(content: Text('Lesson creation failed: $errorMsg\n')),
       );
       print(errorMsg);
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> updateJoinOrLeave(int status) async {
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    int course_id = widget.course.id;
+    //print("course_id: " + course_id.toString());
+    try {
+      final data = await apiService.update_user_course(token, course_id, status);
+
+      String message;
+      if(status == 0)
+        message = "Leaving course " + widget.course.name + "...";
+      else
+        message = "Joining course " + widget.course.name + ".";
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+          ),
+        ),
+      );
+      initializeData();
+      print("Update user course successa ");
+
+      setState(() {
+        // lessons = (data['lessons'] as List)
+        //     .map((json) => Lesson.fromJson(json))
+        //     .toList();
+      });
+    } catch (e) {
+      setState(() {
+        print("Response: " + e.toString());
+      });
     } finally {
       setState(() {
         context.loaderOverlay.hide();
@@ -360,7 +431,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
               ),
 
               // Fourth Card: Manage Course Button
-              if(widget.course.role_id == 1)
+              if(isTutor)
                 SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -392,25 +463,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                   child: const Text("Manage Course"),
                 ),
               ),
-              if(widget.course.role_id == 3)
+              if(isStudent)
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ManageCoursePage(
-                            course: widget.course,
-                            onCourseUpdated: (updatedCourse) {
-                              setState(() {
-                                widget.course = updatedCourse; // Update the course data
-                                initializeData(); // Refresh lessons or other related data
-                              });
-                            },
-                          ),
-                        ),
-                      );
+                    onPressed: () {
+                      updateJoinOrLeave(0);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -424,25 +482,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                     child: const Text("Leave Course"),
                   ),
                 ),
-              if(widget.course.role_id == null)
+              if(!isTutor && !isStudent)
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ManageCoursePage(
-                            course: widget.course,
-                            onCourseUpdated: (updatedCourse) {
-                              setState(() {
-                                widget.course = updatedCourse; // Update the course data
-                                initializeData(); // Refresh lessons or other related data
-                              });
-                            },
-                          ),
-                        ),
-                      );
+                    onPressed: () {
+                      updateJoinOrLeave(1);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
