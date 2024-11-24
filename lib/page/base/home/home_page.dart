@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.purple, // Purple header color
+        backgroundColor: Colors.purple, // Purple header
         title: Row(
           children: [
             Image.asset(
@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      backgroundColor: Colors.white, // Set background color to white
+      backgroundColor: Colors.grey[100], // Original background
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -103,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                         'WELCOME TO STUDYSAMA!',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 28, // Increased size
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                         'Where you can learn a lot of new things.',
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 18, // Adjusted font size for description
+                          fontSize: 16,
                         ),
                       ),
                     ],
@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage> {
                   'Lessons',
                   style: TextStyle(
                     color: Colors.purple,
-                    fontSize: 22,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -138,8 +138,8 @@ class _HomePageState extends State<HomePage> {
                         subtitle: 'Discover new recipes',
                         image: "assets/recipe.jpeg",
                         totalJoined: 120,
-                        createdAt: '2024-01-01',
-                        updatedAt: '2024-11-21',
+                        started: '2024-01-01',
+                        updated: '2024-11-21',
                       ),
                       SizedBox(width: 16),
                       lessonCard(
@@ -147,17 +147,17 @@ class _HomePageState extends State<HomePage> {
                         subtitle: 'Learn new coding',
                         image: "assets/coding.jpeg",
                         totalJoined: 350,
-                        createdAt: '2023-05-12',
-                        updatedAt: '2024-10-15',
+                        started: '2023-05-12',
+                        updated: '2024-10-15',
                       ),
                       SizedBox(width: 16),
                       lessonCard(
-                        title: 'LANGUAGE',
-                        subtitle: 'Improve language skills',
-                        image: "assets/language.png",
+                        title: 'SCIENCE',
+                        subtitle: 'Explore the wonders of science',
+                        image: "assets/science.jpeg",
                         totalJoined: 200,
-                        createdAt: '2024-03-10',
-                        updatedAt: '2024-11-20',
+                        started: '2024-03-10',
+                        updated: '2024-11-20',
                       ),
                     ],
                   ),
@@ -169,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                   'Most Popular Lessons',
                   style: TextStyle(
                     color: Colors.purple,
-                    fontSize: 22,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -185,8 +185,8 @@ class _HomePageState extends State<HomePage> {
                       image: "assets/math.jpeg",
                       rating: 4.9,
                       totalJoined: 1000,
-                      createdAt: '2023-07-02',
-                      updatedAt: '2024-11-20',
+                      started: '2023-07-02',
+                      updated: '2024-11-20',
                     ),
                   ],
                 ),
@@ -204,8 +204,8 @@ class _HomePageState extends State<HomePage> {
     required String subtitle,
     required String image,
     required int totalJoined,
-    required String createdAt,
-    required String updatedAt,
+    required String started,
+    required String updated,
   }) {
     return Container(
       width: 150,
@@ -237,7 +237,7 @@ class _HomePageState extends State<HomePage> {
                   title,
                   style: TextStyle(
                     color: Colors.purple,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -246,12 +246,21 @@ class _HomePageState extends State<HomePage> {
                   subtitle,
                   style: TextStyle(
                     color: Colors.grey[600],
-                    fontSize: 14,
+                    fontSize: 12,
                   ),
                 ),
                 Divider(color: Colors.grey[400]),
                 Text(
                   'Total Joined: $totalJoined',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Started: $started',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                ),
+                Text(
+                  'Updated: $updated',
                   style: TextStyle(color: Colors.grey[700], fontSize: 12),
                 ),
               ],
@@ -269,8 +278,8 @@ class _HomePageState extends State<HomePage> {
     required String image,
     required double rating,
     required int totalJoined,
-    required String createdAt,
-    required String updatedAt,
+    required String started,
+    required String updated,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -304,7 +313,7 @@ class _HomePageState extends State<HomePage> {
                         title,
                         style: TextStyle(
                           color: Colors.purple,
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -316,6 +325,14 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(height: 5),
                       Text(
                         'Total Joined: $totalJoined',
+                        style: TextStyle(color: Colors.grey[700]),
+                      ),
+                      Text(
+                        'Started: $started',
+                        style: TextStyle(color: Colors.grey[700]),
+                      ),
+                      Text(
+                        'Updated: $updated',
                         style: TextStyle(color: Colors.grey[700]),
                       ),
                     ],
