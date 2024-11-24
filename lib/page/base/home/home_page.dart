@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.purple, // Purple header color
         title: Row(
           children: [
             Image.asset(
@@ -57,15 +57,29 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         actions: [
-          IconButton(
+          PopupMenuButton<String>(
             icon: Icon(Icons.menu),
-            onPressed: () {
-              // Handle menu action
+            onSelected: (value) {
+              // Handle menu options
+              if (value == 'Profile') {
+                // Navigate to Profile
+              } else if (value == 'Settings') {
+                // Navigate to Settings
+              } else if (value == 'Logout') {
+                // Handle Logout
+              }
             },
-          )
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem(value: 'Profile', child: Text('Profile')),
+                PopupMenuItem(value: 'Settings', child: Text('Settings')),
+                PopupMenuItem(value: 'Logout', child: Text('Logout')),
+              ];
+            },
+          ),
         ],
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white, // Set background color to white
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -123,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                         title: 'RECIPE',
                         subtitle: 'Discover new recipes',
                         image: "assets/recipe.jpeg",
-                        totalVisits: 120,
+                        totalJoined: 120,
                         createdAt: '2024-01-01',
                         updatedAt: '2024-11-21',
                       ),
@@ -132,7 +146,7 @@ class _HomePageState extends State<HomePage> {
                         title: 'CODING',
                         subtitle: 'Learn new coding',
                         image: "assets/coding.jpeg",
-                        totalVisits: 350,
+                        totalJoined: 350,
                         createdAt: '2023-05-12',
                         updatedAt: '2024-10-15',
                       ),
@@ -141,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                         title: 'LANGUAGE',
                         subtitle: 'Improve language skills',
                         image: "assets/language.png",
-                        totalVisits: 200,
+                        totalJoined: 200,
                         createdAt: '2024-03-10',
                         updatedAt: '2024-11-20',
                       ),
@@ -170,20 +184,9 @@ class _HomePageState extends State<HomePage> {
                       'Master mathematical concepts and sharpen your problem-solving skills.',
                       image: "assets/math.jpeg",
                       rating: 4.9,
-                      totalVisits: 1000,
+                      totalJoined: 1000,
                       createdAt: '2023-07-01',
                       updatedAt: '2024-11-20',
-                    ),
-                    SizedBox(height: 10),
-                    popularLessonCard(
-                      title: 'SCIENCE',
-                      description:
-                      'Explore the wonders of science and expand your knowledge.',
-                      image: "assets/science.jpeg",
-                      rating: 4.7,
-                      totalVisits: 750,
-                      createdAt: '2023-02-20',
-                      updatedAt: '2024-11-19',
                     ),
                   ],
                 ),
@@ -200,7 +203,7 @@ class _HomePageState extends State<HomePage> {
     required String title,
     required String subtitle,
     required String image,
-    required int totalVisits,
+    required int totalJoined,
     required String createdAt,
     required String updatedAt,
   }) {
@@ -208,12 +211,11 @@ class _HomePageState extends State<HomePage> {
       width: 150,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[900],
+        color: Colors.grey[200],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Lesson image
           ClipRRect(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
@@ -243,22 +245,14 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.grey[400],
+                    color: Colors.grey[600],
                     fontSize: 14,
                   ),
                 ),
-                Divider(color: Colors.grey[700]),
+                Divider(color: Colors.grey[400]),
                 Text(
-                  'Total Visits: $totalVisits',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                ),
-                Text(
-                  'Created: $createdAt',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                ),
-                Text(
-                  'Updated: $updatedAt',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  'Total Joined: $totalJoined',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
                 ),
               ],
             ),
@@ -274,14 +268,14 @@ class _HomePageState extends State<HomePage> {
     required String description,
     required String image,
     required double rating,
-    required int totalVisits,
+    required int totalJoined,
     required String createdAt,
     required String updatedAt,
   }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[900],
+        color: Colors.grey[200],
       ),
       child: Column(
         children: [
@@ -317,20 +311,12 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(height: 5),
                       Text(
                         description,
-                        style: TextStyle(color: Colors.grey[400]),
+                        style: TextStyle(color: Colors.grey[600]),
                       ),
                       SizedBox(height: 5),
                       Text(
-                        'Total Visits: $totalVisits',
-                        style: TextStyle(color: Colors.grey[500]),
-                      ),
-                      Text(
-                        'Created: $createdAt',
-                        style: TextStyle(color: Colors.grey[500]),
-                      ),
-                      Text(
-                        'Updated: $updatedAt',
-                        style: TextStyle(color: Colors.grey[500]),
+                        'Total Joined: $totalJoined',
+                        style: TextStyle(color: Colors.grey[700]),
                       ),
                     ],
                   ),
@@ -340,13 +326,10 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.only(right: 10.0, top: 10.0),
                 child: Column(
                   children: [
+                    Icon(Icons.star, color: Colors.orange, size: 20),
                     Text(
-                      '⭐ $rating',
-                      style: TextStyle(
-                        color: Colors.amber,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      '$rating',
+                      style: TextStyle(color: Colors.grey[700]),
                     ),
                   ],
                 ),
