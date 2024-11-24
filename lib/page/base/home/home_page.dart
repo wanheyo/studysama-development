@@ -154,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                       courseCard(
                         title: 'LANGUAGE',
                         subtitle: 'Master a new language',
-                        image: "assets/language.jpeg",
+                        image: "assets/language.png",
                         totalJoined: 200,
                         started: '2024-03-10',
                         updated: '2024-11-20',
