@@ -19,21 +19,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'StudySama dev',
-      theme: AppTheme.lightTheme, // Light Theme
-      darkTheme: AppTheme.darkTheme, // Dark Theme
-      themeMode: ThemeMode.system, // Use system settings
-      // colorScheme: ColorScheme.fromSeed(seedColor: Color.fromRGBO(38, 38, 38, 0.4)),
-      //   useMaterial3: true,
-      // ),
-      // home: const BottomNavbar(),
-      //home: LoginPage(),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => BasePage(), //start page
-        '/home': (context) => BasePage(),
-      }
+        debugShowCheckedModeBanner: false,
+        title: 'StudySama dev',
+        theme: AppTheme.lightTheme, // Light Theme
+        darkTheme: AppTheme.darkTheme, // Dark Theme
+        themeMode: ThemeMode.system, // Use system settings
+        // colorScheme: ColorScheme.fromSeed(seedColor: Color.fromRGBO(38, 38, 38, 0.4)),
+        //   useMaterial3: true,
+        // ),
+        // home: const BottomNavbar(),
+        //home: LoginPage(),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => BasePage(), //start page
+          '/home': (context) => BasePage(),
+        }
     );
   }
 }
@@ -126,3 +126,4 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
