@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/page/base/my_course/manage_course_page.dart';
+import '../../../main.dart';
 import '../../../models/course.dart';
 import '../../../models/course.dart';
 import '../../../models/lesson.dart';
@@ -19,7 +20,7 @@ class CourseDetailPage extends StatefulWidget {
   _CourseDetailPageState createState() => _CourseDetailPageState();
 }
 
-class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerProviderStateMixin {
+class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerProviderStateMixin, RouteAware {
   late TabController _tabController;
   final TextEditingController nameController = TextEditingController();
 
@@ -40,6 +41,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     initializeData();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route); // Safe subscription
+    }
+  }
+
   Future<void> initializeData() async {
     await loadUser();
     fetchUserCourse();
@@ -47,7 +57,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   }
 
   @override
+  void didPopNext() {
+    // Called when returning to this page
+    print('Page became active again');
+    initializeData(); // Refresh data
+  }
+
+  @override
   void dispose() {
+    routeObserver.unsubscribe(this); // Unsubscribe to avoid memory leaks
     _tabController.dispose();
     super.dispose();
   }
@@ -450,7 +468,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                           },
                         ),
                       ),
-                    );
+                    ).then((_) {
+                      // Call initializeData on returning to this page
+                      initializeData();
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -628,7 +649,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => LessonPage(lesson: lessons[index]),
+            builder: (context) => LessonPage(lesson: lessons[index], course: widget.course, isTutor: isTutor,),
           ),
         );
       },
