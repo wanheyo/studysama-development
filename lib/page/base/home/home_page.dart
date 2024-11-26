@@ -1,8 +1,118 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../models/user.dart';
+
+void main() {
+  runApp(StudySamaApp());
+}
+
+class StudySamaApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: StudySamaHome(),
+    );
+  }
+}
+
+class StudySamaHome extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Header section
+            Column(
+              children: [
+                SizedBox(height: 40),
+                Text(
+                  "Let's Start Learning!",
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Welcome to Study Sama",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 40),
+                Icon(
+                  Icons.menu_book_rounded,
+                  size: 100,
+                  color: Colors.blue,
+                ),
+              ],
+            ),
+            // Get Started button
+            Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigate to the HomePage
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+
+                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: Text(
+                    'Get Started',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+            // Bottom navigation bar
+            BottomNavigationBar(
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.menu_book),
+                  label: 'Courses',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person),
+                  label: 'Profile',
+                ),
+              ],
+              selectedItemColor: Colors.blue,
+              unselectedItemColor: Colors.grey,
+              showUnselectedLabels: true,
+              backgroundColor: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class HomePage extends StatefulWidget {
   @override
@@ -89,7 +199,7 @@ class _HomePageState extends State<HomePage> {
                         'WELCOME TO STUDYSAMA!',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 28, // Increased size
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -98,7 +208,7 @@ class _HomePageState extends State<HomePage> {
                         'Where you can learn a lot of new things.',
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 18, // Adjusted font size for description
+                          fontSize: 18,
                         ),
                       ),
                     ],
@@ -195,7 +305,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Lesson Card
   Widget lessonCard({
     required String title,
     required String subtitle,
@@ -213,7 +322,6 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Lesson image
           ClipRRect(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
@@ -268,7 +376,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Popular Lesson Card
   Widget popularLessonCard({
     required String title,
     required String description,
@@ -279,79 +386,64 @@ class _HomePageState extends State<HomePage> {
     required String updatedAt,
   }) {
     return Container(
+      padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(15),
         color: Colors.grey[900],
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                ),
-                child: Image.asset(
-                  image,
-                  height: 80,
-                  width: 80,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: Colors.purple,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        description,
-                        style: TextStyle(color: Colors.grey[400]),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Total Visits: $totalVisits',
-                        style: TextStyle(color: Colors.grey[500]),
-                      ),
-                      Text(
-                        'Created: $createdAt',
-                        style: TextStyle(color: Colors.grey[500]),
-                      ),
-                      Text(
-                        'Updated: $updatedAt',
-                        style: TextStyle(color: Colors.grey[500]),
-                      ),
-                    ],
+          ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.asset(
+              image,
+              height: 80,
+              width: 80,
+              fit: BoxFit.cover,
+            ),
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.purple,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0, top: 10.0),
-                child: Column(
+                SizedBox(height: 5),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
                   children: [
+                    Icon(Icons.star, color: Colors.yellow, size: 18),
+                    SizedBox(width: 5),
                     Text(
-                      '⭐ $rating',
-                      style: TextStyle(
-                        color: Colors.amber,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      '$rating ($totalVisits visits)',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
                     ),
                   ],
                 ),
-              ),
-            ],
+                Text(
+                  'Created: $createdAt',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                ),
+                Text(
+                  'Updated: $updatedAt',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                ),
+              ],
+            ),
           ),
         ],
       ),
