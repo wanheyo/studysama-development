@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:studysama/page/auth/login_Page.dart';
 
 void main() {
-  runApp(startpage());
+  runApp(StartApp());
 }
 
-class startpage extends StatelessWidget {
+class StartApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: StartPage(),
+      home: StartPage(), // Correct class reference
     );
   }
 }
@@ -27,14 +28,12 @@ class StartPage extends StatelessWidget {
             Column(
               children: [
                 SizedBox(height: 40),
-                // Icon
                 Icon(
                   Icons.menu_book_rounded,
                   size: 80,
                   color: Colors.blue,
                 ),
                 SizedBox(height: 20),
-                // Main Title
                 Text(
                   "Let's Start Learning!",
                   style: TextStyle(
@@ -45,7 +44,6 @@ class StartPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 10),
-                // Subtitle
                 Text(
                   "Access courses anywhere and stay ahead!",
                   style: TextStyle(
@@ -62,10 +60,9 @@ class StartPage extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    // Navigate to the home page
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      MaterialPageRoute(builder: (context) => LoginPage()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
