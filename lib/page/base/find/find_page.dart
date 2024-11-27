@@ -87,7 +87,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
             .map((json) => Course.fromJson(json))
             .toList();
 
-        print('course: ' + courses.toString());
+        //print('course: ' + courses.toString());
       });
     } catch (e) {
       setState(() {
