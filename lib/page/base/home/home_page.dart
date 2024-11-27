@@ -54,7 +54,12 @@ class _HomePageState extends State<HomePage> {
               width: 40,
             ),
             SizedBox(width: 10),
-            Text('STUDYSAMA'),
+            Text(
+              'StudySama',
+              style: TextStyle(
+                color: Colors.white, // Set text color to white
+              ),
+            ),
           ],
         ),
         actions: [
@@ -101,7 +106,7 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'WELCOME TO STUDYSAMA!',
+                        'WELCOME TO StudySama!',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -347,20 +352,16 @@ class _HomePageState extends State<HomePage> {
                         'Updated: $updated',
                         style: TextStyle(color: Colors.grey[700]),
                       ),
+                      SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Icon(Icons.star, color: Colors.yellow, size: 16),
+                          SizedBox(width: 5),
+                          Text('$rating', style: TextStyle(color: Colors.grey[700])),
+                        ],
+                      ),
                     ],
                   ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Column(
-                  children: [
-                    Icon(Icons.star, color: Colors.orange, size: 20),
-                    Text(
-                      '$rating',
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                  ],
                 ),
               ),
             ],
@@ -370,3 +371,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+g
