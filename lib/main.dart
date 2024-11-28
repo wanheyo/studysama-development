@@ -6,6 +6,8 @@ import 'package:studysama/page/auth/login_page.dart';
 import 'package:studysama/theme/app_theme.dart';
 import 'package:studysama/utils/colors.dart';
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -31,9 +33,11 @@ class MyApp extends StatelessWidget {
         //home: LoginPage(),
         initialRoute: '/',
         routes: {
-          '/': (context) => BasePage(), //start page
+          // '/': (context) => BasePage(), //start page
+          '/': (context) => LoginPage(), //start page
           '/home': (context) => BasePage(),
-        }
+        },
+      navigatorObservers: [routeObserver],
     );
   }
 }
