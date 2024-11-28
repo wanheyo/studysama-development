@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:studysama/page/auth/start_page.dart';
 import 'package:studysama/page/base/ai/ai_page.dart';
 import 'package:studysama/page/base/my_course/my_course_page.dart';
 import 'package:studysama/page/base/home/home_page.dart';
@@ -21,7 +22,7 @@ class _BasePageState extends State<BasePage> {
 
   // List of pages for bottom navigation
   final List<Widget> _pages = [
-    HomePage(),
+   StartApp(),
     AiPage(),
     FindPage(),
     MyCoursePage(),
