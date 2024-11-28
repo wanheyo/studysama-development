@@ -5,6 +5,7 @@ import 'package:studysama/page/base/ai/ai_page.dart';
 import 'package:studysama/page/base/my_course/my_course_page.dart';
 import 'package:studysama/page/base/home/home_page.dart';
 import 'package:studysama/page/base/profile/profile_page.dart';
+import 'package:studysama/page/base/profile/setting.dart';
 import 'package:studysama/utils/colors.dart';
 
 import 'find/find_page.dart';
@@ -40,13 +41,31 @@ class _BasePageState extends State<BasePage> {
         title: Text(
           'StudySama',
           style: TextStyle(
-            fontFamily: 'Montserrat',  // Set the font to Montserrat
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
           )
         ,),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        actions: [
+          //untuk icons setting
+          if (_selectedIndex == 4)  // bila user tekan index ke4 so akan ada icon ni
+            IconButton(
+              icon: Icon(
+                Icons.settings,
+                color: Colors.white,
+                size: 28,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsPage()),
+                );
+              },
+            ),
+        ],
       ),
+
       body: _pages[_selectedIndex], // Display selected page
       bottomNavigationBar: BottomNavigationBar(
         //backgroundColor: AppColors.background,
