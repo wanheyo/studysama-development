@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:studysama/page/auth/login_Page.dart';
+import 'package:studysama/page/base/ai/ai_page.dart';
 
 void main() {
   runApp(StartApp());

@@ -60,6 +60,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   void didPopNext() {
     // Called when returning to this page
     print('Page became active again');
+
     initializeData(); // Refresh data
   }
 
@@ -452,39 +453,39 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
               // Fourth Card: Manage Course Button
               if(isTutor)
                 SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ManageCoursePage(
-                          course: widget.course,
-                          onCourseUpdated: (updatedCourse) {
-                            setState(() {
-                              widget.course = updatedCourse; // Update the course data
-                              initializeData(); // Refresh lessons or other related data
-                            });
-                          },
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageCoursePage(
+                            course: widget.course,
+                            onCourseUpdated: (updatedCourse) {
+                              setState(() {
+                                widget.course = updatedCourse; // Update the course data
+                                initializeData(); // Refresh lessons or other related data
+                              });
+                            },
+                          ),
                         ),
+                      ).then((_) {
+                        // Call initializeData on returning to this page
+                        initializeData();
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
                       ),
-                    ).then((_) {
-                      // Call initializeData on returning to this page
-                      initializeData();
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.bold,
                     ),
+                    child: const Text("Manage Course"),
                   ),
-                  child: const Text("Manage Course"),
                 ),
-              ),
               if(isStudent)
                 SizedBox(
                   width: double.infinity,
