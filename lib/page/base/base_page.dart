@@ -41,7 +41,7 @@ class _BasePageState extends State<BasePage> {
         title: Text(
           'StudySama',
           style: TextStyle(
-            fontFamily: 'Montserrat',  // Set the font to Montserrat
+            fontFamily: 'Montserrat',
             fontWeight: FontWeight.bold,
           )
         ,),

@@ -1,23 +1,134 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../models/course.dart';
 import '../../../models/lesson.dart';
-import '../../../models/resource.dart'; // The shared Resource model
+import '../../../models/resource.dart';
+import '../../../services/api_service.dart';
+import '../../../utils/colors.dart';
+import 'manage_lesson_page.dart'; // The shared Resource model
 
 class LessonPage extends StatefulWidget {
-  final Lesson lesson;
-
-  const LessonPage({Key? key, required this.lesson}) : super(key: key);
+  Lesson lesson;
+  Course course;
+  bool isTutor;
+  LessonPage({Key? key, required this.lesson, required this.course, required this.isTutor}) : super(key: key);
 
   @override
   _LessonPageState createState() => _LessonPageState();
 }
 
 class _LessonPageState extends State<LessonPage> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController descController = TextEditingController();
+  final TextEditingController linkController = TextEditingController();
   final List<Resource> resources = []; // Replace with fetched resources
+
+  final ApiService apiService = ApiService();
+  String token = "";
+  bool isTutor = false;
+  bool isStudent = false;
 
   @override
   void initState() {
     super.initState();
+    initializeData();
+  }
+
+  Future<void> initializeData() async {
+    await loadUser();
+    //fetchUserCourse();
     fetchResources(); // Simulate fetching resources for the lesson
+  }
+
+  Future<void> loadUser() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final tokenString = prefs.getString('token');
+      if (tokenString != null) {
+        token = tokenString;
+      }
+
+      setState(() {
+        // context.loaderOverlay.show();
+      });
+    } catch (e) {
+      print('Error loading user: $e');
+      setState(() {
+        // context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> fetchUserCourse() async {
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    int course_id = widget.course.id;
+    //print("course_id: " + course_id.toString());
+    try {
+      final data = await apiService.index_user_course(token, course_id);
+      setState(() {
+        // Extract boolean values from the response
+        isTutor = data['is_user_tutor'] ?? false;
+        isStudent = data['is_user_student'] ?? false;
+      });
+    } catch (e) {
+      setState(() {
+        print("Response: " + e.toString());
+      });
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> _createResource() async {
+    // if (!_formKey.currentState!.validate()) {
+    //   return; // Exit if the form is invalid
+    // }
+
+    String name = nameController.text.trim();
+    String desc = descController.text.trim();
+    String link = linkController.text.trim();
+
+    // Perform course creation logic here
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    try {
+      // Call the API
+      await apiService.lesson_store(token, name, widget.course.id);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Lesson "$name" created successfully',
+          ),
+        ),
+      );
+      print("Lesson successa ");
+      //widget.onCourseCreated(); // Notify parent to refresh
+      Navigator.pop(context); // Navigate back to the previous page
+
+    } catch (e) {
+      // Extract meaningful error messages if available
+      final errorMsg = e.toString().replaceFirst('Exception: ', '\n');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lesson creation failed: $errorMsg\n')),
+      );
+      print(errorMsg);
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+    }
   }
 
   void fetchResources() {
@@ -72,6 +183,32 @@ class _LessonPageState extends State<LessonPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.lesson.name),
+        actions: [
+          if (widget.isTutor)
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: IconButton(
+                icon: const Icon(FontAwesomeIcons.solidPenToSquare),
+                tooltip: 'Manage Lesson',
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ManageLessonPage(
+                        lesson: widget.lesson,
+                        course: widget.course,
+                        onLessonUpdated: (updatedLesson) {
+                          setState(() {
+                            widget.lesson = updatedLesson; // Update the lesson data
+                          });
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -79,12 +216,17 @@ class _LessonPageState extends State<LessonPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Lesson Info Section
+              const Text(
+                "About Lesson",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Montserrat',
+                ),
+              ),
+              const SizedBox(height: 10),
               buildLessonInfoSection(),
-
               const SizedBox(height: 20),
-
-              // Resources Section
               const Text(
                 "Resources",
                 style: TextStyle(
@@ -94,14 +236,149 @@ class _LessonPageState extends State<LessonPage> {
                 ),
               ),
               const SizedBox(height: 10),
-
               ...resources.map((resource) => buildResourceCard(resource)).toList(),
             ],
           ),
         ),
       ),
+      floatingActionButton: widget.isTutor
+          ? FloatingActionButton(
+        onPressed: () => _showAddResourceBottomSheet(context),
+        child: const Icon(
+          FontAwesomeIcons.plus,
+          color: Colors.white,
+        ),
+        backgroundColor: AppColors.primary,
+        tooltip: 'Add New Resource',
+      )
+          : null,
     );
   }
+
+  void _showAddResourceBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (BuildContext context) {
+        // final TextEditingController nameController = TextEditingController();
+        // final TextEditingController descController = TextEditingController();
+        // final TextEditingController linkController = TextEditingController();
+        int category = 1; // Default category
+        File? selectedFile;
+
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16.0),
+                const Center(
+                  child: Text(
+                    "Add New Resource",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Resource Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10.0),
+                TextField(
+                  controller: descController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (optional)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10.0),
+                DropdownButtonFormField<int>(
+                  value: category,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 1, child: Text("Note")),
+                    DropdownMenuItem(value: 2, child: Text("Assignment")),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      category = value;
+                    }
+                  },
+                ),
+                const SizedBox(height: 10.0),
+                TextField(
+                  controller: linkController,
+                  decoration: const InputDecoration(
+                    labelText: 'Link (optional)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10.0),
+                TextButton.icon(
+                  onPressed: () async {
+                    // Implement file picker logic here
+                    // selectedFile = await pickFile();
+                  },
+                  icon: const Icon(Icons.attach_file),
+                  label: const Text("Attach File (optional)"),
+                ),
+                const SizedBox(height: 16.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Validate inputs and add resource logic here
+                        String name = nameController.text;
+                        String? desc = descController.text.isEmpty
+                            ? null
+                            : descController.text;
+                        String? link = linkController.text.isEmpty
+                            ? null
+                            : linkController.text;
+
+                        if (name.isNotEmpty) {
+                          // Call API to add resource
+                          print("Resource added: $name, $desc, $category, $link");
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: const Text("Add Resource"),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 
   // Build Lesson Info Section
   Widget buildLessonInfoSection() {
@@ -185,6 +462,8 @@ class _LessonPageState extends State<LessonPage> {
 
     return Card(
       color: cardColor,
+      margin: const EdgeInsets.only(bottom: 16.0),
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0),
       ),
