@@ -1,14 +1,23 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:mime/mime.dart';
 import '../models/login_response.dart';
 import '../models/user.dart';
+import 'package:http_parser/http_parser.dart'; // For MIME types
+import 'package:path/path.dart' as p;
 
 class ApiService {
   //production
   // final String baseUrl = 'https://{domain}/api/studysama';
 
   //development
-  final String baseUrl = 'https://95de-1-32-120-7.ngrok-free.app/api/studysama';
+  final String domainUrl = 'https://c66a-210-19-91-133.ngrok-free.app';
+  late final String baseUrl;
+
+  ApiService() {
+    baseUrl = domainUrl + '/api/studysama';
+  }
 
   // SECTION START: USER
 
@@ -487,8 +496,7 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> lesson_update(
-      String token, int lesson_id, String name, String desc, String learn_outcome, int status) async {
+  Future<Map<String, dynamic>> lesson_update(String token, int lesson_id, String name, String desc, String learn_outcome, int status) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/lesson/update'),
@@ -552,60 +560,121 @@ class ApiService {
 
   // SECTION START: RESOURCE
 
-  Future<void> resource_store(String token, String name, String desc, int category, String link, int lesson_id, String file_name, String file_type) async {
+  Future<Map<String, dynamic>> index_resource_lesson(String token, int lesson_id) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/resource/store'),
+        Uri.parse('$baseUrl/resource/index_resource_lesson'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-          'name': name,
-          'desc': desc,
-          'category': category,
-          'link': link,
-          'lesson_id': lesson_id,
-
-          'file_name': file_name,
-          'file_type': file_type,
-        }),
+        body: jsonEncode({'lesson_id': lesson_id}),
       );
 
-      print("Status Code: ${response.statusCode}");
-      print("Response Body: ${response.body}");
-
-      if (response.statusCode == 201) {
-        // Handle success
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
         if (response.body.isNotEmpty) {
-          final responseData = json.decode(response.body.trim());
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch resource');
+        } else {
+          throw Exception('Failed to fetch resource: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching lessons: $e');
+    }
+  }
+
+  Future<void> resource_store(String token, String name, String desc, int category, String link, int lesson_id, String file_name, String file_type, File? picked_file) async {
+
+    if(picked_file != null) {
+      print(picked_file.path.toString());
+      file_name = p.basename(picked_file.path);
+      file_type = p.extension(picked_file.path);
+    }
+
+    try {
+      // Set up the request
+      final uri = Uri.parse('$baseUrl/resource/store');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add headers
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      // Add form fields
+      request.fields['name'] = name;
+      request.fields['desc'] = desc;
+      request.fields['category'] = category.toString();
+      request.fields['link'] = link;
+      request.fields['lesson_id'] = lesson_id.toString();
+      request.fields['file_name'] = file_name;
+      request.fields['file_type'] = file_type;
+
+      // Attach the file if it exists
+      if (picked_file != null) {
+        final mimeType = lookupMimeType(picked_file.path) ?? 'application/octet-stream';
+
+        request.files.add(await http.MultipartFile.fromPath(
+          'file', // This key should match what the server expects
+          picked_file.path,
+          contentType: MediaType.parse(mimeType),
+        ));
+      }
+
+      // Send the request
+      final response = await request.send();
+
+      // Parse the response
+      if (response.statusCode == 201) {
+        // Successful response
+        final responseBody = await response.stream.bytesToString();
+        print('Error response body: $responseBody'); // Log the entire response body
+        if (responseBody.isNotEmpty) {
+          final responseData = json.decode(responseBody.trim());
           print('Success: $responseData');
         }
-        return;
       } else {
-        // Handle validation errors
-        if (response.body.isNotEmpty) {
-          final responseData = json.decode(response.body.trim());
+        // Handle errors
+        final responseBody = await response.stream.bytesToString();
+        if (responseBody.isNotEmpty) {
+          final responseData = json.decode(responseBody.trim());
 
-          // Check if the response contains 'errors'
+          // Check for validation errors
           if (responseData.containsKey('errors')) {
             final errors = responseData['errors'];
             String errorMessage = '';
 
+            // Process specific field errors
+            if (errors.containsKey('name')) {
+              errorMessage += '${errors['name'][0]}\n';
+            }
+            if (errors.containsKey('desc')) {
+              errorMessage += '${errors['desc'][0]}\n';
+            }
+            if (errors.containsKey('file')) {
+              errorMessage += '${errors['file'][0]}\n';
+            }
+
             // Throw the combined error message
             throw Exception(errorMessage.trim());
           } else {
-            // Fallback error if no validation errors are present
+            // General error message
             throw Exception(responseData['message'] ?? 'Failed to create resource');
           }
+        } else {
+          throw Exception('Failed to create resource: ${response.statusCode}');
         }
       }
     } catch (e) {
-      // Rethrow the exception for the caller to handle
-      // throw Exception('Error registering user: $e');
-      throw Exception(e);
+      // Log and rethrow the exception
+      print('Error: $e');
+      throw Exception('Error creating resource: $e');
     }
   }
 
-  // SECTION END: RESOURCE
+// SECTION END: RESOURCE
 }

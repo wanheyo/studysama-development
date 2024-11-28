@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import '../../../utils/colors.dart';
 import 'edit_profile.dart';
 
@@ -26,58 +25,61 @@ class ProfilePage extends StatelessWidget {
           Column(
             children: <Widget>[
               Expanded(
-                flex: 4,
+                flex: 3,
                 child: Container(
                   color: AppColors.primary,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // Profile Image
                         Column(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            CircleAvatar(
-                              radius: 70, // Size of the profile image
-                              backgroundImage: AssetImage('assets/profile_image.png'),
-                              backgroundColor: Colors.white, //
-                            ),
-                            const SizedBox(height: 10),
-                            //username
+                            // Username
                             Text(
                               '@ayunies',
                               style: TextStyle(
                                 fontFamily: 'Montserrat',
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 16,
+                              ),
+                              overflow: TextOverflow.ellipsis, // kalau nama panjang
+                            ),
+
+                            const SizedBox(height: 20),
+                            CircleAvatar(
+                              radius: 30, // Size of the profile image
+                              backgroundImage: AssetImage('assets/profile_image.png'),
+                              backgroundColor: Colors.white,
+                            ),
+                            const SizedBox(height: 23),
+                            Text(
+                              'BIO: ',
+                              style: TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 16,
                               ),
                               overflow: TextOverflow.ellipsis, // kalau nama panjang
                             ),
                           ],
                         ),
-
-
-                        Spacer(),
-
-                        // Follower and post
+                        //Spacer(),
+                        // Follower and Post
                         Column(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Row for Post and Followers
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // Column for Posts
                                 Column(
-                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
                                       'Post',
                                       style: TextStyle(
                                         color: Colors.white70,
-                                        fontSize: 20,
+                                        fontSize: 16,
                                         fontFamily: 'Montserrat',
                                       ),
                                     ),
@@ -85,24 +87,21 @@ class ProfilePage extends StatelessWidget {
                                       '10',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 25,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         fontFamily: 'Montserrat',
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(width: 40),
-
-                                // Column for Followers
+                                const SizedBox(width: 20),
                                 Column(
-                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
                                       'Followers',
                                       style: TextStyle(
                                         color: Colors.white70,
-                                        fontSize: 20,
+                                        fontSize: 16,
                                         fontFamily: 'Montserrat',
                                       ),
                                     ),
@@ -110,7 +109,7 @@ class ProfilePage extends StatelessWidget {
                                       '120',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 25,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         fontFamily: 'Montserrat',
                                       ),
@@ -119,54 +118,64 @@ class ProfilePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-
-                            const SizedBox(height: 20),
-
-                            // Row for Edit Profile and Share Profile Buttons
+                            const SizedBox(height: 10),
+                            //Spacer(),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => EditProfilePage()),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: AppColors.primary,
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                SizedBox(
+                                  width: 110, // size button
+                                  height: 30,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => EditProfilePage()),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: AppColors.primary,
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                     ),
-                                  ),
-                                  child: Text(
-                                    'Edit Profile',
-                                    style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
+                                    child: Text(
+                                      'Edit Profile',
+                                      style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primary,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 20),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    // Add the share profile action here
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: AppColors.primary,
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                const SizedBox(width: 5),
+                                SizedBox(
+                                  width: 110, // size button
+                                  height: 30,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      // Share profile action
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: AppColors.primary,
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                     ),
-                                  ),
-                                  child: Text(
-                                    'Share Profile',
-                                    style: TextStyle(
-                                      fontFamily: 'Montserrat',
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
+                                    child: Text(
+                                      'Share Profile ',
+                                      style: TextStyle(
+                                        fontFamily: 'Montserrat',
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primary,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -174,44 +183,73 @@ class ProfilePage extends StatelessWidget {
                             ),
                           ],
                         ),
-
-                        Spacer(),// space
-
-                        // Badge Frame
-                        Container(
-                          width: 100,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'badge',
-                              style: TextStyle(
-                                fontSize: 17,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
+                        Spacer(),
                       ],
                     ),
-
                   ),
                 ),
               ),
-
               Expanded(
                 flex: 5,
                 child: Container(
                   color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _buildCard('Art 1', ''),
+                        _buildCard('Art 2', ''),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper function for cards
+  Widget _buildCard(String title, String imagePath) {
+    return Container(
+      width: 200,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+           /* child: Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+              height: 120,
+              width: double.infinity,
+            ),*/
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontFamily: 'Montserrat',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
           ),
         ],
       ),

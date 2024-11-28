@@ -1,3 +1,5 @@
+import 'package:studysama/models/resource_file.dart';
+
 class Resource {
   final int id;
   final int lessonId;
@@ -10,6 +12,7 @@ class Resource {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final int? fileId;
+  ResourceFile? resourceFile; // Optional associated file
 
   Resource({
     required this.id,
@@ -23,6 +26,7 @@ class Resource {
     this.createdAt,
     this.updatedAt,
     this.fileId,
+    this.resourceFile
   });
 
   // Factory method to create a Lesson object from a JSON map
