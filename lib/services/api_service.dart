@@ -8,7 +8,9 @@ class ApiService {
   // final String baseUrl = 'https://{domain}/api/studysama';
 
   //development
-  final String baseUrl = 'https://d9ae-60-48-55-130.ngrok-free.app/api/studysama';
+  final String baseUrl = 'https://95de-1-32-120-7.ngrok-free.app/api/studysama';
+
+  // SECTION START: USER
 
   Future<List<User>> getUsers() async {
     try {
@@ -16,7 +18,6 @@ class ApiService {
         Uri.parse('$baseUrl/users/index'),
         headers: {
           'Content-Type': 'application/json',
-          // Add authorization header if required
           // 'Authorization': 'Bearer $token',
         },
       );
@@ -158,7 +159,10 @@ class ApiService {
     }
   }
 
+  // SECTION END: LESSON
 
+
+  // SECTION START: COURSE
 
   Future<void> course_store(String token, String name, String desc) async {
     try {
@@ -293,10 +297,10 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> index_user_course(String token) async {
+  Future<Map<String, dynamic>> index_course(String token) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/course/index_user_course'),
+        Uri.parse('$baseUrl/course/index_course'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -314,9 +318,97 @@ class ApiService {
         }
       }
     } catch (e) {
+      throw Exception('Error fetching courses: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> index_user_course(String token, int course_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/course/index_user_course'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'course_id': course_id,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch user courses');
+        } else {
+          throw Exception('Failed to fetch user courses: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
       throw Exception('Error fetching user courses: $e');
     }
   }
+
+  Future<Map<String, dynamic>> update_user_course(String token, int course_id, int status) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/course/update_user_course'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'course_id': course_id,
+          'status': status,
+        }),
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Parse and return the updated course data
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+
+          // Ensure 'message' exist in the response
+          if (responseData.containsKey('message')) {
+            return responseData;
+          } else {
+            throw Exception('Invalid response structure: ${response.body}');
+          }
+        } else {
+          throw Exception('Empty response body on success');
+        }
+      } else {
+        // Handle error responses
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> errorData = json.decode(response.body.trim());
+
+          // If errors are present in the response, process them
+          if (errorData.containsKey('errors')) {
+            final errors = errorData['errors'] as Map<String, dynamic>;
+            String errorMessage = errors.values.join(', ');
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error handling
+            throw Exception(errorData['message'] ?? 'Failed to update course');
+          }
+        }
+        throw Exception('Unexpected response format or empty response body');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Error updating course: $e');
+    }
+  }
+
+  // SECTION END: COURSE
+
+
+  // SECTION START: LESSON
 
   Future<Map<String, dynamic>> index_lesson_course(String token, int course_id) async {
     try {
@@ -394,4 +486,126 @@ class ApiService {
       throw Exception(e);
     }
   }
+
+  Future<Map<String, dynamic>> lesson_update(
+      String token, int lesson_id, String name, String desc, String learn_outcome, int status) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/lesson/update'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'lesson_id': lesson_id,
+          'name': name,
+          'desc': desc,
+          'learn_outcome': learn_outcome,
+          'status': status,
+        }),
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Parse and return the updated course data
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+
+          // Ensure 'message' and 'course' exist in the response
+          if (responseData.containsKey('message') &&
+              responseData.containsKey('lesson')) {
+            return responseData;
+          } else {
+            throw Exception('Invalid response structure: ${response.body}');
+          }
+        } else {
+          throw Exception('Empty response body on success');
+        }
+      } else {
+        // Handle error responses
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> errorData = json.decode(response.body.trim());
+
+          // If errors are present in the response, process them
+          if (errorData.containsKey('errors')) {
+            final errors = errorData['errors'] as Map<String, dynamic>;
+            String errorMessage = errors.values.join(', ');
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error handling
+            throw Exception(errorData['message'] ?? 'Failed to update lesson');
+          }
+        }
+        throw Exception('Unexpected response format or empty response body');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Error updating lesson: $e');
+    }
+  }
+
+  // SECTION END: LESSON
+
+
+  // SECTION START: RESOURCE
+
+  Future<void> resource_store(String token, String name, String desc, int category, String link, int lesson_id, String file_name, String file_type) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/resource/store'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'name': name,
+          'desc': desc,
+          'category': category,
+          'link': link,
+          'lesson_id': lesson_id,
+
+          'file_name': file_name,
+          'file_type': file_type,
+        }),
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201) {
+        // Handle success
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+        }
+        return;
+      } else {
+        // Handle validation errors
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body.trim());
+
+          // Check if the response contains 'errors'
+          if (responseData.containsKey('errors')) {
+            final errors = responseData['errors'];
+            String errorMessage = '';
+
+            // Throw the combined error message
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error if no validation errors are present
+            throw Exception(responseData['message'] ?? 'Failed to create resource');
+          }
+        }
+      }
+    } catch (e) {
+      // Rethrow the exception for the caller to handle
+      // throw Exception('Error registering user: $e');
+      throw Exception(e);
+    }
+  }
+
+  // SECTION END: RESOURCE
 }

@@ -4,11 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/page/base/my_course/manage_course_page.dart';
+import '../../../main.dart';
 import '../../../models/course.dart';
 import '../../../models/course.dart';
 import '../../../models/lesson.dart';
 import '../../../services/api_service.dart';
 import '../../../utils/colors.dart';
+import 'lesson_page.dart';
 
 class CourseDetailPage extends StatefulWidget {
   Course course;
@@ -18,7 +20,7 @@ class CourseDetailPage extends StatefulWidget {
   _CourseDetailPageState createState() => _CourseDetailPageState();
 }
 
-class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerProviderStateMixin {
+class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerProviderStateMixin, RouteAware {
   late TabController _tabController;
   final TextEditingController nameController = TextEditingController();
 
@@ -26,8 +28,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   final ApiService apiService = ApiService();
 
   List<Lesson> lessons = [];
+  bool isTutor = false;
+  bool isStudent = false;
   String token = "";
   bool isGrid = false; // Toggle state for grid or list view in lessons
+
 
   @override
   void initState() {
@@ -36,13 +41,31 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     initializeData();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route); // Safe subscription
+    }
+  }
+
   Future<void> initializeData() async {
     await loadUser();
+    fetchUserCourse();
     fetchLessons();
   }
 
   @override
+  void didPopNext() {
+    // Called when returning to this page
+    print('Page became active again');
+    initializeData(); // Refresh data
+  }
+
+  @override
   void dispose() {
+    routeObserver.unsubscribe(this); // Unsubscribe to avoid memory leaks
     _tabController.dispose();
     super.dispose();
   }
@@ -67,6 +90,31 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       print('Error loading user: $e');
       setState(() {
         // context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> fetchUserCourse() async {
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    int course_id = widget.course.id;
+    //print("course_id: " + course_id.toString());
+    try {
+      final data = await apiService.index_user_course(token, course_id);
+      setState(() {
+        // Extract boolean values from the response
+        isTutor = data['is_user_tutor'] ?? false;
+        isStudent = data['is_user_student'] ?? false;
+      });
+    } catch (e) {
+      setState(() {
+        print("Response: " + e.toString());
+      });
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
       });
     }
   }
@@ -131,6 +179,48 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         SnackBar(content: Text('Lesson creation failed: $errorMsg\n')),
       );
       print(errorMsg);
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> updateJoinOrLeave(int status) async {
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    int course_id = widget.course.id;
+    //print("course_id: " + course_id.toString());
+    try {
+      final data = await apiService.update_user_course(token, course_id, status);
+
+      String message;
+      if(status == 0)
+        message = "Leaving course " + widget.course.name + "...";
+      else
+        message = "Joining course " + widget.course.name + ".";
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+          ),
+        ),
+      );
+      initializeData();
+      print("Update user course successa ");
+
+      setState(() {
+        // lessons = (data['lessons'] as List)
+        //     .map((json) => Lesson.fromJson(json))
+        //     .toList();
+      });
+    } catch (e) {
+      setState(() {
+        print("Response: " + e.toString());
+      });
     } finally {
       setState(() {
         context.loaderOverlay.hide();
@@ -360,7 +450,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
               ),
 
               // Fourth Card: Manage Course Button
-              if(widget.course.role_id == 1)
+              if(isTutor)
                 SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -378,7 +468,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                           },
                         ),
                       ),
-                    );
+                    ).then((_) {
+                      // Call initializeData on returning to this page
+                      initializeData();
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -392,25 +485,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                   child: const Text("Manage Course"),
                 ),
               ),
-              if(widget.course.role_id == 3)
+              if(isStudent)
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ManageCoursePage(
-                            course: widget.course,
-                            onCourseUpdated: (updatedCourse) {
-                              setState(() {
-                                widget.course = updatedCourse; // Update the course data
-                                initializeData(); // Refresh lessons or other related data
-                              });
-                            },
-                          ),
-                        ),
-                      );
+                    onPressed: () {
+                      updateJoinOrLeave(0);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -422,6 +502,25 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                       ),
                     ),
                     child: const Text("Leave Course"),
+                  ),
+                ),
+              if(!isTutor && !isStudent)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      updateJoinOrLeave(1);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: const Text("Join Course"),
                   ),
                 ),
             ],
@@ -493,7 +592,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       ),
 
       // Floating Action Button to add a new folder
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isTutor ?
+      FloatingActionButton(
         onPressed: () {
           _showAddFolderDialog(context);
         },
@@ -503,7 +603,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         ),
         backgroundColor: AppColors.primary,
         tooltip: 'Add New Folder',
-      ),
+      ): null,
     );
   }
 
@@ -543,41 +643,52 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   }
 
   Widget _buildLessonCard(List<Lesson> lessons, int index) {
-    return ClipPath(
-      clipper: FolderClipper(), // Custom clipper for folder shape
-      child: Card(
-        elevation: 4,
-        //color: AppColors.accent, // Folder-like color
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Title with Ellipsis
-              Text(
-                lessons[index].name ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+    return GestureDetector(
+      onTap: () {
+        // Navigate to the LessonResourcePage with the lesson's details
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LessonPage(lesson: lessons[index], course: widget.course, isTutor: isTutor,),
+          ),
+        );
+      },
+      child: ClipPath(
+        clipper: FolderClipper(), // Custom clipper for folder shape
+        child: Card(
+          elevation: 4,
+          //color: AppColors.accent, // Folder-like color
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Title with Ellipsis
+                Text(
+                  lessons[index].name ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
+                const SizedBox(height: 4),
 
-              // Description with Ellipsis
-              Text(
-                lessons[index].description ?? '',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 14,
+                // Description with Ellipsis
+                Text(
+                  lessons[index].description ?? '',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

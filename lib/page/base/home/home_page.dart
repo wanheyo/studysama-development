@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../models/user.dart';
+import '../../../utils/colors.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -44,7 +45,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.purple,
+        backgroundColor: AppColors.primary, // Purple header
         title: Row(
           children: [
             Image.asset(
@@ -57,15 +58,29 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         actions: [
-          IconButton(
+          PopupMenuButton<String>(
             icon: Icon(Icons.menu),
-            onPressed: () {
-              // Handle menu action
+            onSelected: (value) {
+              // Handle menu options
+              if (value == 'Profile') {
+                // Navigate to Profile
+              } else if (value == 'Settings') {
+                // Navigate to Settings
+              } else if (value == 'Logout') {
+                // Handle Logout
+              }
             },
-          )
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem(value: 'Profile', child: Text('Profile')),
+                PopupMenuItem(value: 'Settings', child: Text('Settings')),
+                PopupMenuItem(value: 'Logout', child: Text('Logout')),
+              ];
+            },
+          ),
         ],
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.grey[100], // Original background
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -79,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                   padding: EdgeInsets.all(16),
                   margin: EdgeInsets.only(bottom: 20),
                   decoration: BoxDecoration(
-                    color: Colors.purple,
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -89,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                         'WELCOME TO STUDYSAMA!',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 28, // Increased size
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -98,19 +113,19 @@ class _HomePageState extends State<HomePage> {
                         'Where you can learn a lot of new things.',
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 18, // Adjusted font size for description
+                          fontSize: 16,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // Lessons Section
+                // Courses Section
                 Text(
-                  'Lessons',
+                  'Courses',
                   style: TextStyle(
-                    color: Colors.purple,
-                    fontSize: 22,
+                    color: AppColors.primary,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -119,43 +134,43 @@ class _HomePageState extends State<HomePage> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      lessonCard(
+                      courseCard(
                         title: 'RECIPE',
                         subtitle: 'Discover new recipes',
                         image: "assets/recipe.jpeg",
-                        totalVisits: 120,
-                        createdAt: '2024-01-01',
-                        updatedAt: '2024-11-21',
+                        totalJoined: 120,
+                        started: '2024-01-01',
+                        updated: '2024-11-22',
                       ),
                       SizedBox(width: 16),
-                      lessonCard(
+                      courseCard(
                         title: 'CODING',
                         subtitle: 'Learn new coding',
                         image: "assets/coding.jpeg",
-                        totalVisits: 350,
-                        createdAt: '2023-05-12',
-                        updatedAt: '2024-10-15',
+                        totalJoined: 350,
+                        started: '2023-05-12',
+                        updated: '2024-10-15',
                       ),
                       SizedBox(width: 16),
-                      lessonCard(
+                      courseCard(
                         title: 'LANGUAGE',
-                        subtitle: 'Improve language skills',
+                        subtitle: 'Master a new language',
                         image: "assets/language.png",
-                        totalVisits: 200,
-                        createdAt: '2024-03-10',
-                        updatedAt: '2024-11-20',
+                        totalJoined: 200,
+                        started: '2024-03-10',
+                        updated: '2024-11-20',
                       ),
                     ],
                   ),
                 ),
                 SizedBox(height: 20),
 
-                // Most Popular Section
+                // Most Popular Courses Section
                 Text(
-                  'Most Popular Lessons',
+                  'Most Popular Courses',
                   style: TextStyle(
-                    color: Colors.purple,
-                    fontSize: 22,
+                    color: AppColors.primary,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -164,26 +179,26 @@ class _HomePageState extends State<HomePage> {
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   children: [
-                    popularLessonCard(
+                    popularCourseCard(
                       title: 'MATH',
                       description:
                       'Master mathematical concepts and sharpen your problem-solving skills.',
                       image: "assets/math.jpeg",
                       rating: 4.9,
-                      totalVisits: 1000,
-                      createdAt: '2023-07-01',
-                      updatedAt: '2024-11-20',
+                      totalJoined: 1000,
+                      started: '2023-07-01',
+                      updated: '2024-11-20',
                     ),
                     SizedBox(height: 10),
-                    popularLessonCard(
+                    popularCourseCard(
                       title: 'SCIENCE',
                       description:
-                      'Explore the wonders of science and expand your knowledge.',
+                      'Explore the wonders of science and technology.',
                       image: "assets/science.jpeg",
-                      rating: 4.7,
-                      totalVisits: 750,
-                      createdAt: '2023-02-20',
-                      updatedAt: '2024-11-19',
+                      rating: 4.8,
+                      totalJoined: 950,
+                      started: '2023-06-02',
+                      updated: '2024-11-19',
                     ),
                   ],
                 ),
@@ -195,25 +210,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Lesson Card
-  Widget lessonCard({
+  // Widget for Course Card
+  Widget courseCard({
     required String title,
     required String subtitle,
     required String image,
-    required int totalVisits,
-    required String createdAt,
-    required String updatedAt,
+    required int totalJoined,
+    required String started,
+    required String updated,
   }) {
     return Container(
       width: 150,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[900],
+        color: Colors.grey[200],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Lesson image
           ClipRRect(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
@@ -234,8 +248,8 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   title,
                   style: TextStyle(
-                    color: Colors.purple,
-                    fontSize: 18,
+                    color: AppColors.primary,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -243,22 +257,23 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontSize: 12,
                   ),
                 ),
-                Divider(color: Colors.grey[700]),
+                Divider(color: Colors.grey[400]),
                 Text(
-                  'Total Visits: $totalVisits',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  'Total Joined: $totalJoined',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Started: $started',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
                 ),
                 Text(
-                  'Created: $createdAt',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                ),
-                Text(
-                  'Updated: $updatedAt',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  'Updated: $updated',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
                 ),
               ],
             ),
@@ -268,20 +283,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Popular Lesson Card
-  Widget popularLessonCard({
+  // Widget for Popular Course Card
+  Widget popularCourseCard({
     required String title,
     required String description,
     required String image,
     required double rating,
-    required int totalVisits,
-    required String createdAt,
-    required String updatedAt,
+    required int totalJoined,
+    required String started,
+    required String updated,
   }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[900],
+        color: Colors.grey[200],
       ),
       child: Column(
         children: [
@@ -309,44 +324,41 @@ class _HomePageState extends State<HomePage> {
                       Text(
                         title,
                         style: TextStyle(
-                          color: Colors.purple,
-                          fontSize: 18,
+                          color: AppColors.primary,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       SizedBox(height: 5),
                       Text(
                         description,
-                        style: TextStyle(color: Colors.grey[400]),
+                        style: TextStyle(color: Colors.grey[600]),
                       ),
                       SizedBox(height: 5),
                       Text(
-                        'Total Visits: $totalVisits',
-                        style: TextStyle(color: Colors.grey[500]),
+                        'Total Joined: $totalJoined',
+                        style: TextStyle(color: Colors.grey[700]),
                       ),
                       Text(
-                        'Created: $createdAt',
-                        style: TextStyle(color: Colors.grey[500]),
+                        'Started: $started',
+                        style: TextStyle(color: Colors.grey[700]),
                       ),
                       Text(
-                        'Updated: $updatedAt',
-                        style: TextStyle(color: Colors.grey[500]),
+                        'Updated: $updated',
+                        style: TextStyle(color: Colors.grey[700]),
                       ),
                     ],
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0, top: 10.0),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Column(
                   children: [
+                    Icon(Icons.star, color: Colors.orange, size: 20),
                     Text(
-                      '⭐ $rating',
-                      style: TextStyle(
-                        color: Colors.amber,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      '$rating',
+                      style: TextStyle(color: Colors.grey[700]),
                     ),
                   ],
                 ),
