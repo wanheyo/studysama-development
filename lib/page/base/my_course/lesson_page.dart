@@ -1,11 +1,13 @@
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:any_link_preview/any_link_preview.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/models/resource_file.dart';
 import 'package:studysama/page/base/my_course/resource_page.dart';
@@ -226,35 +228,66 @@ class _LessonPageState extends State<LessonPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.lesson.name),
-        // actions: [
-        //   if (widget.isTutor)
-        //     Padding(
-        //       padding: const EdgeInsets.only(right: 16.0),
-        //       // child: IconButton(
-        //       //   icon: const Icon(FontAwesomeIcons.solidPenToSquare, color: Colors.white,),
-        //       //   tooltip: 'Manage Lesson',
-        //       //   onPressed: () async {
-        //       //     await Navigator.push(
-        //       //       context,
-        //       //       MaterialPageRoute(
-        //       //         builder: (context) => ManageLessonPage(
-        //       //           lesson: widget.lesson,
-        //       //           course: widget.course,
-        //       //           onLessonUpdated: (updatedLesson) {
-        //       //             setState(() {
-        //       //               widget.lesson = updatedLesson; // Update the lesson data
-        //       //             });
-        //       //           },
-        //       //         ),
-        //       //       ),
-        //       //     );
-        //       //   },
-        //       // ),
-        //     ),
-        // ],
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        title: Text(
+            "Lesson"
+        ),
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          if (widget.isTutor)
+            Padding(
+              padding: const EdgeInsets.only(right: 0.0),
+              child: PopupMenuButton<String>(
+                icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.black),
+                onSelected: (String value) async {
+                  switch (value) {
+                    case 'Manage Lesson':
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageLessonPage(
+                            lesson: widget.lesson,
+                            course: widget.course,
+                            onLessonUpdated: (updatedLesson) {
+                              setState(() {
+                                widget.lesson = updatedLesson; // Update the lesson data
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                      break;
+                    case 'Add Resource':
+                      _showAddResourceBottomSheet(context);
+                      break;
+                    case 'Hint':
+                      // _showHint();
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) {
+                  return [
+                    const PopupMenuItem<String>(
+                      value: 'Manage Lesson',
+                      child: Text('Manage Lesson'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'Add Resource',
+                      child: Text('Add Resource'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'Hint',
+                      child: Text('Hint'),
+                    ),
+                  ];
+                },
+              ),
+            ),
+        ],
+        backgroundColor: AppColors.background,
+        foregroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -267,14 +300,14 @@ class _LessonPageState extends State<LessonPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "About",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Montserrat',
-                      ),
-                    ),
+                    // const Text(
+                    //   "About",
+                    //   style: TextStyle(
+                    //     fontSize: 20,
+                    //     fontWeight: FontWeight.bold,
+                    //     fontFamily: 'Montserrat',
+                    //   ),
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -724,33 +757,139 @@ class _LessonPageState extends State<LessonPage> {
     // Determine card color and resource type based on category
     switch (resource.category) {
       case 1:
-        cardColor = Colors.blue[100]!;
+        cardColor = Colors.blue[200]!;
         resourceType = "Note (Lecture)";
         break;
       case 2:
-        cardColor = Colors.red[100]!;
+        cardColor = Colors.red[200]!;
         resourceType = "Assignment (Lab)";
         break;
       default:
-        cardColor = Colors.grey[100]!;
+        cardColor = Colors.grey[200]!;
         resourceType = "Other";
     }
 
-    // Generate YouTube thumbnail if applicable
+    // Generate a thumbnail for the resource
     Widget thumbnail = Container(); // Default to no thumbnail
-    if (resource.link != null && isYouTubeLink(resource.link!)) {
-      String videoId = extractYouTubeVideoId(resource.link!);
-      String thumbnailUrl = 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
+    const double thumbnailHeight = 150.0; // Fixed height for all thumbnails
+    const double thumbnailWidth = double.infinity; // Full width
+
+    if (resource.link != null) {
+      if (isYouTubeLink(resource.link!)) {
+        // YouTube video thumbnail
+        String videoId = extractYouTubeVideoId(resource.link!);
+        String thumbnailUrl = 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
+        thumbnail = ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(8.0),
+            topRight: Radius.circular(8.0),
+          ),
+          child: Image.network(
+            thumbnailUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: thumbnailHeight,
+          ),
+        );
+      } else {
+        // Generic link preview
+        thumbnail = ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(8.0),
+            topRight: Radius.circular(8.0),
+          ),
+          child: AnyLinkPreview(
+            link: resource.link!,
+            displayDirection: UIDirection.uiDirectionHorizontal,
+            borderRadius: 0,
+            showMultimedia: true,
+            backgroundColor: Colors.grey[200],
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ResourcePage(
+                    resource: resource,
+                    isTutor: widget.isTutor,
+                    onDelete: () {
+                      // Logic to delete the resource
+                      print("Resource deleted: ${resource.name}");
+                    },
+                  ),
+                ),
+              );
+            },
+            placeholderWidget: const SizedBox(
+              height: thumbnailHeight,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            errorWidget: Container(
+              height: thumbnailHeight,
+              color: Colors.grey[300],
+              child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.link, // Use a file icon based on the file type
+                        size: 30,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Preview not available",
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  )
+              ),
+            ),
+          ),
+        );
+      }
+    } else if (resource.resourceFile != null) {
+      // File preview using open_file
       thumbnail = ClipRRect(
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(8.0),
           topRight: Radius.circular(8.0),
-        ), // Only round the top corners
-        child: Image.network(
-          thumbnailUrl,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: 150,
+        ),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ResourcePage(
+                  resource: resource,
+                  isTutor: widget.isTutor,
+                  onDelete: () {
+                    // Logic to delete the resource
+                    print("Resource deleted: ${resource.name}");
+                  },
+                ),
+              ),
+            );
+          },
+          child: Container(
+            height: thumbnailHeight,
+            width: double.infinity,
+            color: Colors.grey[300], // Background color for the file preview
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    getFileIcon(resource.resourceFile!.type), // Use a file icon based on the file type
+                    size: 30,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Preview not available",
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -762,6 +901,7 @@ class _LessonPageState extends State<LessonPage> {
           MaterialPageRoute(
             builder: (context) => ResourcePage(
               resource: resource,
+              isTutor: widget.isTutor,
               onDelete: () {
                 // Logic to delete the resource
                 print("Resource deleted: ${resource.name}");
@@ -780,7 +920,8 @@ class _LessonPageState extends State<LessonPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (resource.link != null && isYouTubeLink(resource.link!)) thumbnail,
+            // Show the generated thumbnail if available
+            if (thumbnail != null) thumbnail,
             ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               title: Column(
@@ -815,7 +956,7 @@ class _LessonPageState extends State<LessonPage> {
                         children: [
                           const Icon(
                             FontAwesomeIcons.download,
-                            size: 18,
+                            size: 20,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -830,7 +971,7 @@ class _LessonPageState extends State<LessonPage> {
                       children: const [
                         Icon(
                           FontAwesomeIcons.comment,
-                          size: 18,
+                          size: 20,
                         ),
                         SizedBox(width: 4),
                         Text(
@@ -844,7 +985,7 @@ class _LessonPageState extends State<LessonPage> {
                       resource.link != null
                           ? FontAwesomeIcons.link
                           : getFileIcon(resource.resourceFile?.type ?? ""),
-                      size: 18,
+                      size: 20,
                     ),
                     const SizedBox(width: 6),
                   ],

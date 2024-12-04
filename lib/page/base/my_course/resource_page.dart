@@ -1,6 +1,7 @@
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:studysama/page/base/my_course/manage_resource_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../models/resource.dart';
@@ -8,12 +9,14 @@ import '../../../services/api_service.dart';
 
 class ResourcePage extends StatefulWidget {
   final Resource resource;
+  bool isTutor;
   final VoidCallback onDelete;
 
-  const ResourcePage({
+  ResourcePage({
     Key? key,
     required this.resource,
     required this.onDelete,
+    required this.isTutor
   }) : super(key: key);
 
   @override
@@ -70,66 +73,134 @@ class _ResourcePageState extends State<ResourcePage> {
   Widget build(BuildContext context) {
     Widget thumbnail = _buildThumbnail();
     Color appBarColor;
+    String resourceType;
 
-    if(widget.resource.category == 1)
-      appBarColor = Colors.blue[100]!;
-    else if(widget.resource.category == 2)
-      appBarColor = Colors.red[100]!;
-    else
-      appBarColor = Colors.grey[100]!;
+    // Determine card color and resource type based on category
+    switch (widget.resource.category) {
+      case 1:
+        appBarColor = Colors.blue[200]!;
+        resourceType = "Note (Lecture)";
+        break;
+      case 2:
+        appBarColor = Colors.red[200]!;
+        resourceType = "Assignment (Lab)";
+        break;
+      default:
+        appBarColor = Colors.grey[200]!;
+        resourceType = "Other";
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.resource.name),
-        backgroundColor: appBarColor,
+        title: Text(widget.resource.id.toString()),
         actions: [
-          IconButton(
-            icon: const Icon(FontAwesomeIcons.trash),
-            tooltip: 'Delete Resource',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text("Confirm Delete"),
-                  content: const Text("Are you sure you want to delete this resource?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel"),
+          if (widget.isTutor)
+            Padding(
+              padding: const EdgeInsets.only(right: 0.0),
+              child: PopupMenuButton<String>(
+                icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.black),
+                onSelected: (String value) async {
+                  switch (value) {
+                    case 'Manage Resource':
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageResourcePage(
+                            resource: widget.resource,
+                          ),
+                        ),
+                      );
+                      break;
+                    case 'Hint':
+                    // _showHint();
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) {
+                  return [
+                    const PopupMenuItem<String>(
+                      value: 'Manage Resource',
+                      child: Text('Manage Resource'),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        widget.onDelete();
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Delete"),
+                    const PopupMenuItem<String>(
+                      value: 'Hint',
+                      child: Text('Hint'),
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ];
+                },
+              ),
+            ),
         ],
+        backgroundColor: appBarColor,
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: Column(
         children: [
           // Fixed Resource Section
           Container(
             padding: const EdgeInsets.all(16.0),
-            color: Colors.white,
+            color: appBarColor,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: thumbnail,
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Container(
+                        color: Colors.grey[100],
+                        child: GestureDetector(
+                          child: thumbnail,
+                          onTap: () async {
+                            if(widget.resource.resourceFile != null) {
+                              final Uri uri = Uri.parse(domainURL + '/storage/${widget.resource.resourceFile!.name}',);
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Could not download file")),
+                                );
+                              }
+                            }
+
+                            if(widget.resource.link != null) {
+                              final Uri uri = Uri.parse(widget.resource.link!);
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Could not open link")),
+                                );
+                              }
+                            }
+                          },
+                        )
+                    )
                 ),
                 const SizedBox(height: 16),
                 Text(
                   widget.resource.name,
                   style: const TextStyle(
                     fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "| " + resourceType,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                    fontFamily: 'Montserrat',
+                  ),
+                ),
+                const SizedBox(height: 40),
+                const Text(
+                  "Description:",
+                  style: TextStyle(
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Montserrat',
                   ),
@@ -141,48 +212,26 @@ class _ResourcePageState extends State<ResourcePage> {
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
-                const SizedBox(height: 30),
-                // Buttons and Metadata Row
+                if (widget.resource.description == null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    "No description provided",
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+                const SizedBox(height: 50),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Buttons on the Left
-                    Row(
-                      children: [
-                        if (widget.resource.resourceFile != null)
-                          _buildActionButton(
-                            icon: FontAwesomeIcons.download,
-                            label: "Download",
-                            onPressed: () async {
-                              final Uri uri = Uri.parse(
-                                domainURL + '/storage/${widget.resource.resourceFile!.name}',
-                              );
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri, mode: LaunchMode.externalApplication);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Could not download file")),
-                                );
-                              }
-                            },
-                          ),
-                        if (widget.resource.link != null)
-                          _buildActionButton(
-                            icon: FontAwesomeIcons.link,
-                            label: "Open Link",
-                            onPressed: () async {
-                              final Uri uri = Uri.parse(widget.resource.link!);
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri, mode: LaunchMode.externalApplication);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Could not open link")),
-                                );
-                              }
-                            },
-                          ),
-                      ],
-                    ),
+                    // Text(
+                    //   "Comments ...",
+                    //   style: const TextStyle(
+                    //     fontSize: 18,
+                    //     color: Colors.black,
+                    //     fontWeight: FontWeight.bold,
+                    //     fontFamily: 'Montserrat',
+                    //   ),
+                    // ),
                     const Spacer(), // Push metadata to the right
                     // Metadata on the Right
                     Row(
@@ -203,7 +252,7 @@ class _ResourcePageState extends State<ResourcePage> {
                           widget.resource.link != null
                               ? FontAwesomeIcons.link
                               : getFileIcon(widget.resource.resourceFile?.type ?? ""),
-                          size: 18,
+                          size: 20,
                         ),
                       ],
                     ),
@@ -277,31 +326,97 @@ class _ResourcePageState extends State<ResourcePage> {
       );
     } else if (widget.resource.link != null) {
       // Use AnyLinkPreview for general link thumbnails
-      return AnyLinkPreview(
-        displayDirection: UIDirection.uiDirectionHorizontal,
-        showMultimedia: true,
-        bodyMaxLines: 3,
-        bodyTextOverflow: TextOverflow.ellipsis,
-        titleStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-        bodyStyle: const TextStyle(fontSize: 14, color: Colors.grey),
-        errorWidget: Container(
-          color: Colors.grey[200],
-          height: 200,
-          child: const Center(
-            child: Icon(
-              FontAwesomeIcons.link,
-              size: 80,
-              color: Colors.black45,
+      return SizedBox(
+        height: 200,
+        child: AnyLinkPreview.builder(
+          link: widget.resource.link!,
+          cache: const Duration(days: 7),
+          errorWidget: Container(
+            color: Colors.grey[200],
+            height: 200,
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    FontAwesomeIcons.link,
+                    size: 40,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Preview not available",
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
             ),
           ),
+          itemBuilder: (context, metadata, imageProvider, _) {
+            return Row(
+              children: [
+                // Image section with gray background
+                Container(
+                  width: 100,
+                  height: 100,
+                  child: imageProvider != null
+                      ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image(
+                      image: imageProvider,
+                      fit: BoxFit.cover, // Ensure the image does not stretch
+                    ),
+                  )
+                      : null, // If no image, keep the gray background
+                ),
+                const SizedBox(width: 8), // Space between image and text
+                // Text details section
+                Expanded(
+                  child: Container(
+                    color: Colors.grey[200], // Match the detail side color
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (metadata.title != null)
+                          Text(
+                            metadata.title!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        const SizedBox(height: 16),
+                        if (metadata.desc != null)
+                          Text(
+                            metadata.desc!,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 12,
+                            ),
+                          ),
+                        const SizedBox(height: 12),
+                        Text(
+                          metadata.url ?? widget.resource.link!,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
-        link: widget.resource.link!,
-        cache: const Duration(days: 7),
-        backgroundColor: Colors.white,
-        borderRadius: 8.0,
       );
     } else if (widget.resource.resourceFile != null) {
       return Container(
@@ -309,10 +424,21 @@ class _ResourcePageState extends State<ResourcePage> {
         height: 200,
         color: Colors.grey[200],
         alignment: Alignment.center,
-        child: Icon(
-          getFileIcon(widget.resource.resourceFile!.type),
-          size: 80,
-          color: Colors.black45,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                  getFileIcon(widget.resource.resourceFile!.type),
+                  size: 40
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Preview not available",
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -336,7 +462,7 @@ class _ResourcePageState extends State<ResourcePage> {
   Widget _buildDataRow({required IconData icon, required String value}) {
     return Row(
       children: [
-        Icon(icon, size: 18),
+        Icon(icon, size: 20),
         const SizedBox(width: 4),
         Text(value, style: const TextStyle(fontSize: 12)),
       ],

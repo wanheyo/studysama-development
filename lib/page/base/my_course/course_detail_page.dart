@@ -233,11 +233,69 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.course.name,
-          style: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+          "Course",
+          // style: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          if (isTutor)
+            Padding(
+              padding: const EdgeInsets.only(right: 0.0),
+              child: PopupMenuButton<String>(
+                icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.white),
+                onSelected: (String value) async {
+                  switch (value) {
+                    case 'Manage Course':
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageCoursePage(
+                            course: widget.course,
+                            onCourseUpdated: (updatedCourse) {
+                              setState(() {
+                                widget.course = updatedCourse; // Update the course data
+                                initializeData(); // Refresh lessons or other related data
+                              });
+                            },
+                          ),
+                        ),
+                      ).then((_) {
+                        // Call initializeData on returning to this page
+                        initializeData();
+                      });
+                      break;
+                    case 'Add Lesson':
+                      _showAddLessonBottomSheet(context);
+                      break;
+                    case 'Hint':
+                    // _showHint();
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) {
+                  return [
+                    const PopupMenuItem<String>(
+                      value: 'Manage Course',
+                      child: Text('Manage Course'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'Add Lesson',
+                      child: Text('Add Lesson'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'Hint',
+                      child: Text('Hint'),
+                    ),
+                  ];
+                },
+              ),
+            ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [

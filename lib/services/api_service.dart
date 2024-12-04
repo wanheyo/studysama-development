@@ -682,5 +682,97 @@ class ApiService {
     }
   }
 
+  Future<void> resource_update(String token, int isUpdateFile, String name, String desc, int category, String link, int resource_id, String file_name, String file_type, int? file_id, File? picked_file) async {
+
+    if(picked_file != null) {
+      print(picked_file.path.toString());
+      file_name = p.basename(picked_file.path);
+      file_type = p.extension(picked_file.path);
+    }
+
+    try {
+      // Set up the request
+      final uri = Uri.parse('$baseUrl/resource/update');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add headers
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      // Add form fields
+      request.fields['isUpdateFile'] = isUpdateFile.toString();
+      request.fields['resource_id'] = resource_id.toString();
+      request.fields['name'] = name;
+      request.fields['desc'] = desc;
+      request.fields['category'] = category.toString();
+      request.fields['link'] = link;
+      request.fields['file_id'] = file_id.toString();
+      request.fields['file_name'] = file_name;
+      request.fields['file_type'] = file_type;
+
+      // Attach the file if it exists
+      if (picked_file != null) {
+        final mimeType = lookupMimeType(picked_file.path) ?? 'application/octet-stream';
+
+        request.files.add(await http.MultipartFile.fromPath(
+          'file', // This key should match what the server expects
+          picked_file.path,
+          contentType: MediaType.parse(mimeType),
+        ));
+      }
+
+      // Send the request
+      final response = await request.send();
+
+      // Parse the response
+      if (response.statusCode == 201) {
+        // Successful response
+        final responseBody = await response.stream.bytesToString();
+        print('Error response body: $responseBody'); // Log the entire response body
+        if (responseBody.isNotEmpty) {
+          final responseData = json.decode(responseBody.trim());
+          print('Success: $responseData');
+        }
+      } else {
+        // Handle errors
+        final responseBody = await response.stream.bytesToString();
+        if (responseBody.isNotEmpty) {
+          final responseData = json.decode(responseBody.trim());
+
+          // Check for validation errors
+          if (responseData.containsKey('errors')) {
+            final errors = responseData['errors'];
+            String errorMessage = '';
+
+            // Process specific field errors
+            if (errors.containsKey('name')) {
+              errorMessage += '${errors['name'][0]}\n';
+            }
+            if (errors.containsKey('desc')) {
+              errorMessage += '${errors['desc'][0]}\n';
+            }
+            if (errors.containsKey('file')) {
+              errorMessage += '${errors['file'][0]}\n';
+            }
+
+            // Throw the combined error message
+            throw Exception(errorMessage.trim());
+          } else {
+            // General error message
+            throw Exception(responseData['message'] ?? 'Failed to update resource');
+          }
+        } else {
+          throw Exception('Failed to update resource: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      // Log and rethrow the exception
+      print('Error: $e');
+      throw Exception('Error updating resource: $e');
+    }
+  }
+
 // SECTION END: RESOURCE
 }
