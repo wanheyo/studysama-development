@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/models/resource_file.dart';
+import 'package:studysama/page/base/my_course/resource_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../models/course.dart';
 import '../../../models/lesson.dart';
@@ -226,61 +227,121 @@ class _LessonPageState extends State<LessonPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.lesson.name),
-        actions: [
-          if (widget.isTutor)
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: IconButton(
-                icon: const Icon(FontAwesomeIcons.solidPenToSquare),
-                tooltip: 'Manage Lesson',
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ManageLessonPage(
-                        lesson: widget.lesson,
-                        course: widget.course,
-                        onLessonUpdated: (updatedLesson) {
-                          setState(() {
-                            widget.lesson = updatedLesson; // Update the lesson data
-                          });
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-        ],
+        // actions: [
+        //   if (widget.isTutor)
+        //     Padding(
+        //       padding: const EdgeInsets.only(right: 16.0),
+        //       // child: IconButton(
+        //       //   icon: const Icon(FontAwesomeIcons.solidPenToSquare, color: Colors.white,),
+        //       //   tooltip: 'Manage Lesson',
+        //       //   onPressed: () async {
+        //       //     await Navigator.push(
+        //       //       context,
+        //       //       MaterialPageRoute(
+        //       //         builder: (context) => ManageLessonPage(
+        //       //           lesson: widget.lesson,
+        //       //           course: widget.course,
+        //       //           onLessonUpdated: (updatedLesson) {
+        //       //             setState(() {
+        //       //               widget.lesson = updatedLesson; // Update the lesson data
+        //       //             });
+        //       //           },
+        //       //         ),
+        //       //       ),
+        //       //     );
+        //       //   },
+        //       // ),
+        //     ),
+        // ],
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "About Lesson",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Montserrat',
+          child: LoaderOverlay(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // About Section Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "About",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Montserrat',
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 10),
-              buildLessonInfoSection(),
-              const SizedBox(height: 20),
-              const Text(
-                "Resources",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Montserrat',
+                const SizedBox(height: 10),
+                buildLessonInfoSection(),
+                if(widget.isTutor)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ManageLessonPage(
+                              lesson: widget.lesson,
+                              course: widget.course,
+                              onLessonUpdated: (updatedLesson) {
+                                setState(() {
+                                  widget.lesson = updatedLesson; // Update the lesson data
+                                });
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Montserrat',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      child: const Text("Manage Lesson"),
+                    ),
+                  ),
+                const SizedBox(height: 30),
+
+                // Resources Section Header
+                const Text(
+                  "Resources",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              ...resources.map((resource) => buildResourceCard(resource)).toList(),
-            ],
+                if(resources.isNotEmpty)
+                  const SizedBox(height: 10),
+                ...resources.map((resource) => buildResourceCard(resource)).toList(),
+                if(resources.isEmpty)
+                  const SizedBox(
+                    height: 350, // Minimum height to ensure proper placement
+                    child: Center(
+                      child: Text(
+                        "No resource found.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -335,232 +396,230 @@ class _LessonPageState extends State<LessonPage> {
                 right: 16.0,
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
-              child: LoaderOverlay(
-                child: Form(
-                  key: _formKey,
-                  autovalidateMode: AutovalidateMode.disabled, // This prevents automatic validation
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 16.0),
-                        const Center(
-                          child: Text(
-                            "Add New Resource",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+              child: Form(
+                key: _formKey,
+                autovalidateMode: AutovalidateMode.disabled, // This prevents automatic validation
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 16.0),
+                      const Center(
+                        child: Text(
+                          "Add New Resource",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 16.0),
-
-                        // Modify the Radio buttons to clear fields
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Radio<bool>(
-                                  value: true,
-                                  groupValue: isFileUploadSelected,
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      setState(() {
-                                        isFileUploadSelected = true;
-                                        // Clear all fields
-                                        nameController.clear();
-                                        descController.clear();
-                                        linkController.clear();
-                                        selectedFile = null;
-                                        fileName = "Attach File";
-                                        category = 1; // Reset to default category
-                                      });
-                                    }
-                                  },
-                                ),
-                                const Text("Upload File"),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Radio<bool>(
-                                  value: false,
-                                  groupValue: isFileUploadSelected,
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      setState(() {
-                                        isFileUploadSelected = false;
-                                        // Clear all fields
-                                        nameController.clear();
-                                        descController.clear();
-                                        linkController.clear();
-                                        selectedFile = null;
-                                        fileName = "Attach File";
-                                        category = 1; // Reset to default category
-                                      });
-                                    }
-                                  },
-                                ),
-                                const Text("Provide Link"),
-                              ],
-                            ),
-                          ],
+                      ),
+                      const SizedBox(height: 16.0),
+              
+                      // Modify the Radio buttons to clear fields
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Radio<bool>(
+                                value: true,
+                                groupValue: isFileUploadSelected,
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      isFileUploadSelected = true;
+                                      // Clear all fields
+                                      nameController.clear();
+                                      descController.clear();
+                                      linkController.clear();
+                                      selectedFile = null;
+                                      fileName = "Attach File";
+                                      category = 1; // Reset to default category
+                                    });
+                                  }
+                                },
+                              ),
+                              const Text("Upload File"),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Radio<bool>(
+                                value: false,
+                                groupValue: isFileUploadSelected,
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      isFileUploadSelected = false;
+                                      // Clear all fields
+                                      nameController.clear();
+                                      descController.clear();
+                                      linkController.clear();
+                                      selectedFile = null;
+                                      fileName = "Attach File";
+                                      category = 1; // Reset to default category
+                                    });
+                                  }
+                                },
+                              ),
+                              const Text("Provide Link"),
+                            ],
+                          ),
+                        ],
+                      ),
+              
+              
+                      const SizedBox(height: 16.0),
+              
+                      TextFormField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                          labelText : 'Resource Name',
+                          border: OutlineInputBorder(),
+                          hintText: 'Example: My Personal Note',
                         ),
-
-
-                        const SizedBox(height: 16.0),
-
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter resource name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 10.0),
+                      TextFormField(
+                        controller: descController,
+                        maxLines: 3,
+                        decoration: const InputDecoration(
+                          labelText: 'Description (optional)',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 10.0),
+                      DropdownButtonFormField<int>(
+                        value: category,
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                          hintText: 'It is note? Or an assignment?',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 1, child: Text("Note")),
+                          DropdownMenuItem(value: 2, child: Text("Assignment")),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            category = value;
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 10.0),
+              
+                      // Conditionally show the file upload button or the link input
+                      if (!isFileUploadSelected) ...[
                         TextFormField(
-                          controller: nameController,
+                          controller: linkController,
                           decoration: const InputDecoration(
-                            labelText : 'Resource Name',
+                            labelText: 'Link',
                             border: OutlineInputBorder(),
-                            hintText: 'Example: My Personal Note',
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter resource name';
+                            if (!isFileUploadSelected && (value == null || value.isEmpty)) {
+                              return 'Please provide a link';
+                            }
+                            if (!isFileUploadSelected && value != null && !isValidUrl(value)) {
+                              return 'Please enter a valid link';
                             }
                             return null;
                           },
                         ),
-                        const SizedBox(height: 10.0),
-                        TextFormField(
-                          controller: descController,
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            labelText: 'Description (optional)',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 10.0),
-                        DropdownButtonFormField<int>(
-                          value: category,
-                          decoration: const InputDecoration(
-                            labelText: 'Category',
-                            hintText: 'It is note? Or an assignment?',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: const [
-                            DropdownMenuItem(value: 1, child: Text("Note")),
-                            DropdownMenuItem(value: 2, child: Text("Assignment")),
-                          ],
-                          onChanged: (value) {
-                            if (value != null) {
-                              category = value;
+                      ],
+              
+                      // Modify the "Upload File" section
+                      if (isFileUploadSelected) ...[
+                        TextButton.icon(
+                          onPressed: () async {
+                            await pickFile();
+                            if (selectedFile != null) {
+                              // Update UI with file name
+                              setState(() {
+                                fileName = selectedFile!.path.split('/').last;
+                              });
                             }
                           },
-                        ),
-                        const SizedBox(height: 10.0),
-
-                        // Conditionally show the file upload button or the link input
-                        if (!isFileUploadSelected) ...[
-                          TextFormField(
-                            controller: linkController,
-                            decoration: const InputDecoration(
-                              labelText: 'Link',
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (!isFileUploadSelected && (value == null || value.isEmpty)) {
-                                return 'Please provide a link';
-                              }
-                              if (!isFileUploadSelected && value != null && !isValidUrl(value)) {
-                                return 'Please enter a valid link';
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-
-                        // Modify the "Upload File" section
-                        if (isFileUploadSelected) ...[
-                          TextButton.icon(
-                            onPressed: () async {
-                              await pickFile();
-                              if (selectedFile != null) {
-                                // Update UI with file name
-                                setState(() {
-                                  fileName = selectedFile!.path.split('/').last;
-                                });
-                              }
-                            },
-                            icon: const Icon(Icons.attach_file),
-                            label: Text(
-                              fileName.isNotEmpty ? fileName : "Attach File",
-                              style: TextStyle(
-                                color: AppColors.primary,
-                              ),
+                          icon: const Icon(Icons.attach_file),
+                          label: Text(
+                            fileName.isNotEmpty ? fileName : "Attach File",
+                            style: TextStyle(
+                              color: AppColors.primary,
                             ),
                           ),
-                          if (isFileUploadSelected && selectedFile == null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text(
-                                'Please select a file to upload',
-                                style: TextStyle(color: Colors.red, fontSize: 12),
-                              ),
-                            ),
-                        ],
-                        const SizedBox(height: 16.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                // Clear all fields before closing
-                                nameController.clear();
-                                descController.clear();
-                                linkController.clear();
-                                setState(() {
-                                  selectedFile = null;
-                                  fileName = "Attach File";
-                                  isFileUploadSelected = true;
-                                  category = 1; // Reset to default category
-                                });
-                                Navigator.pop(context);
-                              },
-                              child: const Text("Cancel"),
-                            ),
-                            // Modify the ElevatedButton's onPressed method
-                            ElevatedButton(
-                              onPressed: () {
-                                // Reset selectedFile and fileName if not in file upload mode
-                                if (!isFileUploadSelected) {
-                                  selectedFile = null;
-                                  fileName = "Attach File";
-                                }
-
-                                // Validate the form
-                                if (_formKey.currentState!.validate()) {
-                                  // Additional custom validation based on radio button selection
-                                  if (isFileUploadSelected && selectedFile == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text("Please select a file to upload")),
-                                    );
-                                    return;
-                                  }
-
-                                  if (!isFileUploadSelected && (linkController.text.isEmpty || !isValidUrl(linkController.text))) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text("Please provide a valid link")),
-                                    );
-                                    return;
-                                  }
-
-                                  // If all validations pass, proceed with creating the resource
-                                  _createResource();
-                                }
-                              },
-                              child: const Text("Add Resource"),
-                            ),
-                          ],
                         ),
-                        const SizedBox(height: 16.0),
+                        if (isFileUploadSelected && selectedFile == null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'Please select a file to upload',
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            ),
+                          ),
                       ],
-                    ),
+                      const SizedBox(height: 16.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              // Clear all fields before closing
+                              nameController.clear();
+                              descController.clear();
+                              linkController.clear();
+                              setState(() {
+                                selectedFile = null;
+                                fileName = "Attach File";
+                                isFileUploadSelected = true;
+                                category = 1; // Reset to default category
+                              });
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Cancel"),
+                          ),
+                          // Modify the ElevatedButton's onPressed method
+                          ElevatedButton(
+                            onPressed: () {
+                              // Reset selectedFile and fileName if not in file upload mode
+                              if (!isFileUploadSelected) {
+                                selectedFile = null;
+                                fileName = "Attach File";
+                              }
+              
+                              // Validate the form
+                              if (_formKey.currentState!.validate()) {
+                                // Additional custom validation based on radio button selection
+                                if (isFileUploadSelected && selectedFile == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Please select a file to upload")),
+                                  );
+                                  return;
+                                }
+              
+                                if (!isFileUploadSelected && (linkController.text.isEmpty || !isValidUrl(linkController.text))) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Please provide a valid link")),
+                                  );
+                                  return;
+                                }
+              
+                                // If all validations pass, proceed with creating the resource
+                                _createResource();
+                              }
+                            },
+                            child: const Text("Add Resource"),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16.0),
+                    ],
                   ),
                 ),
               ),
@@ -573,156 +632,254 @@ class _LessonPageState extends State<LessonPage> {
 
   // Build Lesson Info Section
   Widget buildLessonInfoSection() {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.lesson.name,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Montserrat',
-                ),
+    return Column(
+      children: [
+        // First Card: Title and Description
+        Card(
+          margin: const EdgeInsets.only(bottom: 16.0),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.lesson.name,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Montserrat',
+                    ),
+                  ),
+                  // Divider(
+                  //   height: 30,
+                  //   color: Colors.black,
+                  //   thickness: 1,
+                  // ),
+                  const SizedBox(height: 30),
+                  const Text(
+                    "Description:",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Montserrat',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    widget.lesson.description ?? "No description available.",
+                    style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 30),
-              const Text(
-                "Description:",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Montserrat',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                widget.lesson.description ?? "No description available.",
-                style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
-              ),
-              const SizedBox(height: 30),
-              const Text(
-                "Learning Outcome :",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Montserrat',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                widget.lesson.learnOutcome ?? "No learning outcome stated.",
-                style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+        // Second Card: Learning Outcome
+        Card(
+          margin: const EdgeInsets.only(bottom: 16.0),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Learning Outcome:",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Montserrat',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    widget.lesson.learnOutcome ?? "No learning outcome stated.",
+                    style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   // Build Resource Card
   Widget buildResourceCard(Resource resource) {
-    IconData iconData;
     Color cardColor;
     String resourceType;
 
+    // Determine card color and resource type based on category
     switch (resource.category) {
       case 1:
-        iconData = FontAwesomeIcons.solidFile;
         cardColor = Colors.blue[100]!;
         resourceType = "Note (Lecture)";
         break;
       case 2:
-        iconData = FontAwesomeIcons.filePen;
         cardColor = Colors.red[100]!;
         resourceType = "Assignment (Lab)";
         break;
       default:
-        iconData = FontAwesomeIcons.question;
         cardColor = Colors.grey[100]!;
         resourceType = "Other";
     }
 
-    // Determine thumbnail based on link or file
-    Widget thumbnail = Icon(iconData, size: 40, color: Colors.black54);
-    if (resource.link != null) {
-      if (isYouTubeLink(resource.link!)) {
-        String videoId = extractYouTubeVideoId(resource.link!);
-        String thumbnailUrl = 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
-        thumbnail = Image.network(
+    // Generate YouTube thumbnail if applicable
+    Widget thumbnail = Container(); // Default to no thumbnail
+    if (resource.link != null && isYouTubeLink(resource.link!)) {
+      String videoId = extractYouTubeVideoId(resource.link!);
+      String thumbnailUrl = 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
+      thumbnail = ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(8.0),
+          topRight: Radius.circular(8.0),
+        ), // Only round the top corners
+        child: Image.network(
           thumbnailUrl,
           fit: BoxFit.cover,
-          width: 40,
-          height: 40,
-        );
-      }
+          width: double.infinity,
+          height: 150,
+        ),
+      );
     }
 
-    return Card(
-      color: cardColor,
-      margin: const EdgeInsets.only(bottom: 16.0),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: ListTile(
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
-          child: thumbnail,
-        ),
-        title: Text(
-          resource.name,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Montserrat',
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResourcePage(
+              resource: resource,
+              onDelete: () {
+                // Logic to delete the resource
+                print("Resource deleted: ${resource.name}");
+              },
+            ),
           ),
+        );
+      },
+      child: Card(
+        color: cardColor,
+        margin: const EdgeInsets.only(bottom: 16.0),
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
         ),
-        subtitle: Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 5),
-            if (resource.description != null) Text("Description: ${resource.description}"),
-            Text("Created: ${resource.createdAt?.toLocal()}"),
-            Text("Updated: ${resource.updatedAt?.toLocal()}"),
-            Text("Category: $resourceType"),
-            if (resource.link != null) Text("Link: ${resource.link}"),
-            if (resource.resourceFile != null) ...[
-              Text("File: ${resource.resourceFile!.name}"),
-              Text("Type: ${resource.resourceFile!.type}"),
-              Text("Downloads: ${resource.resourceFile!.totalDownload}"),
-            ],
+            if (resource.link != null && isYouTubeLink(resource.link!)) thumbnail,
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    resource.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Montserrat',
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "| $resourceType",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                      fontFamily: 'Montserrat',
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (resource.resourceFile != null) ...[
+                      Row(
+                        children: [
+                          const Icon(
+                            FontAwesomeIcons.download,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "${resource.resourceFile!.totalDownload}",
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                    Row(
+                      children: const [
+                        Icon(
+                          FontAwesomeIcons.comment,
+                          size: 18,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          "0",
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 16),
+                    Icon(
+                      resource.link != null
+                          ? FontAwesomeIcons.link
+                          : getFileIcon(resource.resourceFile?.type ?? ""),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
-        onTap: () async {
-          if (resource.link != null) {
-            final Uri uri = Uri.parse(resource.link!);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            } else {
-              throw 'Could not launch ${resource.link}';
-            }
-          } else if (resource.resourceFile != null) {
-            final Uri uri = Uri.parse(domainURL + '/storage/${resource.resourceFile!.name}');
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            } else {
-              throw 'Could not launch file URL';
-            }
-          }
-        },
       ),
     );
   }
 
-// Utility functions
+  // Helper function to determine file type icon
+  IconData getFileIcon(String fileType) {
+    switch (fileType.toLowerCase()) {
+      case '.pdf':
+        return FontAwesomeIcons.filePdf;
+      case '.doc':
+      case '.docx':
+        return FontAwesomeIcons.fileWord;
+      case '.ppt':
+      case '.pptx':
+        return FontAwesomeIcons.filePowerpoint;
+      case '.xls':
+      case '.xlsx':
+        return FontAwesomeIcons.fileExcel;
+      case '.png':
+      case '.jpg':
+      case '.jpeg':
+        return FontAwesomeIcons.fileImage; // Assuming you have an icon for images
+      default:
+        return FontAwesomeIcons.file;
+    }
+  }
+
   bool isYouTubeLink(String url) {
     return url.contains('youtube.com') || url.contains('youtu.be');
   }

@@ -22,7 +22,7 @@ class _BasePageState extends State<BasePage> {
 
   // List of pages for bottom navigation
   final List<Widget> _pages = [
-   StartApp(),
+    HomePage(),
     AiPage(),
     FindPage(),
     MyCoursePage(),

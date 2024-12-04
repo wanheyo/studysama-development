@@ -12,7 +12,7 @@ class ApiService {
   // final String baseUrl = 'https://{domain}/api/studysama';
 
   //development
-  final String domainUrl = 'https://c66a-210-19-91-133.ngrok-free.app';
+  final String domainUrl = 'https://62a8-2001-d08-d5-77c4-c81b-5964-7410-2077.ngrok-free.app';
   late final String baseUrl;
 
   ApiService() {
@@ -445,7 +445,13 @@ class ApiService {
     }
   }
 
-  Future<void> lesson_store(String token, String name, int course_id) async {
+  Future<void> lesson_store(String token, String name, String learn_outcome, String description, int course_id) async {
+    if(learn_outcome == "" || learn_outcome.isEmpty)
+      learn_outcome = "Student will get ...";
+
+    if(description == "" || description.isEmpty)
+      description = "Lesson for " + name;
+
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/lesson/store'),
@@ -455,8 +461,8 @@ class ApiService {
         },
         body: jsonEncode({
           'name': name,
-          'learn_outcome': 'Student will get ...',
-          'desc': "Lesson for " + name,
+          'learn_outcome': learn_outcome,
+          'desc': description,
           'course_id': course_id,
         }),
       );

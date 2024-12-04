@@ -23,6 +23,8 @@ class CourseDetailPage extends StatefulWidget {
 class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerProviderStateMixin, RouteAware {
   late TabController _tabController;
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController descController = TextEditingController();
+  final TextEditingController learnOutcomeController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
@@ -146,12 +148,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   }
 
   Future<void> _createLesson() async {
-    // if (!_formKey.currentState!.validate()) {
-    //   return; // Exit if the form is invalid
-    // }
-
     String name = nameController.text.trim();
-    print("Course id: " + widget.course.id.toString() + " | name: " + name);
+    String description = descController.text.trim();
+    String learningOutcome = learnOutcomeController.text.trim();
 
     // Perform course creation logic here
     setState(() {
@@ -160,7 +159,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     try {
       // Call the API
-      await apiService.lesson_store(token, name, widget.course.id);
+      await apiService.lesson_store(token, name, learningOutcome, description, widget.course.id);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -171,7 +170,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       );
       print("Lesson successa ");
       //widget.onCourseCreated(); // Notify parent to refresh
-      Navigator.pop(context); // Navigate back to the previous page
+      // Navigator.pop(context); // Navigate back to the previous page
 
     } catch (e) {
       // Extract meaningful error messages if available
@@ -309,7 +308,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                           "Description:",
                           style: TextStyle(
                             fontSize: 16,
-                            // fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                             fontFamily: 'Montserrat',
                           ),
                         ),
@@ -542,6 +541,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Text(
+                  "Grid: ",
+                  style: TextStyle(
+                    fontSize: 16,
+                    // fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
+                  ),
+                ),
                 IconButton(
                   icon: Icon(!isGrid ? FontAwesomeIcons.list : FontAwesomeIcons.gripVertical),
                   onPressed: () {
@@ -596,7 +603,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       floatingActionButton: isTutor ?
       FloatingActionButton(
         onPressed: () {
-          _showAddFolderDialog(context);
+          _showAddLessonBottomSheet(context);
         },
         child: Icon(
           FontAwesomeIcons.plus,
@@ -608,36 +615,112 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     );
   }
 
-// Function to show a dialog for adding a folder
-  void _showAddFolderDialog(BuildContext context) {
-    //final TextEditingController _controller = TextEditingController();
-
-    showDialog(
+  // Function to show a dialog for adding a folder
+  void _showAddLessonBottomSheet(BuildContext context) {
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add New Lesson'),
-          content: TextField(
-            controller: nameController,
-            decoration: InputDecoration(labelText: 'Lesson Name'),
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text('Cancel'),
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.disabled,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 16.0),
+                  const Center(
+                    child: Text(
+                      "Add New Lesson",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  // Lesson Name
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Lesson Name',
+                      border: OutlineInputBorder(),
+                      hintText: 'Enter lesson name',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a lesson name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 10.0),
+
+                  // Description
+                  TextFormField(
+                    controller: descController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Description (optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 10.0),
+
+                  // Learning Outcome
+                  TextFormField(
+                    controller: learnOutcomeController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Learning Outcome (optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  // Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          // Clear all fields before closing
+                          nameController.clear();
+                          descController.clear();
+                          learnOutcomeController.clear();
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            // Proceed with lesson creation logic
+                            _createLesson();
+                            initializeData();
+                            Navigator.pop(context); // Close the bottom sheet
+                          }
+                        },
+                        child: const Text("Add Lesson"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                ],
+              ),
             ),
-            TextButton(
-              onPressed: () {
-                // Logic to add the folder goes here
-                // You can store the new folder in a state or database
-                _createLesson();
-                initializeData();
-              },
-              child: Text('Save'),
-            ),
-          ],
+          ),
         );
       },
     );

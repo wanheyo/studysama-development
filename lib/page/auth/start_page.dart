@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:studysama/page/auth/login_Page.dart';
 import 'package:studysama/page/base/ai/ai_page.dart';
 
-void main() {
-  runApp(StartApp());
-}
-
-class StartApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: StartPage(), // Correct class reference
-    );
-  }
-}
+// void main() {
+//   runApp(StartApp());
+// }
+//
+// class StartApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       home: StartPage(), // Correct class reference
+//     );
+//   }
+// }
 
 class StartPage extends StatelessWidget {
   @override
@@ -124,20 +124,20 @@ class StartPage extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Home Page"),
-        backgroundColor: Colors.blue,
-      ),
-      body: Center(
-        child: Text(
-          "Welcome to Study Sama!",
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
-    );
-  }
-}
+// class HomePage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text("Home Page"),
+//         backgroundColor: Colors.blue,
+//       ),
+//       body: Center(
+//         child: Text(
+//           "Welcome to Study Sama!",
+//           style: TextStyle(fontSize: 24),
+//         ),
+//       ),
+//     );
+//   }
+// }
