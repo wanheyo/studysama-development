@@ -12,7 +12,7 @@ class ApiService {
   // final String baseUrl = 'https://{domain}/api/studysama';
 
   //development
-  final String domainUrl = 'https://62a8-2001-d08-d5-77c4-c81b-5964-7410-2077.ngrok-free.app';
+  final String domainUrl = 'https://ee27-2001-d08-d5-77c4-5cc5-a67f-9dbb-4277.ngrok-free.app';
   late final String baseUrl;
 
   ApiService() {
@@ -682,7 +682,7 @@ class ApiService {
     }
   }
 
-  Future<void> resource_update(String token, int isUpdateFile, String name, String desc, int category, String link, int resource_id, String file_name, String file_type, int? file_id, File? picked_file) async {
+  Future<void> resource_update(String token, int isUpdateFile, String name, String desc, int category, String link, int resource_id, String file_name, String file_type, int? file_id, File? picked_file, int status) async {
 
     if(picked_file != null) {
       print(picked_file.path.toString());
@@ -707,10 +707,16 @@ class ApiService {
       request.fields['name'] = name;
       request.fields['desc'] = desc;
       request.fields['category'] = category.toString();
-      request.fields['link'] = link;
-      request.fields['file_id'] = file_id.toString();
+
+      if(isUpdateFile != 1)
+        request.fields['link'] = link;
+
+      request.fields['status'] = status.toString();
+
+      if(file_id != null)
+        request.fields['file_id'] = file_id.toString();
+
       request.fields['file_name'] = file_name;
-      request.fields['file_type'] = file_type;
 
       // Attach the file if it exists
       if (picked_file != null) {

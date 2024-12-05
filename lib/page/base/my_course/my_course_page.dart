@@ -204,7 +204,7 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
               ),
             );
           },
-          icon: const Icon(Icons.add),
+          icon: const Icon(FontAwesomeIcons.plus),
           label: const Text(
             "Add New Course",
             style: TextStyle(fontFamily: 'Montserrat'),

@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/models/resource_file.dart';
 import 'package:studysama/page/base/my_course/resource_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../main.dart';
 import '../../../models/course.dart';
 import '../../../models/lesson.dart';
 import '../../../models/resource.dart';
@@ -29,7 +30,7 @@ class LessonPage extends StatefulWidget {
   _LessonPageState createState() => _LessonPageState();
 }
 
-class _LessonPageState extends State<LessonPage> {
+class _LessonPageState extends State<LessonPage> with RouteAware {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descController = TextEditingController();
   final TextEditingController linkController = TextEditingController();
@@ -64,6 +65,23 @@ class _LessonPageState extends State<LessonPage> {
     descController.dispose();
     linkController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route); // Safe subscription
+    }
+  }
+
+  @override
+  void didPopNext() {
+    // Called when returning to this page
+    print('Page became active again');
+
+    initializeData(); // Refresh data
   }
 
   Future<void> initializeData() async {

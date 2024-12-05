@@ -164,9 +164,7 @@ class _ManageLessonPageState extends State<ManageLessonPage> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context)
-                    ..pop() // Close the dialog
-                    ..pop(); // Pops the previous page (ManageLesson to Course)
+                Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
@@ -217,23 +215,21 @@ class _ManageLessonPageState extends State<ManageLessonPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            const Icon(FontAwesomeIcons.pencil, color: Colors.black),
-            const SizedBox(width: 8),
-            const Text(
-              'Manage Lesson',
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.bold,
-                // color: Colors.white,
-                fontSize: 18,
-              ),
-            ),
-          ],
+        title: const Text(
+          'Manage Lesson',
+          // style: TextStyle(
+          //   fontFamily: 'Montserrat',
+          //   fontWeight: FontWeight.bold,
+          //   // color: Colors.white,
+          //   fontSize: 18,
+          // ),
         ),
-        // backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.background,
         // foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: LoaderOverlay(
         child: Column(

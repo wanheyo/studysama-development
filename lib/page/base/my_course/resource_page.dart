@@ -92,7 +92,7 @@ class _ResourcePageState extends State<ResourcePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.resource.id.toString()),
+        title: Text(resourceType),
         actions: [
           if (widget.isTutor)
             Padding(

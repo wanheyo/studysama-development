@@ -39,7 +39,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this); // 3 tabs: About, Lessons, Reviews
+    _tabController = TabController(length: 4, vsync: this); // 4 tabs: About, Lessons, Meet, Reviews
     initializeData();
   }
 
@@ -301,6 +301,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           tabs: const [
             Tab(text: 'About'),
             Tab(text: 'Lessons'),
+            Tab(text: 'Meet'),
             Tab(text: 'Reviews'),
           ],
           labelStyle: TextStyle(
@@ -322,6 +323,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           children: [
             _buildAboutTab(widget.course),
             _buildLessonsTab(),
+            _buildReviewsTab(),
             _buildReviewsTab(),
           ],
         ),
