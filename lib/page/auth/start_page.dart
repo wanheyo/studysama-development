@@ -2,20 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For formatting date and time
 import 'login_page.dart'; // Import the login page
 
-void main() {
-  runApp(LearningApp());
-}
-
-class LearningApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(),
-      home: StartPage(),
-    );
-  }
-}
 
 class StartPage extends StatelessWidget {
   @override
