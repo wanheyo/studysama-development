@@ -772,21 +772,6 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
     Color cardColor;
     String resourceType;
 
-    // Determine card color and resource type based on category
-    switch (resource.category) {
-      case 1:
-        cardColor = Colors.blue[200]!;
-        resourceType = "Note (Lecture)";
-        break;
-      case 2:
-        cardColor = Colors.red[200]!;
-        resourceType = "Assignment (Lab)";
-        break;
-      default:
-        cardColor = Colors.grey[200]!;
-        resourceType = "Other";
-    }
-
     // Generate a thumbnail for the resource
     Widget thumbnail = Container(); // Default to no thumbnail
     const double thumbnailHeight = 150.0; // Fixed height for all thumbnails
@@ -912,6 +897,21 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
       );
     }
 
+    // Determine card color and resource type based on category
+    switch (resource.category) {
+      case 1:
+        cardColor = Colors.blue[300]!;
+        resourceType = "Note (Lecture)";
+        break;
+      case 2:
+        cardColor = Colors.red[300]!;
+        resourceType = "Assignment (Lab)";
+        break;
+      default:
+        cardColor = Colors.grey[300]!;
+        resourceType = "Other";
+    }
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -929,7 +929,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
         );
       },
       child: Card(
-        color: cardColor,
+        color: Colors.white,
         margin: const EdgeInsets.only(bottom: 16.0),
         elevation: 3,
         shape: RoundedRectangleBorder(
@@ -951,15 +951,27 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Montserrat',
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    "| $resourceType",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black,
-                      fontFamily: 'Montserrat',
+                  Card(
+                    color: cardColor,
+                    margin: const EdgeInsets.only(bottom: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                      child: Text(
+                        resourceType,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontFamily: 'Montserrat',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -975,11 +987,12 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                           const Icon(
                             FontAwesomeIcons.download,
                             size: 20,
+                            color: Colors.black,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             "${resource.resourceFile!.totalDownload}",
-                            style: const TextStyle(fontSize: 12),
+                            style: const TextStyle(fontSize: 12, color: Colors.black,),
                           ),
                         ],
                       ),
@@ -990,11 +1003,12 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                         Icon(
                           FontAwesomeIcons.comment,
                           size: 20,
+                          color: Colors.black,
                         ),
                         SizedBox(width: 4),
                         Text(
                           "0",
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 12, color: Colors.black,),
                         ),
                       ],
                     ),
@@ -1004,6 +1018,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                           ? FontAwesomeIcons.link
                           : getFileIcon(resource.resourceFile?.type ?? ""),
                       size: 20,
+                      color: Colors.black,
                     ),
                     const SizedBox(width: 6),
                   ],

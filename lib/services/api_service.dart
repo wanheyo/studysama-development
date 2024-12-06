@@ -9,10 +9,10 @@ import 'package:path/path.dart' as p;
 
 class ApiService {
   //production
-  // final String baseUrl = 'https://{domain}/api/studysama';
+  // final String domainUrl = 'https://{domain}';
 
   //development
-  final String domainUrl = 'https://ee27-2001-d08-d5-77c4-5cc5-a67f-9dbb-4277.ngrok-free.app';
+  final String domainUrl = 'https://15bf-2001-d08-d5-77c4-a886-8324-67c4-8472.ngrok-free.app';
   late final String baseUrl;
 
   ApiService() {
