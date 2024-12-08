@@ -1,14 +1,24 @@
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:studysama/models/user_course.dart';
 import 'package:studysama/page/base/my_course/manage_resource_page.dart';
 import 'package:studysama/utils/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../models/comment.dart';
 import '../../../models/resource.dart';
+import '../../../models/user.dart';
 import '../../../services/api_service.dart';
 
 class ResourcePage extends StatefulWidget {
+  final ApiService apiService = ApiService();
+  String get domainURL => apiService.domainUrl;
+  String token = "";
+
   final Resource resource;
   bool isTutor;
   final VoidCallback onDelete;
@@ -25,22 +35,28 @@ class ResourcePage extends StatefulWidget {
 }
 
 class _ResourcePageState extends State<ResourcePage> {
-  List<String> comments = [];
+  // List<String> comments = [];
   final TextEditingController _commentController = TextEditingController();
   bool isLoadingComments = true;
 
-  String selectedFilter = 'All';
-  String selectedSort = 'Newest';
   Color cardColor = Colors.grey[300]!;
   String resourceType = "Other";
 
   final ApiService apiService = ApiService();
   String get domainURL => apiService.domainUrl;
+  String token = "";
+
+  List<UserCourse> userCourse = [];
+  List<Comment> comments = [];
+
+  List<Comment> filteredComments = [];
+  String selectedFilter = 'All';
+  String selectedSort = 'Newest';
 
   @override
   void initState() {
     super.initState();
-    _fetchComments();
+    initializeData();
   }
 
   @override
@@ -49,27 +65,102 @@ class _ResourcePageState extends State<ResourcePage> {
     super.dispose();
   }
 
+  Future<void> initializeData() async {
+    await loadUser();
+    //fetchUserCourse();
+    _fetchComments();
+  }
+
+  Future<void> loadUser() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final tokenString = prefs.getString('token');
+      if (tokenString != null) {
+        token = tokenString;
+      }
+
+      setState(() {
+        // context.loaderOverlay.show();
+      });
+    } catch (e) {
+      print('Error loading user: $e');
+      setState(() {
+        // context.loaderOverlay.hide();
+      });
+    }
+  }
+
   Future<void> _fetchComments() async {
     setState(() {
+      context.loaderOverlay.show();
       isLoadingComments = true;
     });
 
-    await Future.delayed(const Duration(seconds: 2), () {
+    try {
+      final data = await apiService.index_comment_resource(token, widget.resource.id);
+
+      // Map `ResourceFile` data for quick lookup by `fileId`.
+      final userCourseMap = {
+        for (var file in (data['user_courses'] as List))
+          file['id']: UserCourse.fromJson(file)
+      };
+
+      final userMap = {
+        for (var file in (data['users'] as List))
+          file['id']: User.fromJson(file)
+      };
+
+      // Combine `Resource` with corresponding `ResourceFile`.
       setState(() {
-        comments = [
-          "Great resource!",
-          "Can you upload a new version?",
-          "Thanks for sharing!",
-        ];
+        comments = (data['comments'] as List)
+            .map((json) {
+          final comment = Comment.fromJson(json);
+          comment.userCourse = userCourseMap[comment.userCourseId];
+          comment.userCourse?.user = userMap[comment.userCourse?.userId];
+          return comment;
+        }).toList();
+
+        _applyFiltersAndSort();
+      });
+    } catch (e) {
+      setState(() {
+        print("Response: " + e.toString());
+      });
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
         isLoadingComments = false;
       });
+    }
+  }
+
+  void _applyFiltersAndSort() {
+    // Start with the original comments list
+    List<Comment> tempComments = List.from(comments);
+
+    // Apply filtering
+    if (selectedFilter == 'Tutor') {
+      tempComments = tempComments.where((comment) => comment.userCourse!.roleId == 1).toList();
+    }
+
+    // Apply sorting
+    if (selectedSort == 'Newest') {
+      tempComments.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+    } else if (selectedSort == 'Oldest') {
+      tempComments.sort((a, b) => a.createdAt!.compareTo(b.createdAt!));
+    }
+
+    // Update the filteredComments list
+    setState(() {
+      filteredComments = tempComments;
     });
   }
+
 
   Future<void> _addComment(String comment) async {
     if (comment.isNotEmpty) {
       setState(() {
-        comments.add(comment);
+        // comments.add(comment);
       });
       _commentController.clear();
     }
@@ -265,8 +356,8 @@ class _ResourcePageState extends State<ResourcePage> {
                                   onChanged: (String? newValue) {
                                     setState(() {
                                       selectedSort = newValue!;
-                                      // Implement sorting logic here if needed
                                     });
+                                    _applyFiltersAndSort();
                                   },
                                   items: <String>['Newest', 'Oldest']
                                       .map<DropdownMenuItem<String>>((String value) {
@@ -280,21 +371,33 @@ class _ResourcePageState extends State<ResourcePage> {
                             ),
         
                             const SizedBox(height: 16),
-        
                             // Comments List (Scrollable)
-                            SizedBox(
-                              height: 200, // Adjust height as needed
-                              child: isLoadingComments
-                                  ? const Center(child: CircularProgressIndicator())
-                                  : ListView.builder(
-                                padding: const EdgeInsets.all(0),
-                                itemCount: comments.length,
-                                itemBuilder: (context, index) {
-                                  return _buildCommentCard("Abu", comments[index], "07/12/2024, 12:54 AM");
-                                },
+                            if(filteredComments.isNotEmpty)
+                              SizedBox(
+                                height: 200,
+                                child: isLoadingComments
+                                    ? const Center(child: CircularProgressIndicator()) :
+                                SingleChildScrollView(
+                                  child: Column(
+                                    children: filteredComments.map((comment) => _buildCommentCard(comment)).toList(),
+                                  ),
+                                ),
                               ),
-                            ),
-        
+                            if(filteredComments.isEmpty)
+                              const SizedBox(
+                                height: 200,
+                                child: Center(
+                                  child: Text(
+                                    "No comment found.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             const SizedBox(height: 16),
         
                             // Comment Input
@@ -583,42 +686,75 @@ class _ResourcePageState extends State<ResourcePage> {
   }
 
   // Build a comment card
-  Widget _buildCommentCard(String username, String comment, String date) {
-    return Card(
-      color: Colors.grey[100],
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Username and Date Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  username,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+  Widget _buildCommentCard(Comment comment) {
+    return LoaderOverlay(
+      child: Card(
+        color: Colors.grey[100],
+        margin: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Username and Date Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        comment.userCourse!.user!.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (comment.userCourse!.roleId == 1)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 2.0),
+                          child: Card(
+                            color: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                                vertical: 4.0,
+                              ),
+                              child: Text(
+                                'Tutor',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-                ),
-                Text(
-                  date,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                  Text(
+                    DateFormat('dd/MM/yyyy hh:mm a').format(comment.createdAt!),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Comment Content
-            Text(
-              comment,
-              style: const TextStyle(fontSize: 14),
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Comment Content
+              Text(
+                comment.commentText,
+                // maxLines: 4,
+                // overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -631,33 +767,13 @@ class _ResourcePageState extends State<ResourcePage> {
       onPressed: () {
         setState(() {
           selectedFilter = label;
-          // Implement filtering logic here if needed
         });
+        _applyFiltersAndSort();
       },
-      child: Text(label),
       style: ElevatedButton.styleFrom(
         backgroundColor: selectedFilter == label ? AppColors.primary : AppColors.accent,
       ),
-    );
-  }
-
-
-  // Build a comment bubble
-  Widget _buildCommentBubble(String comment) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4.0),
-        padding: const EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: Colors.blue[100],
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Text(
-          comment,
-          style: const TextStyle(fontSize: 14),
-        ),
-      ),
+      child: Text(label),
     );
   }
 

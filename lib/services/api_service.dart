@@ -12,7 +12,7 @@ class ApiService {
   // final String domainUrl = 'https://{domain}';
 
   //development
-  final String domainUrl = 'https://15bf-2001-d08-d5-77c4-a886-8324-67c4-8472.ngrok-free.app';
+  final String domainUrl = 'https://9697-203-106-173-140.ngrok-free.app';
   late final String baseUrl;
 
   ApiService() {
@@ -781,4 +781,34 @@ class ApiService {
   }
 
 // SECTION END: RESOURCE
+
+// SECTION START: COMMENT
+
+  Future<Map<String, dynamic>> index_comment_resource(String token, int resource_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/comment/index_comment_resource'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'resource_id': resource_id}),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch comment');
+        } else {
+          throw Exception('Failed to fetch comment: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching comment: $e');
+    }
+  }
+
+// SECTION END: COMMENT
 }

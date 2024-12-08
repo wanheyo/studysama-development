@@ -9,6 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:studysama/models/comment.dart';
 import 'package:studysama/models/resource_file.dart';
 import 'package:studysama/page/base/my_course/resource_page.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -45,6 +46,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
 
   List<Resource> resources = [];
   List<ResourceFile> resource_files = [];
+  List<Comment> comments = [];
 
   int category = 1; // Default category
   File? selectedFile;
@@ -203,6 +205,11 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
           file['id']: ResourceFile.fromJson(file)
       };
 
+      final resourceMap = {
+        for (var file in (data['resources'] as List))
+          file['id']: Resource.fromJson(file)
+      };
+
       // Combine `Resource` with corresponding `ResourceFile`.
       setState(() {
         resources = (data['resources'] as List)
@@ -210,8 +217,16 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
           final resource = Resource.fromJson(json);
           resource.resourceFile = resourceFilesMap[resource.fileId];
           return resource;
-        })
-            .toList();
+        }).toList();
+
+        comments = (data['comments'] as List)
+            .map((json) {
+          final comment = Comment.fromJson(json);
+          comment.resource = resourceMap[comment.resourceId];
+          return comment;
+        }).toList();
+
+
       });
     } catch (e) {
       setState(() {
@@ -777,6 +792,12 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
     const double thumbnailHeight = 150.0; // Fixed height for all thumbnails
     const double thumbnailWidth = double.infinity; // Full width
 
+    int commentCount = 0;
+    for(int i = 0; i < comments.length; i++) {
+      if(comments[i].resourceId == resource.id)
+        commentCount++;
+    }
+
     if (resource.link != null) {
       if (isYouTubeLink(resource.link!)) {
         // YouTube video thumbnail
@@ -999,7 +1020,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                       const SizedBox(width: 16),
                     ],
                     Row(
-                      children: const [
+                      children: [
                         Icon(
                           FontAwesomeIcons.comment,
                           size: 20,
@@ -1007,7 +1028,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                         ),
                         SizedBox(width: 4),
                         Text(
-                          "0",
+                          commentCount.toString(),
                           style: TextStyle(fontSize: 12, color: Colors.black,),
                         ),
                       ],
