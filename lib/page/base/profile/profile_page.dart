@@ -1,13 +1,28 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/colors.dart';
 import 'edit_profile.dart';
 
-class ProfilePage extends StatelessWidget {
-  get headingTextStyle9 => null;
-  get headingTextStyle => null;
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this); // Three tabs now
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -19,239 +34,291 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              Expanded(
-                flex: 3,
-                child: Container(
-                  color: AppColors.primary,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Profile Image
-                        Column(
-                          children: [
-                            // Username
-                            Text(
-                              '@ayunies',
-                              style: TextStyle(
-                                fontFamily: 'Montserrat',
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                              overflow: TextOverflow.ellipsis, // kalau nama panjang
-                            ),
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    final screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
 
-                            const SizedBox(height: 20),
-                            CircleAvatar(
-                              radius: 30, // Size of the profile image
-                              backgroundImage: AssetImage('assets/profile_image.png'),
-                              backgroundColor: Colors.white,
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          // Top Purple Section
+          Container(
+            color: AppColors.primary,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.04,
+                vertical: screenHeight * 0.02,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Profile Information
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Username
+                          Text(
+                            '@ayunies',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: screenWidth * 0.04,
                             ),
-                            const SizedBox(height: 23),
-                            Text(
-                              'BIO: ',
-                              style: TextStyle(
-                                fontFamily: 'Montserrat',
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                fontSize: 16,
+                            overflow: TextOverflow
+                                .ellipsis, // Handle long names
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          CircleAvatar(
+                            radius: screenWidth * 0.08,
+                            // Size of the profile image
+                            backgroundImage: AssetImage(
+                                'assets/profile_image.png'),
+                            backgroundColor: Colors.white,
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          Text(
+                            'BIO:',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: screenWidth * 0.04,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Spacer(),
+                      // Follower and Post Information
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              _buildStatColumn('Post', '10', screenWidth),
+                              SizedBox(width: screenWidth * 0.05),
+                              _buildStatColumn('Followers', '120', screenWidth),
+                              SizedBox(width: screenWidth * 0.05),
+                              _buildStatColumn('Following', '120', screenWidth),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildResponsiveButton(
+                                context,
+                                'Edit Profile',
+                                screenWidth,
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditProfilePage(),
+                                    ),
+                                  );
+                                },
                               ),
-                              overflow: TextOverflow.ellipsis, // kalau nama panjang
-                            ),
-                          ],
-                        ),
-                        //Spacer(),
-                        // Follower and Post
-                        Column(
-                          children: [
-                            Row(
-                              children: [
-                                Column(
-                                  children: [
-                                    Text(
-                                      'Post',
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 16,
-                                        fontFamily: 'Montserrat',
-                                      ),
-                                    ),
-                                    Text(
-                                      '10',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Montserrat',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 20),
-                                Column(
-                                  children: [
-                                    Text(
-                                      'Followers',
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 16,
-                                        fontFamily: 'Montserrat',
-                                      ),
-                                    ),
-                                    Text(
-                                      '120',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Montserrat',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            //Spacer(),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 110, // size button
-                                  height: 30,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => EditProfilePage()),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      foregroundColor: AppColors.primary,
-                                      backgroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                    ),
-                                    child: Text(
-                                      'Edit Profile',
-                                      style: TextStyle(
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                SizedBox(
-                                  width: 110, // size button
-                                  height: 30,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      // Share profile action
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      foregroundColor: AppColors.primary,
-                                      backgroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                    ),
-                                    child: Text(
-                                      'Share Profile ',
-                                      style: TextStyle(
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Spacer(),
-                      ],
-                    ),
+                              SizedBox(width: screenWidth * 0.02),
+                              _buildResponsiveButton(
+                                context,
+                                'Share Profile',
+                                screenWidth,
+                                onPressed: () {
+                                  // Share profile action
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              Expanded(
-                flex: 5,
-                child: Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _buildCard('Art 1', ''),
-                        _buildCard('Art 2', ''),
-                      ],
+                  SizedBox(height: screenHeight * 0.02),
+                  // TabBar Section
+                  TabBar(
+                    controller: _tabController,
+                    tabs: const [
+                      Tab(text: "Created Courses"),
+                      Tab(text: "Joined Courses"),
+                      Tab(text: "Badge Button"), // Added new tab
+                    ],
+                    labelStyle: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: screenWidth * 0.04,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
+                    unselectedLabelStyle: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: screenWidth * 0.04,
+                      color: Colors.white70,
+                    ),
+                    indicatorColor: Colors.white,
+                    indicatorWeight: 3,
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
+          ),
+          // Tab Bar View Section
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildCoursesTab(
+                  "Created Courses",
+                  "No created courses found.",
+                ),
+                _buildCoursesTab(
+                  "Joined Courses",
+                  "No joined courses found.",
+                ),
+                _buildBadgeButtonTab(), // Added new tab content
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Helper function for cards
-  Widget _buildCard(String title, String imagePath) {
-    return Container(
-      width: 200,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+  Widget _buildStatColumn(String label, String count, double screenWidth) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: screenWidth * 0.04,
+            fontFamily: 'Montserrat',
           ),
-        ],
+        ),
+        Text(
+          count,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: screenWidth * 0.05,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Montserrat',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResponsiveButton(BuildContext context, String label,
+      double screenWidth,
+      {required VoidCallback onPressed}) {
+    return SizedBox(
+      width: screenWidth * 0.3,
+      height: 40,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Montserrat',
+            fontSize: screenWidth * 0.035,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-           /* child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-              height: 120,
-              width: double.infinity,
-            ),*/
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              title,
+    );
+  }
+
+  Widget _buildCoursesTab(String title, String emptyMessage) {
+    return Center(
+      child: Text(
+        emptyMessage,
+        style: TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 16,
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBadgeButtonTab() {
+    // Simulate the number of courses created by the user.
+    int coursesCreated = 5; // Replace this with dynamic data from your app
+
+    // Check if the user has created at least 5 courses
+    bool showCard = coursesCreated >= 5;
+
+    return Center(
+      child: showCard
+          ? Container(
+        width: 300,
+        height: 200,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Badge Icon (you can replace this with an actual icon or image)
+            Icon(
+              Icons.star, // Example: star icon
+              size: 50,
+              color: Colors.amber,
+            ),
+            SizedBox(height: 10),
+            // Badge Text
+            Text(
+              "Congratulations!",
               style: TextStyle(
                 fontFamily: 'Montserrat',
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 20,
+                color: Colors.black,
               ),
             ),
-          ),
-        ],
+            SizedBox(height: 5),
+            Text(
+              "You've created at least 5 courses!",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Montserrat',
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      )
+          : Text(
+        "Keep going! Create 5 courses to earn a badge.",
+        style: TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 16,
+          color: Colors.grey,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
