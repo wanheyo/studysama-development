@@ -135,58 +135,72 @@ class HomePage extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Physical Classes',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50], // Light blue for Physical
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Physical Classes',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          liveLocationWidget(
-                            icon: Icons.location_on,
-                            courseName: 'CODING',
-                            method: 'Physical',
-                            location: 'Room 101, Main Building',
-                            time: '10:00 AM - 12:00 PM',
-                          ),
-                          SizedBox(height: 10),
-                          liveLocationWidget(
-                            icon: Icons.location_on,
-                            courseName: 'LANGUAGE',
-                            method: 'Physical',
-                            location: 'Room 202, Science Block',
-                            time: '11:00 AM - 1:00 PM',
-                          ),
-                        ],
+                            SizedBox(height: 10),
+                            liveLocationWidget(
+                              icon: Icons.location_on,
+                              courseName: 'CODING',
+                              method: 'Physical',
+                              location: 'Room 101, Main Building',
+                              time: '10:00 AM - 12:00 PM',
+                            ),
+                            SizedBox(height: 10),
+                            liveLocationWidget(
+                              icon: Icons.location_on,
+                              courseName: 'LANGUAGE',
+                              method: 'Physical',
+                              location: 'Room 202, Science Block',
+                              time: '11:00 AM - 1:00 PM',
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     SizedBox(width: 20),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Online Classes',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.green[50], // Light green for Online
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Online Classes',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          liveLocationWidget(
-                            icon: Icons.video_call,
-                            courseName: 'SCIENCE',
-                            method: 'Online',
-                            location: 'Zoom Meeting',
-                            time: '2:00 PM - 4:00 PM',
-                          ),
-                        ],
+                            SizedBox(height: 10),
+                            liveLocationWidget(
+                              icon: Icons.video_call,
+                              courseName: 'SCIENCE',
+                              method: 'Online',
+                              location: 'Zoom Meeting',
+                              time: '2:00 PM - 4:00 PM',
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
