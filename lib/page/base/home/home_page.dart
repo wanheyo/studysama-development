@@ -103,8 +103,6 @@ class _HomePageState extends State<HomePage> {
                         subtitle: 'Discover new recipes',
                         image: "assets/recipe.jpeg",
                         totalJoined: 120,
-                        started: '2024-01-01',
-                        updated: '2024-11-22',
                       ),
                       SizedBox(width: 16),
                       courseCard(
@@ -112,8 +110,6 @@ class _HomePageState extends State<HomePage> {
                         subtitle: 'Learn new coding',
                         image: "assets/coding.jpeg",
                         totalJoined: 350,
-                        started: '2023-05-12',
-                        updated: '2024-10-15',
                       ),
                       SizedBox(width: 16),
                       courseCard(
@@ -121,8 +117,6 @@ class _HomePageState extends State<HomePage> {
                         subtitle: 'Master a new language',
                         image: "assets/language.png",
                         totalJoined: 200,
-                        started: '2024-03-10',
-                        updated: '2024-11-20',
                       ),
                     ],
                   ),
@@ -144,24 +138,23 @@ class _HomePageState extends State<HomePage> {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     popularCourseCard(
-                      title: 'MATH',
-                      description:
-                      'Master mathematical concepts and sharpen your problem-solving skills.',
-                      image: "assets/math.jpeg",
-                      rating: 4.9,
-                      totalJoined: 1000,
-                      started: '2023-07-01',
-                      updated: '2024-11-20',
+                      author: 'Md Sohag Sheke',
+                      title: 'UI UX Design Career Track Program',
+                      image: "assets/uiux.jpeg",
+                      price: "₹19",
+                      rating: 0.0,
+                      enrolled: 1,
+                      duration: '1 min',
                     ),
                     SizedBox(height: 10),
                     popularCourseCard(
-                      title: 'SCIENCE',
-                      description: 'Explore the wonders of science and technology.',
-                      image: "assets/science.jpeg",
-                      rating: 4.8,
-                      totalJoined: 950,
-                      started: '2023-06-02',
-                      updated: '2024-11-19',
+                      author: 'Joynal Abedin',
+                      title: 'Typography',
+                      image: "assets/typography.jpeg",
+                      price: 'Free',
+                      rating: 4.0,
+                      enrolled: 7,
+                      duration: '40 min',
                     ),
                   ],
                 ),
@@ -179,8 +172,6 @@ class _HomePageState extends State<HomePage> {
     required String subtitle,
     required String image,
     required int totalJoined,
-    required String started,
-    required String updated,
   }) {
     return Container(
       width: 200,
@@ -230,15 +221,6 @@ class _HomePageState extends State<HomePage> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Started: $started',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-                Text(
-                  'Updated: $updated',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-                SizedBox(height: 8),
-                Text(
                   'Total joined: $totalJoined',
                   style: TextStyle(
                     fontSize: 12,
@@ -256,13 +238,13 @@ class _HomePageState extends State<HomePage> {
 
   // Widget for displaying a popular course card
   Widget popularCourseCard({
+    required String author,
     required String title,
-    required String description,
     required String image,
+    required String price,
     required double rating,
-    required int totalJoined,
-    required String started,
-    required String updated,
+    required int enrolled,
+    required String duration,
   }) {
     return Container(
       padding: EdgeInsets.all(12),
@@ -294,6 +276,14 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+                  author,
+                  style: TextStyle(
+                    color: Colors.purple,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
                   title,
                   style: TextStyle(
                     color: AppColors.primary,
@@ -301,36 +291,28 @@ class _HomePageState extends State<HomePage> {
                     fontSize: 16,
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      price,
+                      style: TextStyle(
+                        color: Colors.purple,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Spacer(),
+                    Icon(Icons.star, color: Colors.orange, size: 14),
+                    Text(
+                      ' $rating (${enrolled})',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Rating: $rating',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[800]),
-                ),
-                Text(
-                  'Total joined: $totalJoined',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[800],
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Started: $started',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-                Text(
-                  'Updated: $updated',
+                  '$duration · $enrolled Enrolled',
                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
