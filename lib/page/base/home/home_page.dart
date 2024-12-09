@@ -117,9 +117,10 @@ class HomePage extends StatelessWidget {
                     ),
                   ],
                 ),
+
                 SizedBox(height: 20),
 
-                // Class Schedules Section (formerly Live Location for Classes)
+                // Class Schedules Section
                 Text(
                   'Class Schedules',
                   style: TextStyle(
@@ -129,69 +130,78 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 10),
-                Column(
-                  children: [
-                    // Physical Class
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      margin: EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100],
-                        borderRadius: BorderRadius.circular(10),
+
+                // Physical Classes at the Top
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50], // Light blue for Physical
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Physical Classes',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Physical Classes',
-                            style: TextStyle(
-                              color: Colors.blue[800],
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          classDetail(
-                            course: 'CODING',
-                            username: 'James Brown',
-                            location: 'Room 101, Building A',
-                            time: '10:00 AM',
-                            date: '2024-12-10',
-                          ),
-                        ],
+                      SizedBox(height: 10),
+                      classScheduleWidget(
+                        icon: Icons.location_on,
+                        username: 'Alice',
+                        courseName: 'CODING',
+                        location: 'Room 101, Main Building',
+                        time: '10:00 AM - 12:00 PM',
+                        date: 'Monday, Dec 10th',
                       ),
-                    ),
-                    // Online Class
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      margin: EdgeInsets.only(bottom: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.green[100],
-                        borderRadius: BorderRadius.circular(10),
+                      SizedBox(height: 10),
+                      classScheduleWidget(
+                        icon: Icons.location_on,
+                        username: 'Bob',
+                        courseName: 'LANGUAGE',
+                        location: 'Room 202, Science Block',
+                        time: '11:00 AM - 1:00 PM',
+                        date: 'Tuesday, Dec 11th',
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Online Classes',
-                            style: TextStyle(
-                              color: Colors.green[800],
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          classDetail(
-                            course: 'SCIENCE',
-                            username: 'Sarah Lee',
-                            location: 'Online (Zoom)',
-                            time: '1:00 PM',
-                            date: '2024-12-11',
-                          ),
-                        ],
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20),
+
+                // Online Classes at the Bottom
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50], // Light green for Online
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Online Classes',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: 10),
+                      classScheduleWidget(
+                        icon: Icons.video_call,
+                        username: 'Charlie',
+                        courseName: 'SCIENCE',
+                        location: 'Zoom Meeting',
+                        time: '2:00 PM - 4:00 PM',
+                        date: 'Wednesday, Dec 12th',
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -272,7 +282,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying a popular course card
+  // Widget for displaying a popular course card with rating on the right side
   Widget popularCourseCard({
     required String author,
     required String title,
@@ -311,6 +321,7 @@ class HomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Author name
                 Text(
                   author,
                   style: TextStyle(
@@ -339,16 +350,21 @@ class HomePage extends StatelessWidget {
                 SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.star, color: Colors.orange, size: 14),
-                    SizedBox(width: 4),
-                    Text(
-                      '$rating',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                    Spacer(),
                     Text(
                       duration,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                    Spacer(),
+                    // Rating on the right side
+                    Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.orange, size: 18),
+                        SizedBox(width: 4),
+                        Text(
+                          '$rating',
+                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -360,49 +376,72 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying class details
-  Widget classDetail({
-    required String course,
+  // Widget for displaying class schedules with username
+  Widget classScheduleWidget({
+    required IconData icon,
     required String username,
+    required String courseName,
     required String location,
     required String time,
     required String date,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 5,
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primary, size: 24),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'User: $username',
+                  style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  '$courseName Class',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Location: $location',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Time: $time',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Date: $date',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Course: $course',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            SizedBox(height: 6),
-            Text('Instructor: $username'),
-            SizedBox(height: 6),
-            Text('Location: $location'),
-            SizedBox(height: 6),
-            Text('Time: $time'),
-            SizedBox(height: 6),
-            Text('Date: $date'),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
