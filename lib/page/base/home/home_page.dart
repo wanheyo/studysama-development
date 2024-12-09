@@ -284,7 +284,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying a popular course card with rating on the right side and Enrolled count
+  // Widget for displaying a popular course card with rating on the right side and Enrolled count next to duration
   Widget popularCourseCard({
     required String author,
     required String title,
@@ -357,6 +357,11 @@ class HomePage extends StatelessWidget {
                       duration,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
+                    SizedBox(width: 10),
+                    Text(
+                      '$enrolled Enrolled',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
                     Spacer(),
                     // Rating on the right side
                     Row(
@@ -366,16 +371,6 @@ class HomePage extends StatelessWidget {
                         Text(
                           '$rating',
                           style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 10),
-                    // Enrolled count next to the hour
-                    Row(
-                      children: [
-                        Text(
-                          '$enrolled Enrolled',
-                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                         ),
                       ],
                     ),
