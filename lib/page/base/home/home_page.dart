@@ -44,48 +44,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primary, // Purple header
-        title: Row(
-          children: [
-            Image.asset(
-              "assets/logo.jpg", // Replace with your logo path
-              height: 40,
-              width: 40,
-            ),
-            SizedBox(width: 10),
-            Text(
-              'StudySama',
-              style: TextStyle(
-                color: Colors.white, // Set text color to white
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          PopupMenuButton<String>(
-            icon: Icon(Icons.menu),
-            onSelected: (value) {
-              // Handle menu options
-              if (value == 'Profile') {
-                // Navigate to Profile
-              } else if (value == 'Settings') {
-                // Navigate to Settings
-              } else if (value == 'Logout') {
-                // Handle Logout
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem(value: 'Profile', child: Text('Profile')),
-                PopupMenuItem(value: 'Settings', child: Text('Settings')),
-                PopupMenuItem(value: 'Logout', child: Text('Logout')),
-              ];
-            },
-          ),
-        ],
-      ),
-      backgroundColor: Colors.grey[100], // Original background
+      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -197,8 +156,7 @@ class _HomePageState extends State<HomePage> {
                     SizedBox(height: 10),
                     popularCourseCard(
                       title: 'SCIENCE',
-                      description:
-                      'Explore the wonders of science and technology.',
+                      description: 'Explore the wonders of science and technology.',
                       image: "assets/science.jpeg",
                       rating: 4.8,
                       totalJoined: 950,
@@ -215,7 +173,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Course Card
+  // Widget for displaying a course card
   Widget courseCard({
     required String title,
     required String subtitle,
@@ -225,24 +183,28 @@ class _HomePageState extends State<HomePage> {
     required String updated,
   }) {
     return Container(
-      width: 150,
+      width: 200,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
             child: Image.asset(
               image,
-              height: 100,
-              width: 150,
               fit: BoxFit.cover,
+              width: double.infinity,
+              height: 120,
             ),
           ),
           Padding(
@@ -254,8 +216,8 @@ class _HomePageState extends State<HomePage> {
                   title,
                   style: TextStyle(
                     color: AppColors.primary,
-                    fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
                 SizedBox(height: 4),
@@ -263,22 +225,26 @@ class _HomePageState extends State<HomePage> {
                   subtitle,
                   style: TextStyle(
                     color: Colors.grey[600],
-                    fontSize: 12,
+                    fontSize: 14,
                   ),
                 ),
-                Divider(color: Colors.grey[400]),
-                Text(
-                  'Total Joined: $totalJoined',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
-                ),
-                SizedBox(height: 4),
+                SizedBox(height: 8),
                 Text(
                   'Started: $started',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
                 Text(
                   'Updated: $updated',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Total joined: $totalJoined',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[800],
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -288,7 +254,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Popular Course Card
+  // Widget for displaying a popular course card
   Widget popularCourseCard({
     required String title,
     required String description,
@@ -299,72 +265,76 @@ class _HomePageState extends State<HomePage> {
     required String updated,
   }) {
     return Container(
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[200],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                ),
-                child: Image.asset(
-                  image,
-                  height: 80,
-                  width: 80,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        description,
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Total Joined: $totalJoined',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                      Text(
-                        'Started: $started',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                      Text(
-                        'Updated: $updated',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                      SizedBox(height: 5),
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.yellow, size: 16),
-                          SizedBox(width: 5),
-                          Text('$rating', style: TextStyle(color: Colors.grey[700])),
-                        ],
-                      ),
-                    ],
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              image,
+              fit: BoxFit.cover,
+              width: 80,
+              height: 80,
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Rating: $rating',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[800]),
+                ),
+                Text(
+                  'Total joined: $totalJoined',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[800],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Started: $started',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                Text(
+                  'Updated: $updated',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+              ],
+            ),
           ),
         ],
       ),

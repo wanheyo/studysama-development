@@ -38,18 +38,48 @@ class _BasePageState extends State<BasePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'StudySama',
-          style: TextStyle(
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.bold,
-          )
-        ,),
+        title: Row(
+          children: [
+            Image.asset(
+              "assets/logo.jpg", // Replace with your logo path
+              height: 40,
+              width: 40,
+            ),
+            SizedBox(width: 10),
+            Text(
+              'StudySama',
+              style: TextStyle(
+                fontFamily: 'Montserrat',
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         actions: [
-          //untuk icons setting
-          if (_selectedIndex == 4)  // bila user tekan index ke4 so akan ada icon ni
+          PopupMenuButton<String>(
+            icon: Icon(Icons.menu),
+            onSelected: (value) {
+              // Handle menu options
+              if (value == 'Profile') {
+                // Navigate to Profile
+              } else if (value == 'Settings') {
+                // Navigate to Settings
+              } else if (value == 'Logout') {
+                // Handle Logout
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                PopupMenuItem(value: 'Profile', child: Text('Profile')),
+                PopupMenuItem(value: 'Settings', child: Text('Settings')),
+                PopupMenuItem(value: 'Logout', child: Text('Logout')),
+              ];
+            },
+          ),
+          if (_selectedIndex == 4) // Index for Profile Page
             IconButton(
               icon: Icon(
                 Icons.settings,
@@ -65,10 +95,8 @@ class _BasePageState extends State<BasePage> {
             ),
         ],
       ),
-
       body: _pages[_selectedIndex], // Display selected page
       bottomNavigationBar: BottomNavigationBar(
-        //backgroundColor: AppColors.background,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
@@ -96,17 +124,16 @@ class _BasePageState extends State<BasePage> {
         selectedItemColor: AppColors.primary,
         unselectedItemColor: Colors.grey,
         selectedLabelStyle: TextStyle(
-          fontFamily: 'Montserrat', // Set the font to Montserrat
-          fontWeight: FontWeight.bold, // Optional: Make the label bold
+          fontFamily: 'Montserrat',
+          fontWeight: FontWeight.bold,
         ),
         unselectedLabelStyle: TextStyle(
-          fontFamily: 'Montserrat', // Set the font to Montserrat
-          fontWeight: FontWeight.normal, // Optional: Normal weight for unselected labels
+          fontFamily: 'Montserrat',
+          fontWeight: FontWeight.normal,
         ),
-        type: BottomNavigationBarType.fixed, // Keeps label visible on tap
-        showUnselectedLabels: false, // Turn off labels for unselected items
+        type: BottomNavigationBarType.fixed,
+        showUnselectedLabels: false,
       ),
     );
   }
 }
-
