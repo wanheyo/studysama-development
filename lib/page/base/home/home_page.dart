@@ -99,7 +99,7 @@ class HomePage extends StatelessWidget {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     popularCourseCard(
-                      author: 'John',
+                      author: 'John Doe',
                       title: 'Mathematics Mastery',
                       image: "assets/math.jpeg",
                       description: 'A comprehensive guide to mastering math.',
@@ -108,7 +108,7 @@ class HomePage extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     popularCourseCard(
-                      author: 'Siti',
+                      author: 'Jane Smith',
                       title: 'Explore Science Wonders',
                       image: "assets/science.jpeg",
                       description: 'Dive deep into the wonders of science.',
@@ -152,8 +152,8 @@ class HomePage extends StatelessWidget {
                       SizedBox(height: 10),
                       classScheduleWidget(
                         icon: Icons.location_on,
-                        username: 'Alice',
                         courseName: 'CODING',
+                        username: 'Alice',
                         location: 'Room 101, Main Building',
                         time: '10:00 AM - 12:00 PM',
                         date: 'Monday, Dec 10th',
@@ -161,8 +161,8 @@ class HomePage extends StatelessWidget {
                       SizedBox(height: 10),
                       classScheduleWidget(
                         icon: Icons.location_on,
-                        username: 'Bob',
                         courseName: 'LANGUAGE',
+                        username: 'Bob',
                         location: 'Room 202, Science Block',
                         time: '11:00 AM - 1:00 PM',
                         date: 'Tuesday, Dec 11th',
@@ -194,8 +194,8 @@ class HomePage extends StatelessWidget {
                       SizedBox(height: 10),
                       classScheduleWidget(
                         icon: Icons.video_call,
-                        username: 'Charlie',
                         courseName: 'SCIENCE',
+                        username: 'Charlie',
                         location: 'Zoom Meeting',
                         time: '2:00 PM - 4:00 PM',
                         date: 'Wednesday, Dec 12th',
@@ -379,8 +379,8 @@ class HomePage extends StatelessWidget {
   // Widget for displaying class schedules with username
   Widget classScheduleWidget({
     required IconData icon,
-    required String username,
     required String courseName,
+    required String username,
     required String location,
     required String time,
     required String date,
@@ -407,21 +407,17 @@ class HomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'User: $username',
-                  style: TextStyle(
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
                   '$courseName Class',
                   style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  username,
+                  style: TextStyle(color: Colors.blueAccent, fontSize: 14),
                 ),
                 SizedBox(height: 4),
                 Text(
