@@ -1,86 +1,11 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../models/user.dart';
 import '../../../utils/colors.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  User? user;
-  String? username;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    loadUser();
-  }
-
-  Future<void> loadUser() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final userString = prefs.getString('user');
-      if (userString != null) {
-        Map<String, dynamic> userMap = jsonDecode(userString);
-        user = User.fromJson(userMap);
-      }
-      setState(() {
-        username = user?.username;
-        isLoading = false;
-      });
-    } catch (e) {
-      print('Error loading username: $e');
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primary, // Purple header
-        title: Row(
-          children: [
-            Image.asset(
-              "assets/logo.jpg", // Replace with your logo path
-              height: 40,
-              width: 40,
-            ),
-            SizedBox(width: 10),
-            Text('STUDYSAMA'),
-          ],
-        ),
-        actions: [
-          PopupMenuButton<String>(
-            icon: Icon(Icons.menu),
-            onSelected: (value) {
-              // Handle menu options
-              if (value == 'Profile') {
-                // Navigate to Profile
-              } else if (value == 'Settings') {
-                // Navigate to Settings
-              } else if (value == 'Logout') {
-                // Handle Logout
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem(value: 'Profile', child: Text('Profile')),
-                PopupMenuItem(value: 'Settings', child: Text('Settings')),
-                PopupMenuItem(value: 'Logout', child: Text('Logout')),
-              ];
-            },
-          ),
-        ],
-      ),
-      backgroundColor: Colors.grey[100], // Original background
+      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -101,7 +26,7 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'WELCOME TO STUDYSAMA!',
+                        'WELCOME TO StudySama!',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -139,8 +64,6 @@ class _HomePageState extends State<HomePage> {
                         subtitle: 'Discover new recipes',
                         image: "assets/recipe.jpeg",
                         totalJoined: 120,
-                        started: '2024-01-01',
-                        updated: '2024-11-22',
                       ),
                       SizedBox(width: 16),
                       courseCard(
@@ -148,8 +71,6 @@ class _HomePageState extends State<HomePage> {
                         subtitle: 'Learn new coding',
                         image: "assets/coding.jpeg",
                         totalJoined: 350,
-                        started: '2023-05-12',
-                        updated: '2024-10-15',
                       ),
                       SizedBox(width: 16),
                       courseCard(
@@ -157,15 +78,13 @@ class _HomePageState extends State<HomePage> {
                         subtitle: 'Master a new language',
                         image: "assets/language.png",
                         totalJoined: 200,
-                        started: '2024-03-10',
-                        updated: '2024-11-20',
                       ),
                     ],
                   ),
                 ),
                 SizedBox(height: 20),
 
-                // Most Popular Courses Section
+                // Popular Courses Section
                 Text(
                   'Most Popular Courses',
                   style: TextStyle(
@@ -180,27 +99,111 @@ class _HomePageState extends State<HomePage> {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     popularCourseCard(
-                      title: 'MATH',
-                      description:
-                      'Master mathematical concepts and sharpen your problem-solving skills.',
+                      author: 'John',
+                      title: 'Mathematics Mastery',
                       image: "assets/math.jpeg",
-                      rating: 4.9,
-                      totalJoined: 1000,
-                      started: '2023-07-01',
-                      updated: '2024-11-20',
+                      description: 'A comprehensive guide to mastering math.',
+                      rating: 4.5,
+                      duration: '2 hours',
+                      enrolled: 120, // Added Enrolled count
                     ),
                     SizedBox(height: 10),
                     popularCourseCard(
-                      title: 'SCIENCE',
-                      description:
-                      'Explore the wonders of science and technology.',
+                      author: 'Siti',
+                      title: 'Explore Science Wonders',
                       image: "assets/science.jpeg",
-                      rating: 4.8,
-                      totalJoined: 950,
-                      started: '2023-06-02',
-                      updated: '2024-11-19',
+                      description: 'Dive deep into the wonders of science.',
+                      rating: 4.7,
+                      duration: '3 hours',
+                      enrolled: 150, // Added Enrolled count
                     ),
                   ],
+                ),
+
+                SizedBox(height: 20),
+
+                // Class Schedules Section
+                Text(
+                  'Class Schedules',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+
+                // Physical Classes at the Top
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50], // Light blue for Physical
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Physical Classes',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      classScheduleWidget(
+                        icon: Icons.location_on,
+                        courseName: 'CODING',
+                        username: 'Alice',
+                        location: 'Room 101, Main Building',
+                        time: '10:00 AM - 12:00 PM',
+                        date: 'Monday, Dec 10th',
+                      ),
+                      SizedBox(height: 10),
+                      classScheduleWidget(
+                        icon: Icons.location_on,
+                        courseName: 'LANGUAGE',
+                        username: 'Bob',
+                        location: 'Room 202, Science Block',
+                        time: '11:00 AM - 1:00 PM',
+                        date: 'Tuesday, Dec 11th',
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20),
+
+                // Online Classes at the Bottom
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50], // Light green for Online
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Online Classes',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      classScheduleWidget(
+                        icon: Icons.video_call,
+                        courseName: 'SCIENCE',
+                        username: 'Siti',
+                        location: 'Zoom Meeting',
+                        time: '2:00 PM - 4:00 PM',
+                        date: 'Wednesday, Dec 12th',
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -210,36 +213,40 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Course Card
+  // Widget for displaying a course card (Horizontal Scrolling)
   Widget courseCard({
     required String title,
     required String subtitle,
     required String image,
     required int totalJoined,
-    required String started,
-    required String updated,
   }) {
     return Container(
-      width: 150,
+      width: 250,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Image
           ClipRRect(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
             child: Image.asset(
               image,
-              height: 100,
-              width: 150,
               fit: BoxFit.cover,
+              height: 140,
+              width: double.infinity,
             ),
           ),
+          // Details
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -249,31 +256,25 @@ class _HomePageState extends State<HomePage> {
                   title,
                   style: TextStyle(
                     color: AppColors.primary,
-                    fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
                 SizedBox(height: 4),
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+                    color: Colors.grey[700],
+                    fontSize: 14,
                   ),
                 ),
-                Divider(color: Colors.grey[400]),
+                SizedBox(height: 8),
                 Text(
-                  'Total Joined: $totalJoined',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Started: $started',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
-                ),
-                Text(
-                  'Updated: $updated',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                  '$totalJoined Enrolled',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
                 ),
               ],
             ),
@@ -283,87 +284,166 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget for Popular Course Card
+  // Widget for displaying a popular course card with rating on the right side and Enrolled count next to duration
   Widget popularCourseCard({
+    required String author,
     required String title,
-    required String description,
     required String image,
+    required String description,
     required double rating,
-    required int totalJoined,
-    required String started,
-    required String updated,
+    required String duration,
+    required int enrolled, // Added enrolled count
   }) {
     return Container(
       decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[200],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                ),
-                child: Image.asset(
-                  image,
-                  height: 80,
-                  width: 80,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        description,
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Total Joined: $totalJoined',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                      Text(
-                        'Started: $started',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                      Text(
-                        'Updated: $updated',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                    ],
+          // Full-Width Course Image
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+            child: Image.asset(
+              image,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: 180,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Author name
+                Text(
+                  author,
+                  style: TextStyle(
+                    color: Colors.purple,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Column(
+                SizedBox(height: 4),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Row(
                   children: [
-                    Icon(Icons.star, color: Colors.orange, size: 20),
                     Text(
-                      '$rating',
-                      style: TextStyle(color: Colors.grey[700]),
+                      duration,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      '$enrolled Enrolled',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                    Spacer(),
+                    // Rating on the right side
+                    Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.orange, size: 18),
+                        SizedBox(width: 4),
+                        Text(
+                          '$rating',
+                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget for displaying class schedules with username
+  Widget classScheduleWidget({
+    required IconData icon,
+    required String courseName,
+    required String username,
+    required String location,
+    required String time,
+    required String date,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primary, size: 24),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$courseName Class',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  username,
+                  style: TextStyle(color: Colors.blueAccent, fontSize: 14),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Location: $location',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Time: $time',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Date: $date',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                ),
+              ],
+            ),
           ),
         ],
       ),
