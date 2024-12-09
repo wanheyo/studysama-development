@@ -370,7 +370,7 @@ class HomePage extends StatelessWidget {
                       ],
                     ),
                     SizedBox(width: 10),
-                    // Enrolled count on the right side
+                    // Enrolled count next to the hour
                     Row(
                       children: [
                         Text(
