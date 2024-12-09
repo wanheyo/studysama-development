@@ -105,6 +105,7 @@ class HomePage extends StatelessWidget {
                       description: 'A comprehensive guide to mastering math.',
                       rating: 4.5,
                       duration: '2 hours',
+                      liveLocation: 'Online, 10:00 AM - 12:00 PM',
                     ),
                     SizedBox(height: 10),
                     popularCourseCard(
@@ -114,8 +115,32 @@ class HomePage extends StatelessWidget {
                       description: 'Dive deep into the wonders of science.',
                       rating: 4.7,
                       duration: '3 hours',
+                      liveLocation: 'Physical, Science Building, 1:00 PM - 4:00 PM',
                     ),
                   ],
+                ),
+                SizedBox(height: 20),
+
+                // Live Location Section
+                Text(
+                  'Live Location and Class Info',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                liveLocationWidget(
+                  method: 'Online',
+                  location: 'Zoom',
+                  time: '10:00 AM - 12:00 PM',
+                ),
+                SizedBox(height: 10),
+                liveLocationWidget(
+                  method: 'Physical',
+                  location: 'Room 202, Science Building',
+                  time: '1:00 PM - 4:00 PM',
                 ),
               ],
             ),
@@ -204,6 +229,7 @@ class HomePage extends StatelessWidget {
     required String description,
     required double rating,
     required String duration,
+    required String liveLocation,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -263,11 +289,11 @@ class HomePage extends StatelessWidget {
                 SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.star, color: Colors.orange, size: 14),
+                    Icon(Icons.star, color: Colors.orange, size: 18),
                     SizedBox(width: 4),
                     Text(
                       '$rating',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[800]),
                     ),
                     Spacer(),
                     Text(
@@ -276,8 +302,90 @@ class HomePage extends StatelessWidget {
                     ),
                   ],
                 ),
+                SizedBox(height: 10),
+                // Live Location Info
+                Text(
+                  'Live Location:',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  liveLocation,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget for displaying Live Location and Class Info
+  Widget liveLocationWidget({
+    required String method,
+    required String location,
+    required String time,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Method (Online/Physical)
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: method == 'Online' ? Colors.blue : Colors.green,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              method,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(width: 10),
+          // Location & Time Info
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                location,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                time,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
           ),
         ],
       ),
