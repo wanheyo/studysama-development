@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'StudySama dev',
       theme: AppTheme.lightTheme, // Light Theme
-      darkTheme: AppTheme.darkTheme, // Dark Theme
+      darkTheme: AppTheme.lightTheme, // Dark Theme
       themeMode: ThemeMode.system, // Use system settings
       // colorScheme: ColorScheme.fromSeed(seedColor: Color.fromRGBO(38, 38, 38, 0.4)),
       //   useMaterial3: true,
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         // '/': (context) => BasePage(), //start page
-        '/': (context) => BasePage(), //start page
+        '/': (context) => LoginPage(), //start page
         '/home': (context) => BasePage(),
       },
       navigatorObservers: [routeObserver],

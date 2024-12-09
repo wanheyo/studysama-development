@@ -12,7 +12,7 @@ class ApiService {
   // final String domainUrl = 'https://{domain}';
 
   //development
-  final String domainUrl = 'https://9697-203-106-173-140.ngrok-free.app';
+  final String domainUrl = 'https://2162-2001-e68-8231-6200-3533-5bb-280a-d1a4.ngrok-free.app';
   late final String baseUrl;
 
   ApiService() {
@@ -807,6 +807,112 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error fetching comment: $e');
+    }
+  }
+
+  Future<void> comment_store(String token, int user_course_id, int resource_id, String comment_text) async {
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/comment/store'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'user_course_id': user_course_id,
+          'resource_id': resource_id,
+          'comment_text': comment_text,
+        }),
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201) {
+        // Handle success
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+        }
+        return;
+      } else {
+        // Handle validation errors
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body.trim());
+
+          // Check if the response contains 'errors'
+          if (responseData.containsKey('errors')) {
+            final errors = responseData['errors'];
+            String errorMessage = '';
+
+            // Throw the combined error message
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error if no validation errors are present
+            throw Exception(responseData['message'] ?? 'Failed to create comment');
+          }
+        }
+      }
+    } catch (e) {
+      // Rethrow the exception for the caller to handle
+      throw Exception('Error creating comment: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> comment_update(String token, int comment_id, int status) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/comment/update'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'comment_id': comment_id,
+          'status': status,
+        }),
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Parse and return the updated course data
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+
+          // Ensure 'message' and 'course' exist in the response
+          if (responseData.containsKey('message') &&
+              responseData.containsKey('comment')) {
+            return responseData;
+          } else {
+            throw Exception('Invalid response structure: ${response.body}');
+          }
+        } else {
+          throw Exception('Empty response body on success');
+        }
+      } else {
+        // Handle error responses
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> errorData = json.decode(response.body.trim());
+
+          // If errors are present in the response, process them
+          if (errorData.containsKey('errors')) {
+            final errors = errorData['errors'] as Map<String, dynamic>;
+            String errorMessage = errors.values.join(', ');
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error handling
+            throw Exception(errorData['message'] ?? 'Failed to update comment');
+          }
+        }
+        throw Exception('Unexpected response format or empty response body');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Error updating comment: $e');
     }
   }
 

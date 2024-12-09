@@ -1,15 +1,18 @@
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:studysama/models/lesson.dart';
 import 'package:studysama/models/user_course.dart';
 import 'package:studysama/page/base/my_course/manage_resource_page.dart';
 import 'package:studysama/utils/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../models/comment.dart';
+import '../../../models/course.dart';
 import '../../../models/resource.dart';
 import '../../../models/user.dart';
 import '../../../services/api_service.dart';
@@ -19,15 +22,22 @@ class ResourcePage extends StatefulWidget {
   String get domainURL => apiService.domainUrl;
   String token = "";
 
+  final Course course;
+  final Lesson lesson;
   final Resource resource;
   bool isTutor;
+  UserCourse? userCourse;
+
   final VoidCallback onDelete;
 
   ResourcePage({
     Key? key,
+    required this.course,
+    required this.lesson,
     required this.resource,
     required this.onDelete,
-    required this.isTutor
+    required this.isTutor,
+    this.userCourse
   }) : super(key: key);
 
   @override
@@ -38,6 +48,7 @@ class _ResourcePageState extends State<ResourcePage> {
   // List<String> comments = [];
   final TextEditingController _commentController = TextEditingController();
   bool isLoadingComments = true;
+  bool isLoadingUserCourse = true; // Add this line
 
   Color cardColor = Colors.grey[300]!;
   String resourceType = "Other";
@@ -46,7 +57,7 @@ class _ResourcePageState extends State<ResourcePage> {
   String get domainURL => apiService.domainUrl;
   String token = "";
 
-  List<UserCourse> userCourse = [];
+  List<UserCourse> userCourses = [];
   List<Comment> comments = [];
 
   List<Comment> filteredComments = [];
@@ -67,8 +78,8 @@ class _ResourcePageState extends State<ResourcePage> {
 
   Future<void> initializeData() async {
     await loadUser();
-    //fetchUserCourse();
     _fetchComments();
+    fetchUserCourse();
   }
 
   Future<void> loadUser() async {
@@ -86,6 +97,37 @@ class _ResourcePageState extends State<ResourcePage> {
       print('Error loading user: $e');
       setState(() {
         // context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> fetchUserCourse() async {
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    int course_id = widget.course.id;
+    //print("course_id: " + course_id.toString());
+    try {
+      final data = await apiService.index_user_course(token, course_id);
+      setState(() {
+        // Extract boolean values from the response
+        widget.isTutor = data['is_user_tutor'] ?? false;
+        // isStudent = data['is_user_student'] ?? false;
+        widget.userCourse = data['user_course'] != null
+            ? UserCourse.fromJson(data['user_course'])
+            : null;
+
+        print("UserCourse exist: " + widget.userCourse.toString());
+      });
+    } catch (e) {
+      setState(() {
+        print("Response: " + e.toString());
+      });
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
+        isLoadingUserCourse = false;
       });
     }
   }
@@ -157,12 +199,79 @@ class _ResourcePageState extends State<ResourcePage> {
   }
 
 
-  Future<void> _addComment(String comment) async {
-    if (comment.isNotEmpty) {
+  Future<void> _addComment(String commentText) async {
+    if (commentText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Comment must not be empty.'),
+        ),
+      );
+      return;
+    }
+
+    if (commentText.length > 500) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Comment cannot exceed 500 characters.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    try {
+      // Call the API
+      await apiService.comment_store(token, widget.userCourse!.id, widget.resource.id, commentText);
+
+      print("Comment created successfully");
+    } catch (e) {
+      // Extract meaningful error messages if available
+      final errorMsg = e.toString().replaceFirst('Exception: ', '\n');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Resource creation failed: $errorMsg\n')),
+      );
+      print(errorMsg);
+    } finally {
       setState(() {
-        // comments.add(comment);
+        context.loaderOverlay.hide();
+        _commentController.clear();
+        initializeData();
       });
-      _commentController.clear();
+    }
+  }
+
+  Future<void> _deleteComment(Comment comment) async {
+    int status = 0;
+
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    try {
+      // Call the API and get the updated course data
+      final updatedData = await apiService.comment_update(token, comment.id, status);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Comment deleted successfully!'),
+        ),
+      );
+      Navigator.pop(context);
+
+      initializeData();
+    } catch (e) {
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Comment update failed: $errorMsg')),
+      );
+      print(errorMsg);
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
+      });
     }
   }
 
@@ -318,12 +427,26 @@ class _ResourcePageState extends State<ResourcePage> {
                                       icon: FontAwesomeIcons.comment,
                                       value: "${comments.length}",
                                     ),
-                                    const SizedBox(width: 16),
-                                    Icon(
-                                      widget.resource.link != null
-                                          ? FontAwesomeIcons.link
-                                          : getFileIcon(widget.resource.resourceFile?.type ?? ""),
-                                      size: 20,
+                                    const SizedBox(width: 2),
+                                    IconButton(
+                                      icon: Icon(
+                                        widget.resource.link != null
+                                            ? FontAwesomeIcons.link
+                                            : getFileIcon(widget.resource.resourceFile?.type ?? ""),
+                                        size: 20,
+                                        color: Colors.black,
+                                      ),
+                                      onPressed: () async {
+                                            final Uri uri = Uri.parse(widget.resource.link!);
+                                            if (await canLaunchUrl(uri)) {
+                                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                            } else {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(content: Text("Could not open link")
+                                            ),
+                                          );
+                                        }
+                                      },
                                     ),
                                   ],
                                 ),
@@ -399,37 +522,72 @@ class _ResourcePageState extends State<ResourcePage> {
                                 ),
                               ),
                             const SizedBox(height: 16),
-        
                             // Comment Input
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: _commentController,
-                                    decoration: InputDecoration(
-                                      hintText: "Add a comment...",
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0),
+                            if (widget.userCourse != null)
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _commentController,
+                                      decoration: InputDecoration(
+                                        hintText: "Add a comment...",
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(8.0),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _addComment(_commentController.text.trim());
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      _addComment(_commentController.text.trim());
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                    ),
+                                    child: const Text("Post"),
+                                  ),
+                                ],
+                              )
+                            else
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _commentController,
+                                      enabled: false, // Disable the TextField
+                                      decoration: InputDecoration(
+                                        hintText: "You must join the course to comment.",
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(8.0),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  child: const Text("Post"),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('User must join this course first to comment.'),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.grey, // Disabled button color
+                                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                    ),
+                                    child: const Text("Post"),
+                                  ),
+                                ],
+                              )
                           ],
                         ),
                       ),
@@ -685,9 +843,10 @@ class _ResourcePageState extends State<ResourcePage> {
     );
   }
 
-  // Build a comment card
+  // Build Comment Card
   Widget _buildCommentCard(Comment comment) {
-    return LoaderOverlay(
+    return GestureDetector(
+      onTap: () => _showCommentDetail(context, comment),
       child: Card(
         color: Colors.grey[100],
         margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -711,7 +870,7 @@ class _ResourcePageState extends State<ResourcePage> {
                       ),
                       if (comment.userCourse!.roleId == 1)
                         Padding(
-                          padding: const EdgeInsets.only(right: 2.0),
+                          padding: const EdgeInsets.only(left: 8.0),
                           child: Card(
                             color: AppColors.primary,
                             shape: RoundedRectangleBorder(
@@ -749,8 +908,8 @@ class _ResourcePageState extends State<ResourcePage> {
               // Comment Content
               Text(
                 comment.commentText,
-                // maxLines: 4,
-                // overflow: TextOverflow.ellipsis,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 14),
               ),
             ],
@@ -760,6 +919,148 @@ class _ResourcePageState extends State<ResourcePage> {
     );
   }
 
+  void _showCommentDetail(BuildContext context, Comment comment) {
+    final bool canDelete = (DateTime.now().difference(comment.createdAt!).inMinutes <= 5 &&
+        widget.userCourse!.id == comment.userCourseId);
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Gray swipe indicator at the top
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(2.0),
+                  ),
+                ),
+              ),
+              // Comment details
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        comment.userCourse!.user!.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (comment.userCourse!.roleId == 1)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Card(
+                            color: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                                vertical: 4.0,
+                              ),
+                              child: Text(
+                                'Tutor',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  Text(
+                    DateFormat('dd/MM/yyyy hh:mm a').format(comment.createdAt!),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                comment.commentText,
+                style: const TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              // Action buttons at the bottom-right
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: comment.commentText));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Comment copied to clipboard')),
+                      );
+                    },
+                    icon: const Icon(FontAwesomeIcons.copy, size: 20,),
+                    tooltip: 'Copy Comment',
+                  ),
+                  if (canDelete)
+                    IconButton(
+                      onPressed: () {
+                        _showDeleteConfirmation(context, () {
+                          _deleteComment(comment);
+                        });
+                      },
+                      icon: const Icon(FontAwesomeIcons.trash, size: 20,),
+                      tooltip: 'Delete Comment',
+                    ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, VoidCallback onConfirm) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirm Delete'),
+          content: const Text('Are you sure you want to delete this comment? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Close confirmation dialog
+                onConfirm();
+              },
+              child: const Text('Delete'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   // Build segmented button
   Widget _buildSegmentedButton(String label) {

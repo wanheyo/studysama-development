@@ -11,6 +11,7 @@ import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/models/comment.dart';
 import 'package:studysama/models/resource_file.dart';
+import 'package:studysama/models/user_course.dart';
 import 'package:studysama/page/base/my_course/resource_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../main.dart';
@@ -25,7 +26,8 @@ class LessonPage extends StatefulWidget {
   Lesson lesson;
   Course course;
   bool isTutor;
-  LessonPage({Key? key, required this.lesson, required this.course, required this.isTutor}) : super(key: key);
+  UserCourse? userCourse;
+  LessonPage({Key? key, required this.lesson, required this.course, required this.isTutor, this.userCourse}) : super(key: key);
 
   @override
   _LessonPageState createState() => _LessonPageState();
@@ -325,89 +327,87 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: LoaderOverlay(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // About Section Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // const Text(
-                    //   "About",
-                    //   style: TextStyle(
-                    //     fontSize: 20,
-                    //     fontWeight: FontWeight.bold,
-                    //     fontFamily: 'Montserrat',
-                    //   ),
-                    // ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                buildLessonInfoSection(),
-                if(widget.isTutor)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ManageLessonPage(
-                              lesson: widget.lesson,
-                              course: widget.course,
-                              onLessonUpdated: (updatedLesson) {
-                                setState(() {
-                                  widget.lesson = updatedLesson; // Update the lesson data
-                                });
-                              },
-                            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // About Section Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // const Text(
+                  //   "About",
+                  //   style: TextStyle(
+                  //     fontSize: 20,
+                  //     fontWeight: FontWeight.bold,
+                  //     fontFamily: 'Montserrat',
+                  //   ),
+                  // ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              buildLessonInfoSection(),
+              if(widget.isTutor)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageLessonPage(
+                            lesson: widget.lesson,
+                            course: widget.course,
+                            onLessonUpdated: (updatedLesson) {
+                              setState(() {
+                                widget.lesson = updatedLesson; // Update the lesson data
+                              });
+                            },
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
-                        textStyle: const TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'Montserrat',
-                          fontWeight: FontWeight.bold,
                         ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: const Text("Manage Lesson"),
                     ),
-                  ),
-                const SizedBox(height: 30),
-
-                // Resources Section Header
-                const Text(
-                  "Resources",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Montserrat',
+                    child: const Text("Manage Lesson"),
                   ),
                 ),
-                if(resources.isNotEmpty)
-                  const SizedBox(height: 10),
-                ...resources.map((resource) => buildResourceCard(resource)).toList(),
-                if(resources.isEmpty)
-                  const SizedBox(
-                    height: 350, // Minimum height to ensure proper placement
-                    child: Center(
-                      child: Text(
-                        "No resource found.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
+              const SizedBox(height: 30),
+
+              // Resources Section Header
+              const Text(
+                "Resources",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Montserrat',
+                ),
+              ),
+              if(resources.isNotEmpty)
+                const SizedBox(height: 10),
+              ...resources.map((resource) => buildResourceCard(resource)).toList(),
+              if(resources.isEmpty)
+                const SizedBox(
+                  height: 350, // Minimum height to ensure proper placement
+                  child: Center(
+                    child: Text(
+                      "No resource found.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 16,
+                        color: Colors.grey,
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),
@@ -675,7 +675,6 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                                   );
                                   return;
                                 }
-              
                                 // If all validations pass, proceed with creating the resource
                                 _createResource();
                               }
@@ -794,7 +793,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
 
     int commentCount = 0;
     for(int i = 0; i < comments.length; i++) {
-      if(comments[i].resourceId == resource.id)
+      if(comments[i].resourceId == resource.id && comments[i].status != 0)
         commentCount++;
     }
 
@@ -835,6 +834,9 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                   builder: (context) => ResourcePage(
                     resource: resource,
                     isTutor: widget.isTutor,
+                    course: widget.course,
+                    lesson: widget.lesson,
+                    userCourse: widget.userCourse,
                     onDelete: () {
                       // Logic to delete the resource
                       print("Resource deleted: ${resource.name}");
@@ -883,6 +885,8 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
               context,
               MaterialPageRoute(
                 builder: (context) => ResourcePage(
+                  course: widget.course,
+                  lesson: widget.lesson,
                   resource: resource,
                   isTutor: widget.isTutor,
                   onDelete: () {
@@ -939,6 +943,8 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
           context,
           MaterialPageRoute(
             builder: (context) => ResourcePage(
+              course: widget.course,
+              lesson: widget.lesson,
               resource: resource,
               isTutor: widget.isTutor,
               onDelete: () {

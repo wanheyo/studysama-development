@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:studysama/models/user_course.dart';
 import 'package:studysama/page/base/my_course/manage_course_page.dart';
 import '../../../main.dart';
 import '../../../models/course.dart';
@@ -32,6 +33,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   List<Lesson> lessons = [];
   bool isTutor = false;
   bool isStudent = false;
+  UserCourse? userCourse;
   String token = "";
   bool isGrid = false; // Toggle state for grid or list view in lessons
 
@@ -110,6 +112,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         // Extract boolean values from the response
         isTutor = data['is_user_tutor'] ?? false;
         isStudent = data['is_user_student'] ?? false;
+        userCourse = data['user_course'] != null
+            ? UserCourse.fromJson(data['user_course'])
+            : null;
       });
     } catch (e) {
       setState(() {
@@ -168,7 +173,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           ),
         ),
       );
-      print("Lesson successa ");
+      print("Lesson success");
       //widget.onCourseCreated(); // Notify parent to refresh
       // Navigator.pop(context); // Navigate back to the previous page
 
@@ -793,7 +798,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => LessonPage(lesson: lessons[index], course: widget.course, isTutor: isTutor,),
+            builder: (context) => LessonPage(lesson: lessons[index], course: widget.course, isTutor: isTutor, userCourse: userCourse),
           ),
         );
       },
