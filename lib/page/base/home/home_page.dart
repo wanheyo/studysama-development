@@ -99,21 +99,23 @@ class HomePage extends StatelessWidget {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     popularCourseCard(
-                      author: 'John Doe',
+                      author: 'John',
                       title: 'Mathematics Mastery',
                       image: "assets/math.jpeg",
                       description: 'A comprehensive guide to mastering math.',
                       rating: 4.5,
                       duration: '2 hours',
+                      enrolled: 120, // Added Enrolled count
                     ),
                     SizedBox(height: 10),
                     popularCourseCard(
-                      author: 'Jane Smith',
+                      author: 'Siti',
                       title: 'Explore Science Wonders',
                       image: "assets/science.jpeg",
                       description: 'Dive deep into the wonders of science.',
                       rating: 4.7,
                       duration: '3 hours',
+                      enrolled: 150, // Added Enrolled count
                     ),
                   ],
                 ),
@@ -195,7 +197,7 @@ class HomePage extends StatelessWidget {
                       classScheduleWidget(
                         icon: Icons.video_call,
                         courseName: 'SCIENCE',
-                        username: 'Charlie',
+                        username: 'Siti',
                         location: 'Zoom Meeting',
                         time: '2:00 PM - 4:00 PM',
                         date: 'Wednesday, Dec 12th',
@@ -282,7 +284,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying a popular course card with rating on the right side
+  // Widget for displaying a popular course card with rating on the right side and Enrolled count
   Widget popularCourseCard({
     required String author,
     required String title,
@@ -290,6 +292,7 @@ class HomePage extends StatelessWidget {
     required String description,
     required double rating,
     required String duration,
+    required int enrolled, // Added enrolled count
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -363,6 +366,16 @@ class HomePage extends StatelessWidget {
                         Text(
                           '$rating',
                           style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                    SizedBox(width: 10),
+                    // Enrolled count on the right side
+                    Row(
+                      children: [
+                        Text(
+                          '$enrolled Enrolled',
+                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                         ),
                       ],
                     ),
