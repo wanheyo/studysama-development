@@ -45,6 +45,45 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
 
+                // Courses Section
+                Text(
+                  'Courses',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      courseCard(
+                        title: 'RECIPE',
+                        subtitle: 'Discover new recipes',
+                        image: "assets/recipe.jpeg",
+                        totalJoined: 120,
+                      ),
+                      SizedBox(width: 16),
+                      courseCard(
+                        title: 'CODING',
+                        subtitle: 'Learn new coding',
+                        image: "assets/coding.jpeg",
+                        totalJoined: 350,
+                      ),
+                      SizedBox(width: 16),
+                      courseCard(
+                        title: 'LANGUAGE',
+                        subtitle: 'Master a new language',
+                        image: "assets/language.png",
+                        totalJoined: 200,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
+
                 // Popular Courses Section
                 Text(
                   'Most Popular Courses',
@@ -62,7 +101,7 @@ class HomePage extends StatelessWidget {
                     popularCourseCard(
                       author: 'John Doe',
                       title: 'Mathematics Mastery',
-                      image: "assets/math.jpg",
+                      image: "assets/math.jpeg",
                       price: 'Free',
                       rating: 4.5,
                       enrolled: 25,
@@ -72,7 +111,7 @@ class HomePage extends StatelessWidget {
                     popularCourseCard(
                       author: 'Jane Smith',
                       title: 'Explore Science Wonders',
-                      image: "assets/science.jpg",
+                      image: "assets/science.jpeg",
                       price: '₹50',
                       rating: 4.7,
                       enrolled: 30,
@@ -84,6 +123,77 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Widget for displaying a course card (Horizontal Scrolling)
+  Widget courseCard({
+    required String title,
+    required String subtitle,
+    required String image,
+    required int totalJoined,
+  }) {
+    return Container(
+      width: 250,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+            child: Image.asset(
+              image,
+              fit: BoxFit.cover,
+              height: 140,
+              width: double.infinity,
+            ),
+          ),
+          // Details
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  '$totalJoined Enrolled',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
