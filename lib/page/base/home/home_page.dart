@@ -99,7 +99,7 @@ class HomePage extends StatelessWidget {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     popularCourseCard(
-                      author: 'John',
+                      author: 'John Doe',
                       title: 'Mathematics Mastery',
                       image: "assets/math.jpeg",
                       description: 'A comprehensive guide to mastering math.',
@@ -108,7 +108,7 @@ class HomePage extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     popularCourseCard(
-                      author: 'Siti',
+                      author: 'Jane Smith',
                       title: 'Explore Science Wonders',
                       image: "assets/science.jpeg",
                       description: 'Dive deep into the wonders of science.',
@@ -131,79 +131,74 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 10),
 
-                // Divided into Physical and Online classes
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50], // Light blue for Physical
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Physical Classes',
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            liveLocationWidget(
-                              icon: Icons.location_on,
-                              courseName: 'CODING',
-                              method: 'Physical',
-                              location: 'Room 101, Main Building',
-                              time: '10:00 AM - 12:00 PM',
-                            ),
-                            SizedBox(height: 10),
-                            liveLocationWidget(
-                              icon: Icons.location_on,
-                              courseName: 'LANGUAGE',
-                              method: 'Physical',
-                              location: 'Room 202, Science Block',
-                              time: '11:00 AM - 1:00 PM',
-                            ),
-                          ],
+                // Physical Classes at the Top
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50], // Light blue for Physical
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Physical Classes',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    SizedBox(width: 20),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.green[50], // Light green for Online
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Online Classes',
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            liveLocationWidget(
-                              icon: Icons.video_call,
-                              courseName: 'SCIENCE',
-                              method: 'Online',
-                              location: 'Zoom Meeting',
-                              time: '2:00 PM - 4:00 PM',
-                            ),
-                          ],
+                      SizedBox(height: 10),
+                      liveLocationWidget(
+                        icon: Icons.location_on,
+                        courseName: 'CODING',
+                        location: 'Room 101, Main Building',
+                        time: '10:00 AM - 12:00 PM',
+                        date: 'Monday, Dec 10th',
+                      ),
+                      SizedBox(height: 10),
+                      liveLocationWidget(
+                        icon: Icons.location_on,
+                        courseName: 'LANGUAGE',
+                        location: 'Room 202, Science Block',
+                        time: '11:00 AM - 1:00 PM',
+                        date: 'Tuesday, Dec 11th',
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20),
+
+                // Online Classes at the Bottom
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50], // Light green for Online
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Online Classes',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: 10),
+                      liveLocationWidget(
+                        icon: Icons.video_call,
+                        courseName: 'SCIENCE',
+                        location: 'Zoom Meeting',
+                        time: '2:00 PM - 4:00 PM',
+                        date: 'Wednesday, Dec 12th',
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -382,9 +377,9 @@ class HomePage extends StatelessWidget {
   Widget liveLocationWidget({
     required IconData icon,
     required String courseName,
-    required String method,
     required String location,
     required String time,
+    required String date,
   }) {
     return Container(
       padding: EdgeInsets.all(16),
@@ -417,17 +412,17 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Method: $method',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
-                ),
-                SizedBox(height: 4),
-                Text(
                   'Location: $location',
                   style: TextStyle(color: Colors.grey[700], fontSize: 14),
                 ),
                 SizedBox(height: 4),
                 Text(
                   'Time: $time',
+                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Date: $date',
                   style: TextStyle(color: Colors.grey[700], fontSize: 14),
                 ),
               ],
