@@ -99,7 +99,7 @@ class HomePage extends StatelessWidget {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     popularCourseCard(
-                      author: 'Ali',
+                      author: 'John',
                       title: 'Mathematics Mastery',
                       image: "assets/math.jpeg",
                       description: 'A comprehensive guide to mastering math.',
@@ -130,25 +130,63 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 10),
-                liveLocationWidget(
-                  courseName: 'CODING',
-                  method: 'Physical',
-                  location: 'Room 101, Main Building',
-                  time: '10:00 AM - 12:00 PM',
-                ),
-                SizedBox(height: 10),
-                liveLocationWidget(
-                  courseName: 'SCIENCE',
-                  method: 'Online',
-                  location: 'Zoom Meeting',
-                  time: '2:00 PM - 4:00 PM',
-                ),
-                SizedBox(height: 10),
-                liveLocationWidget(
-                  courseName: 'LANGUAGE',
-                  method: 'Physical',
-                  location: 'Room 202, Science Block',
-                  time: '11:00 AM - 1:00 PM',
+
+                // Divided into Physical and Online classes
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Physical Classes',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          liveLocationWidget(
+                            courseName: 'CODING',
+                            method: 'Physical',
+                            location: 'Room 101, Main Building',
+                            time: '10:00 AM - 12:00 PM',
+                          ),
+                          SizedBox(height: 10),
+                          liveLocationWidget(
+                            courseName: 'LANGUAGE',
+                            method: 'Physical',
+                            location: 'Room 202, Science Block',
+                            time: '11:00 AM - 1:00 PM',
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Online Classes',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          liveLocationWidget(
+                            courseName: 'SCIENCE',
+                            method: 'Online',
+                            location: 'Zoom Meeting',
+                            time: '2:00 PM - 4:00 PM',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -229,7 +267,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying a popular course card with rating on the right side
+  // Widget for displaying a popular course card with rating on the left side
   Widget popularCourseCard({
     required String author,
     required String title,
@@ -268,6 +306,18 @@ class HomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Rating on the left side
+                Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.orange, size: 18),
+                    SizedBox(width: 4),
+                    Text(
+                      '$rating',
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
                 Text(
                   author,
                   style: TextStyle(
@@ -295,18 +345,7 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(Icons.star, color: Colors.orange, size: 18),
-                        SizedBox(width: 4),
-                        Text(
-                          '$rating',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
                     Text(
                       duration,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
@@ -321,7 +360,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying live location for courses
+  // Widget for displaying live location for courses (Physical or Online)
   Widget liveLocationWidget({
     required String courseName,
     required String method,
