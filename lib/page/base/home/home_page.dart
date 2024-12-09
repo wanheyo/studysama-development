@@ -1,46 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../models/user.dart';
 import '../../../utils/colors.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  User? user;
-  String? username;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    loadUser();
-  }
-
-  Future<void> loadUser() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final userString = prefs.getString('user');
-      if (userString != null) {
-        Map<String, dynamic> userMap = jsonDecode(userString);
-        user = User.fromJson(userMap);
-      }
-      setState(() {
-        username = user?.username;
-        isLoading = false;
-      });
-    } catch (e) {
-      print('Error loading username: $e');
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,46 +45,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
 
-                // Courses Section
-                Text(
-                  'Courses',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 10),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      courseCard(
-                        title: 'RECIPE',
-                        subtitle: 'Discover new recipes',
-                        image: "assets/recipe.jpeg",
-                        totalJoined: 120,
-                      ),
-                      SizedBox(width: 16),
-                      courseCard(
-                        title: 'CODING',
-                        subtitle: 'Learn new coding',
-                        image: "assets/coding.jpeg",
-                        totalJoined: 350,
-                      ),
-                      SizedBox(width: 16),
-                      courseCard(
-                        title: 'LANGUAGE',
-                        subtitle: 'Master a new language',
-                        image: "assets/language.png",
-                        totalJoined: 200,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-
-                // Most Popular Courses Section
+                // Popular Courses Section
                 Text(
                   'Most Popular Courses',
                   style: TextStyle(
@@ -138,23 +60,23 @@ class _HomePageState extends State<HomePage> {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     popularCourseCard(
-                      author: 'Md Sohag Sheke',
-                      title: 'UI UX Design Career Track Program',
-                      image: "assets/uiux.jpeg",
-                      price: "₹19",
-                      rating: 0.0,
-                      enrolled: 1,
-                      duration: '1 min',
+                      author: 'John Doe',
+                      title: 'Mathematics Mastery',
+                      image: "assets/math.jpg",
+                      price: 'Free',
+                      rating: 4.5,
+                      enrolled: 25,
+                      duration: '2 hours',
                     ),
                     SizedBox(height: 10),
                     popularCourseCard(
-                      author: 'Joynal Abedin',
-                      title: 'Typography',
-                      image: "assets/typography.jpeg",
-                      price: 'Free',
-                      rating: 4.0,
-                      enrolled: 7,
-                      duration: '40 min',
+                      author: 'Jane Smith',
+                      title: 'Explore Science Wonders',
+                      image: "assets/science.jpg",
+                      price: '₹50',
+                      rating: 4.7,
+                      enrolled: 30,
+                      duration: '3 hours',
                     ),
                   ],
                 ),
@@ -162,76 +84,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  // Widget for displaying a course card
-  Widget courseCard({
-    required String title,
-    required String subtitle,
-    required String image,
-    required int totalJoined,
-  }) {
-    return Container(
-      width: 200,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-            child: Image.asset(
-              image,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: 120,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Total joined: $totalJoined',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[800],
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -247,7 +99,6 @@ class _HomePageState extends State<HomePage> {
     required String duration,
   }) {
     return Container(
-      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
@@ -259,19 +110,21 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Full-Width Course Image
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
             child: Image.asset(
               image,
               fit: BoxFit.cover,
-              width: 80,
-              height: 80,
+              width: double.infinity,
+              height: 180,
             ),
           ),
-          SizedBox(width: 12),
-          Expanded(
+          Padding(
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -283,6 +136,7 @@ class _HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                SizedBox(height: 4),
                 Text(
                   title,
                   style: TextStyle(
