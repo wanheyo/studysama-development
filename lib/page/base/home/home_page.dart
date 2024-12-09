@@ -99,31 +99,30 @@ class HomePage extends StatelessWidget {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     popularCourseCard(
-                      author: 'John Doe',
+                      author: 'Ali',
                       title: 'Mathematics Mastery',
                       image: "assets/math.jpeg",
                       description: 'A comprehensive guide to mastering math.',
                       rating: 4.5,
                       duration: '2 hours',
-                      liveLocation: 'Online, 10:00 AM - 12:00 PM',
                     ),
                     SizedBox(height: 10),
                     popularCourseCard(
-                      author: 'Jane Smith',
+                      author: 'Siti',
                       title: 'Explore Science Wonders',
                       image: "assets/science.jpeg",
                       description: 'Dive deep into the wonders of science.',
                       rating: 4.7,
                       duration: '3 hours',
-                      liveLocation: 'Physical, Science Building, 1:00 PM - 4:00 PM',
                     ),
                   ],
                 ),
+
                 SizedBox(height: 20),
 
                 // Live Location Section
                 Text(
-                  'Live Location and Class Info',
+                  'Live Location for Classes',
                   style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 20,
@@ -132,15 +131,24 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 10),
                 liveLocationWidget(
-                  method: 'Online',
-                  location: 'Zoom',
+                  courseName: 'CODING',
+                  method: 'Physical',
+                  location: 'Room 101, Main Building',
                   time: '10:00 AM - 12:00 PM',
                 ),
                 SizedBox(height: 10),
                 liveLocationWidget(
+                  courseName: 'SCIENCE',
+                  method: 'Online',
+                  location: 'Zoom Meeting',
+                  time: '2:00 PM - 4:00 PM',
+                ),
+                SizedBox(height: 10),
+                liveLocationWidget(
+                  courseName: 'LANGUAGE',
                   method: 'Physical',
-                  location: 'Room 202, Science Building',
-                  time: '1:00 PM - 4:00 PM',
+                  location: 'Room 202, Science Block',
+                  time: '11:00 AM - 1:00 PM',
                 ),
               ],
             ),
@@ -221,7 +229,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying a popular course card
+  // Widget for displaying a popular course card with rating on the right side
   Widget popularCourseCard({
     required String author,
     required String title,
@@ -229,7 +237,6 @@ class HomePage extends StatelessWidget {
     required String description,
     required double rating,
     required String duration,
-    required String liveLocation,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -288,37 +295,23 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.star, color: Colors.orange, size: 18),
-                    SizedBox(width: 4),
-                    Text(
-                      '$rating',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[800]),
+                    Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.orange, size: 18),
+                        SizedBox(width: 4),
+                        Text(
+                          '$rating',
+                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        ),
+                      ],
                     ),
-                    Spacer(),
                     Text(
                       duration,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ],
-                ),
-                SizedBox(height: 10),
-                // Live Location Info
-                Text(
-                  'Live Location:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.grey[800],
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  liveLocation,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
                 ),
               ],
             ),
@@ -328,64 +321,51 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying Live Location and Class Info
+  // Widget for displaying live location for courses
   Widget liveLocationWidget({
+    required String courseName,
     required String method,
     required String location,
     required String time,
   }) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withOpacity(0.2),
             spreadRadius: 2,
             blurRadius: 5,
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Method (Online/Physical)
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: method == 'Online' ? Colors.blue : Colors.green,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              method,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+          Text(
+            '$courseName Class',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
-          SizedBox(width: 10),
-          // Location & Time Info
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                location,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[800],
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                time,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
+          SizedBox(height: 8),
+          Text(
+            'Method: $method',
+            style: TextStyle(color: Colors.grey[700], fontSize: 14),
+          ),
+          SizedBox(height: 4),
+          Text(
+            'Location: $location',
+            style: TextStyle(color: Colors.grey[700], fontSize: 14),
+          ),
+          SizedBox(height: 4),
+          Text(
+            'Time: $time',
+            style: TextStyle(color: Colors.grey[700], fontSize: 14),
           ),
         ],
       ),
