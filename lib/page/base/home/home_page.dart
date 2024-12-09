@@ -99,7 +99,7 @@ class HomePage extends StatelessWidget {
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     popularCourseCard(
-                      author: 'John Doe',
+                      author: 'John',
                       title: 'Mathematics Mastery',
                       image: "assets/math.jpeg",
                       description: 'A comprehensive guide to mastering math.',
@@ -108,7 +108,7 @@ class HomePage extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     popularCourseCard(
-                      author: 'Jane Smith',
+                      author: 'Siti',
                       title: 'Explore Science Wonders',
                       image: "assets/science.jpeg",
                       description: 'Dive deep into the wonders of science.',
@@ -117,12 +117,11 @@ class HomePage extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 SizedBox(height: 20),
 
-                // Live Location Section
+                // Class Schedules Section (formerly Live Location for Classes)
                 Text(
-                  'Live Location for Classes',
+                  'Class Schedules',
                   style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 20,
@@ -130,75 +129,69 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 10),
-
-                // Physical Classes at the Top
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50], // Light blue for Physical
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Physical Classes',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                Column(
+                  children: [
+                    // Physical Class
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      margin: EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[100],
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      SizedBox(height: 10),
-                      liveLocationWidget(
-                        icon: Icons.location_on,
-                        courseName: 'CODING',
-                        location: 'Room 101, Main Building',
-                        time: '10:00 AM - 12:00 PM',
-                        date: 'Monday, Dec 10th',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Physical Classes',
+                            style: TextStyle(
+                              color: Colors.blue[800],
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          classDetail(
+                            course: 'CODING',
+                            username: 'James Brown',
+                            location: 'Room 101, Building A',
+                            time: '10:00 AM',
+                            date: '2024-12-10',
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 10),
-                      liveLocationWidget(
-                        icon: Icons.location_on,
-                        courseName: 'LANGUAGE',
-                        location: 'Room 202, Science Block',
-                        time: '11:00 AM - 1:00 PM',
-                        date: 'Tuesday, Dec 11th',
+                    ),
+                    // Online Class
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      margin: EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.green[100],
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: 20),
-
-                // Online Classes at the Bottom
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green[50], // Light green for Online
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Online Classes',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Online Classes',
+                            style: TextStyle(
+                              color: Colors.green[800],
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          classDetail(
+                            course: 'SCIENCE',
+                            username: 'Sarah Lee',
+                            location: 'Online (Zoom)',
+                            time: '1:00 PM',
+                            date: '2024-12-11',
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 10),
-                      liveLocationWidget(
-                        icon: Icons.video_call,
-                        courseName: 'SCIENCE',
-                        location: 'Zoom Meeting',
-                        time: '2:00 PM - 4:00 PM',
-                        date: 'Wednesday, Dec 12th',
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -279,7 +272,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying a popular course card with rating on the right side
+  // Widget for displaying a popular course card
   Widget popularCourseCard({
     required String author,
     required String title,
@@ -318,7 +311,6 @@ class HomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Author name
                 Text(
                   author,
                   style: TextStyle(
@@ -347,21 +339,16 @@ class HomePage extends StatelessWidget {
                 SizedBox(height: 8),
                 Row(
                   children: [
+                    Icon(Icons.star, color: Colors.orange, size: 14),
+                    SizedBox(width: 4),
                     Text(
-                      duration,
+                      '$rating',
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                     Spacer(),
-                    // Rating on the right side
-                    Row(
-                      children: [
-                        Icon(Icons.star, color: Colors.orange, size: 18),
-                        SizedBox(width: 4),
-                        Text(
-                          '$rating',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                      ],
+                    Text(
+                      duration,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -373,62 +360,49 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Widget for displaying live location for courses (Physical or Online)
-  Widget liveLocationWidget({
-    required IconData icon,
-    required String courseName,
+  // Widget for displaying class details
+  Widget classDetail({
+    required String course,
+    required String username,
     required String location,
     required String time,
     required String date,
   }) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.primary, size: 24),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$courseName Class',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Location: $location',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Time: $time',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Date: $date',
-                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
-                ),
-              ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Container(
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Course: $course',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 6),
+            Text('Instructor: $username'),
+            SizedBox(height: 6),
+            Text('Location: $location'),
+            SizedBox(height: 6),
+            Text('Time: $time'),
+            SizedBox(height: 6),
+            Text('Date: $date'),
+          ],
+        ),
       ),
     );
   }
