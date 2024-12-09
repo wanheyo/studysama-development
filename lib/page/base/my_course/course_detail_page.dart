@@ -23,6 +23,8 @@ class CourseDetailPage extends StatefulWidget {
 class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerProviderStateMixin, RouteAware {
   late TabController _tabController;
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController descController = TextEditingController();
+  final TextEditingController learnOutcomeController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
@@ -37,7 +39,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this); // 3 tabs: About, Lessons, Reviews
+    _tabController = TabController(length: 4, vsync: this); // 4 tabs: About, Lessons, Meet, Reviews
     initializeData();
   }
 
@@ -60,6 +62,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   void didPopNext() {
     // Called when returning to this page
     print('Page became active again');
+
     initializeData(); // Refresh data
   }
 
@@ -145,12 +148,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   }
 
   Future<void> _createLesson() async {
-    // if (!_formKey.currentState!.validate()) {
-    //   return; // Exit if the form is invalid
-    // }
-
     String name = nameController.text.trim();
-    print("Course id: " + widget.course.id.toString() + " | name: " + name);
+    String description = descController.text.trim();
+    String learningOutcome = learnOutcomeController.text.trim();
 
     // Perform course creation logic here
     setState(() {
@@ -159,7 +159,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     try {
       // Call the API
-      await apiService.lesson_store(token, name, widget.course.id);
+      await apiService.lesson_store(token, name, learningOutcome, description, widget.course.id);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -170,7 +170,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       );
       print("Lesson successa ");
       //widget.onCourseCreated(); // Notify parent to refresh
-      Navigator.pop(context); // Navigate back to the previous page
+      // Navigator.pop(context); // Navigate back to the previous page
 
     } catch (e) {
       // Extract meaningful error messages if available
@@ -233,16 +233,75 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.course.name,
-          style: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+          "Course",
+          // style: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          if (isTutor)
+            Padding(
+              padding: const EdgeInsets.only(right: 0.0),
+              child: PopupMenuButton<String>(
+                icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.white),
+                onSelected: (String value) async {
+                  switch (value) {
+                    case 'Manage Course':
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageCoursePage(
+                            course: widget.course,
+                            onCourseUpdated: (updatedCourse) {
+                              setState(() {
+                                widget.course = updatedCourse; // Update the course data
+                                initializeData(); // Refresh lessons or other related data
+                              });
+                            },
+                          ),
+                        ),
+                      ).then((_) {
+                        // Call initializeData on returning to this page
+                        initializeData();
+                      });
+                      break;
+                    case 'Add Lesson':
+                      _showAddLessonBottomSheet(context);
+                      break;
+                    case 'Hint':
+                    // _showHint();
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) {
+                  return [
+                    const PopupMenuItem<String>(
+                      value: 'Manage Course',
+                      child: Text('Manage Course'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'Add Lesson',
+                      child: Text('Add Lesson'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'Hint',
+                      child: Text('Hint'),
+                    ),
+                  ];
+                },
+              ),
+            ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
             Tab(text: 'About'),
             Tab(text: 'Lessons'),
+            Tab(text: 'Meet'),
             Tab(text: 'Reviews'),
           ],
           labelStyle: TextStyle(
@@ -264,6 +323,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           children: [
             _buildAboutTab(widget.course),
             _buildLessonsTab(),
+            _buildReviewsTab(),
             _buildReviewsTab(),
           ],
         ),
@@ -308,7 +368,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                           "Description:",
                           style: TextStyle(
                             fontSize: 16,
-                            // fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                             fontFamily: 'Montserrat',
                           ),
                         ),
@@ -452,39 +512,39 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
               // Fourth Card: Manage Course Button
               if(isTutor)
                 SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ManageCoursePage(
-                          course: widget.course,
-                          onCourseUpdated: (updatedCourse) {
-                            setState(() {
-                              widget.course = updatedCourse; // Update the course data
-                              initializeData(); // Refresh lessons or other related data
-                            });
-                          },
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageCoursePage(
+                            course: widget.course,
+                            onCourseUpdated: (updatedCourse) {
+                              setState(() {
+                                widget.course = updatedCourse; // Update the course data
+                                initializeData(); // Refresh lessons or other related data
+                              });
+                            },
+                          ),
                         ),
+                      ).then((_) {
+                        // Call initializeData on returning to this page
+                        initializeData();
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
                       ),
-                    ).then((_) {
-                      // Call initializeData on returning to this page
-                      initializeData();
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.bold,
                     ),
+                    child: const Text("Manage Course"),
                   ),
-                  child: const Text("Manage Course"),
                 ),
-              ),
               if(isStudent)
                 SizedBox(
                   width: double.infinity,
@@ -541,6 +601,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Text(
+                  "Grid: ",
+                  style: TextStyle(
+                    fontSize: 16,
+                    // fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
+                  ),
+                ),
                 IconButton(
                   icon: Icon(!isGrid ? FontAwesomeIcons.list : FontAwesomeIcons.gripVertical),
                   onPressed: () {
@@ -595,7 +663,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       floatingActionButton: isTutor ?
       FloatingActionButton(
         onPressed: () {
-          _showAddFolderDialog(context);
+          _showAddLessonBottomSheet(context);
         },
         child: Icon(
           FontAwesomeIcons.plus,
@@ -607,36 +675,112 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     );
   }
 
-// Function to show a dialog for adding a folder
-  void _showAddFolderDialog(BuildContext context) {
-    //final TextEditingController _controller = TextEditingController();
-
-    showDialog(
+  // Function to show a dialog for adding a folder
+  void _showAddLessonBottomSheet(BuildContext context) {
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add New Lesson'),
-          content: TextField(
-            controller: nameController,
-            decoration: InputDecoration(labelText: 'Lesson Name'),
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text('Cancel'),
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.disabled,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 16.0),
+                  const Center(
+                    child: Text(
+                      "Add New Lesson",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  // Lesson Name
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Lesson Name',
+                      border: OutlineInputBorder(),
+                      hintText: 'Enter lesson name',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a lesson name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 10.0),
+
+                  // Description
+                  TextFormField(
+                    controller: descController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Description (optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 10.0),
+
+                  // Learning Outcome
+                  TextFormField(
+                    controller: learnOutcomeController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: 'Learning Outcome (optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+
+                  // Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          // Clear all fields before closing
+                          nameController.clear();
+                          descController.clear();
+                          learnOutcomeController.clear();
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Cancel"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            // Proceed with lesson creation logic
+                            _createLesson();
+                            initializeData();
+                            Navigator.pop(context); // Close the bottom sheet
+                          }
+                        },
+                        child: const Text("Add Lesson"),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                ],
+              ),
             ),
-            TextButton(
-              onPressed: () {
-                // Logic to add the folder goes here
-                // You can store the new folder in a state or database
-                _createLesson();
-                initializeData();
-              },
-              child: Text('Save'),
-            ),
-          ],
+          ),
         );
       },
     );

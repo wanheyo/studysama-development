@@ -211,21 +211,23 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Icon(FontAwesomeIcons.pencil, color: Colors.white),
-            const SizedBox(width: 8),
             const Text(
               'Manage Course',
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 18,
-              ),
+              // style: TextStyle(
+              //   fontFamily: 'Montserrat',
+              //   fontWeight: FontWeight.bold,
+              //   color: Colors.white,
+              //   fontSize: 18,
+              // ),
             ),
           ],
         ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: LoaderOverlay(
         child: Column(
