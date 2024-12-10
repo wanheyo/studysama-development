@@ -146,9 +146,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                   TabBar(
                     controller: _tabController,
                     tabs: const [
-                      Tab(text: "Created Courses"),
-                      Tab(text: "Joined Courses"),
-                      Tab(text: "Badge Button"), // Added new tab
+                      Tab(text: "Created"),
+                      Tab(text: "Joined"),
+                      Tab(text: "Badge"), // Added new tab
                     ],
                     labelStyle: TextStyle(
                       fontFamily: 'Montserrat',
