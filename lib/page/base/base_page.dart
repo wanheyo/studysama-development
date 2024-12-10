@@ -41,11 +41,6 @@ class _BasePageState extends State<BasePage> {
       appBar: AppBar(
         title: Row(
           children: [
-            Image.asset(
-              "assets/logo.jpg", // Replace with your logo path
-              height: 40,
-              width: 40,
-            ),
             SizedBox(width: 10),
             Text(
               'StudySama',

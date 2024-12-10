@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         // '/': (context) => BasePage(), //start page
-        '/': (context) => LoginPage(), //start page
+        '/': (context) => BasePage(), //start page
         '/home': (context) => BasePage(),
       },
       navigatorObservers: [routeObserver],
