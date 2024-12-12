@@ -12,7 +12,7 @@ class ApiService {
   // final String domainUrl = 'https://{domain}';
 
   //development
-  final String domainUrl = 'https://2162-2001-e68-8231-6200-3533-5bb-280a-d1a4.ngrok-free.app';
+  final String domainUrl = 'https://cac5-210-19-91-135.ngrok-free.app';
   late final String baseUrl;
 
   ApiService() {
@@ -917,4 +917,161 @@ class ApiService {
   }
 
 // SECTION END: COMMENT
+
+// SECTION START: TUTOR SLOT
+
+  Future<Map<String, dynamic>> index_tutorslot_course(String token, int course_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/tutorslot/index_tutorslot_course'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'course_id': course_id}),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch tutor slots');
+        } else {
+          throw Exception('Failed to fetch tutor slots: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching tutor slots: $e');
+    }
+  }
+
+  Future<void> tutorslot_store(String token, String name, String learnOutcome, String desc, int courseId, String type, DateTime date, DateTime startTime, DateTime endTime, String location,) async {
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/tutorslot/store'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'course_id': courseId,
+          'name': name,
+          'desc': desc,
+          'type': type,
+          'date': date.toIso8601String().split('T')[0], // Format date to ISO 8601
+          'start_time': startTime.toIso8601String().split('T')[1].substring(0, 5), // Format start time to ISO 8601
+          'end_time': endTime.toIso8601String().split('T')[1].substring(0, 5), // Format end time to ISO 8601
+          'location': location,
+        }),
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201) {
+        // Handle success
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+        }
+        return;
+      } else {
+        // Handle validation errors
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body.trim());
+
+          // Check if the response contains 'errors'
+          if (responseData.containsKey('errors')) {
+            final errors = responseData['errors'];
+            String errorMessage = '';
+
+            // Combine error messages
+            if (errors is Map) {
+              errors.forEach((key, value) {
+                errorMessage += '$key: $value\n';
+              });
+            } else if (errors is List) {
+              errorMessage = errors.join('\n');
+            }
+
+            // Throw the combined error message
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error if no validation errors are present
+            throw Exception(responseData['message'] ?? 'Failed to create tutor slot');
+          }
+        }
+      }
+    } catch (e) {
+      // Rethrow the exception for the caller to handle
+      throw Exception('Error creating tutor slot: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> tutorslot_update(String token, int tutorSlotId, String name, String desc, String type, DateTime date, DateTime startTime, DateTime endTime, String location, int status)  async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/tutorslot/update'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'tutor_slot_id': tutorSlotId,
+          'name': name,
+          'desc': desc,
+          'type': type,
+          'date': date.toIso8601String().split('T')[0], // Format date to ISO 8601
+          'start_time': startTime.toIso8601String().split('T')[1].substring(0, 5), // Format start time to ISO 8601
+          'end_time': endTime.toIso8601String().split('T')[1].substring(0, 5), // Format end time to ISO 8601
+          'location': location,
+          'status': status,
+        }),
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Parse and return the updated course data
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+
+          // Ensure 'message' and 'tutor_slot' exist in the response
+          if (responseData.containsKey('message') &&
+              responseData.containsKey('tutor_slot')) {
+            return responseData;
+          } else {
+            throw Exception('Invalid response structure: ${response.body}');
+          }
+        } else {
+          throw Exception('Empty response body on success');
+        }
+      } else {
+        // Handle error responses
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> errorData = json.decode(response.body.trim());
+
+          // If errors are present in the response, process them
+          if (errorData.containsKey('errors')) {
+            final errors = errorData['errors'] as Map<String, dynamic>;
+            String errorMessage = errors.values.join(', ');
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error handling
+            throw Exception(errorData['message'] ?? 'Failed to update tutor slot');
+          }
+        }
+        throw Exception('Unexpected response format or empty response body');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Error updating tutor slot: $e');
+    }
+  }
+
+// SECTION END: TUTOR SLOT
 }
