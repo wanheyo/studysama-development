@@ -34,7 +34,11 @@ class UserCourse {
       userId: json['user_id'] as int,
       courseId: json['course_id'] as int,
       roleId: json['role_id'] as int,
-      rating: json['rating'],
+      rating: json['rating'] != null
+          ? (json['rating'] is String
+          ? double.tryParse(json['rating'] as String) ?? 0.0 // Handle parsing failure
+          : (json['rating'] as num).toDouble())
+          : 0.0, // Default to 0.0 if null
       commentReview: json['comment_review'],
       status: json['status'] as int,
       createdAt: json['created_at'] != null

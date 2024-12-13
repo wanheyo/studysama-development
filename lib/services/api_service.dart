@@ -12,7 +12,7 @@ class ApiService {
   // final String domainUrl = 'https://{domain}';
 
   //development
-  final String domainUrl = 'https://cac5-210-19-91-135.ngrok-free.app';
+  final String domainUrl = 'https://53b5-2001-e68-8208-be00-d440-77bb-a872-9a72.ngrok-free.app';
   late final String baseUrl;
 
   ApiService() {
@@ -411,6 +411,34 @@ class ApiService {
     } catch (e) {
       print('Error: $e');
       throw Exception('Error updating course: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> index_review(String token, int course_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/course/index_review'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'course_id': course_id,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch user courses (review)');
+        } else {
+          throw Exception('Failed to fetch user courses (review): ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching user courses (review): $e');
     }
   }
 

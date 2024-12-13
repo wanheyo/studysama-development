@@ -10,7 +10,6 @@ import 'package:studysama/models/user_course.dart';
 import 'package:studysama/page/base/my_course/manage_course_page.dart';
 import '../../../main.dart';
 import '../../../models/course.dart';
-import '../../../models/course.dart';
 import '../../../models/lesson.dart';
 import '../../../models/user.dart';
 import '../../../services/api_service.dart';
@@ -38,6 +37,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   final TextEditingController endTimeTutorSlotController = TextEditingController();
   final TextEditingController locationTutorSlotController = TextEditingController();
 
+  final TextEditingController commentReviewController = TextEditingController();
+
+
+
   String selectedType = "Online";
   TimeOfDay? selectedStartTime;
 
@@ -46,6 +49,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
   List<Lesson> lessons = [];
   List<TutorSlot> tutorSlots = [];
+  List<UserCourse> reviews = [];
 
   bool isTutor = false;
   bool isStudent = false;
@@ -59,10 +63,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   String tutorSlotTab_selectedSortOrder = 'Upcoming'; // Default sort order
   List<TutorSlot> filteredTutorSlots = [];
 
+  String reviewTab_selectedFilter = 'All'; // Default filter
+  String reviewTab_selectedSortOrder = 'Newest'; // Default sort order
+  List<UserCourse> filteredReviews = [];
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this); // 4 tabs: About, Lessons, Tutor Slot, Reviews
+    _tabController = TabController(
+        length: 4, vsync: this); // 4 tabs: About, Lessons, Tutor Slot, Reviews
     initializeData();
   }
 
@@ -80,6 +89,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     fetchUserCourse();
     fetchLessons();
     fetchTutorSlots();
+    fetchUserCourseReview();
   }
 
   @override
@@ -189,7 +199,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     try {
       // Call the API
-      await apiService.lesson_store(token, name, learningOutcome, description, widget.course.id);
+      await apiService.lesson_store(
+          token, name, learningOutcome, description, widget.course.id);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -224,10 +235,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     int course_id = widget.course.id;
     //print("course_id: " + course_id.toString());
     try {
-      final data = await apiService.update_user_course(token, course_id, status);
+      final data = await apiService.update_user_course(
+          token, course_id, status);
 
       String message;
-      if(status == 0)
+      if (status == 0)
         message = "Leaving course " + widget.course.name + "...";
       else
         message = "Joining course " + widget.course.name + ".";
@@ -272,7 +284,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
             .map((json) => TutorSlot.fromJson(json))
             .toList();
 
-        _applyFiltersAndSort();
+        _applyFiltersAndSortTutorSlot();
       });
     } catch (e) {
       setState(() {
@@ -299,15 +311,19 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     try {
       // Combine date with time to create full ISO 8601 strings
-      String fullStartTime = '${dateTutorSlotController.text.trim()}T${startTimeTutorSlotController.text.trim()}:00';
-      String fullEndTime = '${dateTutorSlotController.text.trim()}T${endTimeTutorSlotController.text.trim()}:00';
+      String fullStartTime = '${dateTutorSlotController.text
+          .trim()}T${startTimeTutorSlotController.text.trim()}:00';
+      String fullEndTime = '${dateTutorSlotController.text
+          .trim()}T${endTimeTutorSlotController.text.trim()}:00';
 
       date = DateTime.parse(dateTutorSlotController.text.trim());
-      startTime = DateTime.parse(fullStartTime); // Parse the combined start time
+      startTime =
+          DateTime.parse(fullStartTime); // Parse the combined start time
       endTime = DateTime.parse(fullEndTime); // Parse the combined end time
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid date or time format. Please use ISO 8601 format.')),
+        SnackBar(content: Text(
+            'Invalid date or time format. Please use ISO 8601 format.')),
       );
       return; // Exit if parsing fails
     }
@@ -319,7 +335,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     try {
       // Call the API
-      await apiService.tutorslot_store(token, name, learningOutcome, description, widget.course.id, type, date, startTime, endTime, location,);
+      await apiService.tutorslot_store(
+        token,
+        name,
+        learningOutcome,
+        description,
+        widget.course.id,
+        type,
+        date,
+        startTime,
+        endTime,
+        location,);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -361,15 +387,19 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     try {
       // Combine date with time to create full ISO 8601 strings
-      String fullStartTime = '${dateTutorSlotController.text.trim()}T${startTimeTutorSlotController.text.trim()}:00';
-      String fullEndTime = '${dateTutorSlotController.text.trim()}T${endTimeTutorSlotController.text.trim()}:00';
+      String fullStartTime = '${dateTutorSlotController.text
+          .trim()}T${startTimeTutorSlotController.text.trim()}:00';
+      String fullEndTime = '${dateTutorSlotController.text
+          .trim()}T${endTimeTutorSlotController.text.trim()}:00';
 
       date = DateTime.parse(dateTutorSlotController.text.trim());
-      startTime = DateTime.parse(fullStartTime); // Parse the combined start time
+      startTime =
+          DateTime.parse(fullStartTime); // Parse the combined start time
       endTime = DateTime.parse(fullEndTime); // Parse the combined end time
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid date or time format. Please use ISO 8601 format.')),
+        SnackBar(content: Text(
+            'Invalid date or time format. Please use ISO 8601 format.')),
       );
       return; // Exit if parsing fails
     }
@@ -381,7 +411,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     try {
       // Call the API
-      await apiService.tutorslot_update(token, tutorSlot.id, name, description, type, date, startTime, endTime, location, status);
+      await apiService.tutorslot_update(
+          token,
+          tutorSlot.id,
+          name,
+          description,
+          type,
+          date,
+          startTime,
+          endTime,
+          location,
+          status);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -390,7 +430,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           ),
         ),
       );
-
     } catch (e) {
       // Extract meaningful error messages if available
       final errorMsg = e.toString().replaceFirst('Exception: ', '\n');
@@ -419,15 +458,19 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     try {
       // Combine date with time to create full ISO 8601 strings
-      String fullStartTime = '${dateTutorSlotController.text.trim()}T${startTimeTutorSlotController.text.trim()}:00';
-      String fullEndTime = '${dateTutorSlotController.text.trim()}T${endTimeTutorSlotController.text.trim()}:00';
+      String fullStartTime = '${dateTutorSlotController.text
+          .trim()}T${startTimeTutorSlotController.text.trim()}:00';
+      String fullEndTime = '${dateTutorSlotController.text
+          .trim()}T${endTimeTutorSlotController.text.trim()}:00';
 
       date = DateTime.parse(dateTutorSlotController.text.trim());
-      startTime = DateTime.parse(fullStartTime); // Parse the combined start time
+      startTime =
+          DateTime.parse(fullStartTime); // Parse the combined start time
       endTime = DateTime.parse(fullEndTime); // Parse the combined end time
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid date or time format. Please use ISO 8601 format.')),
+        SnackBar(content: Text(
+            'Invalid date or time format. Please use ISO 8601 format.')),
       );
       return; // Exit if parsing fails
     }
@@ -439,7 +482,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     try {
       // Call the API
-      await apiService.tutorslot_update(token, tutorSlot.id, name, description, type, date, startTime, endTime, location, status);
+      await apiService.tutorslot_update(
+          token,
+          tutorSlot.id,
+          name,
+          description,
+          type,
+          date,
+          startTime,
+          endTime,
+          location,
+          status);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -448,7 +501,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           ),
         ),
       );
-
     } catch (e) {
       // Extract meaningful error messages if available
       final errorMsg = e.toString().replaceFirst('Exception: ', '\n');
@@ -456,6 +508,42 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         SnackBar(content: Text('Tutor slot update failed: $errorMsg\n')),
       );
       print(errorMsg);
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> fetchUserCourseReview() async {
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    int course_id = widget.course.id;
+    //print("course_id: " + course_id.toString());
+    try {
+      final data = await apiService.index_review(token, course_id);
+
+      final userMap = {
+        for (var file in (data['users'] as List))
+          file['id']: User.fromJson(file)
+      };
+
+      setState(() {
+        reviews = (data['reviews'] as List)
+            .map((json) {
+          final review = UserCourse.fromJson(json);
+          review.user = userMap[review.userId];
+          return review;
+        }).toList();
+
+        _applyFiltersAndSortReview();
+      });
+    } catch (e) {
+      setState(() {
+        print("Response: " + e.toString());
+      });
     } finally {
       setState(() {
         context.loaderOverlay.hide();
@@ -482,22 +570,25 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
             Padding(
               padding: const EdgeInsets.only(right: 0.0),
               child: PopupMenuButton<String>(
-                icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Colors.white),
+                icon: const Icon(
+                    FontAwesomeIcons.ellipsisVertical, color: Colors.white),
                 onSelected: (String value) async {
                   switch (value) {
                     case 'Manage Course':
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ManageCoursePage(
-                            course: widget.course,
-                            onCourseUpdated: (updatedCourse) {
-                              setState(() {
-                                widget.course = updatedCourse; // Update the course data
-                                initializeData(); // Refresh lessons or other related data
-                              });
-                            },
-                          ),
+                          builder: (context) =>
+                              ManageCoursePage(
+                                course: widget.course,
+                                onCourseUpdated: (updatedCourse) {
+                                  setState(() {
+                                    widget.course =
+                                        updatedCourse; // Update the course data
+                                    initializeData(); // Refresh lessons or other related data
+                                  });
+                                },
+                              ),
                         ),
                       ).then((_) {
                         // Call initializeData on returning to this page
@@ -566,6 +657,27 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     );
   }
 
+  // Helper for creating segmented buttons
+  Widget _buildSegmentedButton(String label, String selected, Function(String) onPressed) {
+    return GestureDetector(
+      onTap: () => onPressed(label),
+      child: Card(
+        color: selected == label ? AppColors.primary : Colors.grey[200],
+        elevation: 1,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected == label ? Colors.white : Colors.black,
+              fontWeight: selected == label ? FontWeight.bold : FontWeight.normal, // Set font weight
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   // About Tab
   Widget _buildAboutTab(Course course) {
     return Scaffold(
@@ -610,7 +722,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                         const SizedBox(height: 10),
                         Text(
                           course.desc ?? "No description available.",
-                          style: const TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
+                          style: const TextStyle(fontSize: 16,
+                              fontFamily: 'Montserrat'),
                         ),
                       ],
                     ),
@@ -634,7 +747,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                       children: [
                         // Total Joined and Average Rating Row
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Space between title-value pairs
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // Space between title-value pairs
                           children: [
                             // Total Joined Column
                             Column(
@@ -642,12 +756,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                               children: [
                                 const Text(
                                   "Total Joined",
-                                  style: TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
+                                  style: TextStyle(
+                                      fontSize: 16, fontFamily: 'Montserrat'),
                                 ),
                                 const SizedBox(height: 5),
                                 Text(
                                   "${course.totalJoined}",
-                                  style: const TextStyle(fontSize: 20, fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontSize: 20,
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -657,12 +774,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                               children: [
                                 const Text(
                                   "Average Rating",
-                                  style: TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
+                                  style: TextStyle(
+                                      fontSize: 16, fontFamily: 'Montserrat'),
                                 ),
                                 const SizedBox(height: 5),
                                 Text(
                                   "${course.averageRating.toStringAsFixed(1)}",
-                                  style: const TextStyle(fontSize: 20, fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontSize: 20,
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -692,29 +812,37 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                         Row(
                           children: [
                             Text(
-                              "Status: ${course.status == 1 ? 'Public' : course.status == 2 ? 'Private' : 'Deleted'}",
+                              "Status: ${course.status == 1 ? 'Public' : course
+                                  .status == 2 ? 'Private' : 'Deleted'}",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontFamily: 'Montserrat',
-                                color: course.status == 0 ? Colors.red : Colors.black, // Red for deleted, black for others
+                                color: course.status == 0 ? Colors.red : Colors
+                                    .black, // Red for deleted, black for others
                               ),
                             ),
-                            if (course.status == 1) // Show the lock icon only if the status is Private
+                            if (course.status ==
+                                1) // Show the lock icon only if the status is Private
                               const Padding(
-                                padding: EdgeInsets.only(left: 5.0), // Optional: adds some space between text and icon
+                                padding: EdgeInsets.only(left: 5.0),
+                                // Optional: adds some space between text and icon
                                 child: Icon(
                                   FontAwesomeIcons.globe,
                                   size: 14, // Adjust size as needed
-                                  color: Colors.grey, // You can change the color as per your need
+                                  color: Colors
+                                      .grey, // You can change the color as per your need
                                 ),
                               ),
-                            if (course.status == 2) // Show the lock icon only if the status is Private
+                            if (course.status ==
+                                2) // Show the lock icon only if the status is Private
                               const Padding(
-                                padding: EdgeInsets.only(left: 5.0), // Optional: adds some space between text and icon
+                                padding: EdgeInsets.only(left: 5.0),
+                                // Optional: adds some space between text and icon
                                 child: Icon(
                                   FontAwesomeIcons.lock,
                                   size: 14, // Adjust size as needed
-                                  color: Colors.grey, // You can change the color as per your need
+                                  color: Colors
+                                      .grey, // You can change the color as per your need
                                 ),
                               ),
                           ],
@@ -723,7 +851,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
                         // Created At and Updated At Sections
                         Text(
-                          "Created At: ${formatDate(course.createdAt.toLocal())}",
+                          "Created At: ${formatDate(
+                              course.createdAt.toLocal())}",
                           style: const TextStyle(
                             fontSize: 14,
                             fontFamily: 'Montserrat',
@@ -731,7 +860,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                           ),
                         ),
                         Text(
-                          "Updated At: ${formatDate(course.updatedAt.toLocal())}",
+                          "Updated At: ${formatDate(
+                              course.updatedAt.toLocal())}",
                           style: const TextStyle(
                             fontSize: 14,
                             fontFamily: 'Montserrat',
@@ -821,15 +951,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ManageCoursePage(
-                            course: widget.course,
-                            onCourseUpdated: (updatedCourse) {
-                              setState(() {
-                                widget.course = updatedCourse; // Update the course data
-                                initializeData(); // Refresh lessons or other related data
-                              });
-                            },
-                          ),
+                          builder: (context) =>
+                              ManageCoursePage(
+                                course: widget.course,
+                                onCourseUpdated: (updatedCourse) {
+                                  setState(() {
+                                    widget.course =
+                                        updatedCourse; // Update the course data
+                                    initializeData(); // Refresh lessons or other related data
+                                  });
+                                },
+                              ),
                         ),
                       ).then((_) {
                         // Call initializeData on returning to this page
@@ -838,7 +970,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32.0, vertical: 12.0),
                       textStyle: const TextStyle(
                         fontSize: 16,
                         fontFamily: 'Montserrat',
@@ -857,7 +990,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32.0, vertical: 12.0),
                       textStyle: const TextStyle(
                         fontSize: 16,
                         fontFamily: 'Montserrat',
@@ -876,7 +1010,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32.0, vertical: 12.0),
                       textStyle: const TextStyle(
                         fontSize: 16,
                         fontFamily: 'Montserrat',
@@ -925,7 +1060,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                     ),
                   ),
                   IconButton(
-                    icon: Icon(!isGrid ? FontAwesomeIcons.list : FontAwesomeIcons.gripVertical),
+                    icon: Icon(
+                        !isGrid ? FontAwesomeIcons.list : FontAwesomeIcons
+                            .gripVertical),
                     onPressed: () {
                       setState(() {
                         isGrid = !isGrid; // Toggle the layout
@@ -945,24 +1082,24 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                   ),
                 )
                     : !isGrid
-                        ? GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 8,
-                        childAspectRatio: 3 / 2,
-                      ),
-                      itemCount: lessons.length,
-                      itemBuilder: (context, index) {
-                        return _buildLessonCard(lessons, index);
-                      },
-                    )
-                        : ListView.builder(
-                      itemCount: lessons.length,
-                      itemBuilder: (context, index) {
-                        return _buildLessonCard(lessons, index);
-                      },
-                    ),
+                    ? GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 3 / 2,
+                  ),
+                  itemCount: lessons.length,
+                  itemBuilder: (context, index) {
+                    return _buildLessonCard(lessons, index);
+                  },
+                )
+                    : ListView.builder(
+                  itemCount: lessons.length,
+                  itemBuilder: (context, index) {
+                    return _buildLessonCard(lessons, index);
+                  },
+                ),
               ),
             ],
           ),
@@ -981,7 +1118,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         ),
         backgroundColor: AppColors.primary,
         tooltip: 'Add New Folder',
-      ): null,
+      ) : null,
     );
   }
 
@@ -998,7 +1135,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           padding: EdgeInsets.only(
             left: 16.0,
             right: 16.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery
+                .of(context)
+                .viewInsets
+                .bottom,
           ),
           child: Form(
             key: _formKey,
@@ -1103,7 +1243,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => LessonPage(lesson: lessons[index], course: widget.course, isTutor: isTutor, userCourse: userCourse),
+            builder: (context) =>
+                LessonPage(lesson: lessons[index],
+                    course: widget.course,
+                    isTutor: isTutor,
+                    userCourse: userCourse),
           ),
         );
       },
@@ -1152,149 +1296,166 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   // Tutor Slot Tab
   Widget _buildTutorSlotTab() {
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: initializeData,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Resources Section Header
-              const Text(
-                "Tutor Slot",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Montserrat',
+        body: RefreshIndicator(
+          onRefresh: initializeData,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Resources Section Header
+                const Text(
+                  "Tutor Slot",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Montserrat',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              // Filter and Sort Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Segmented Button for Filter with horizontal scrolling
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _buildSegmentedButton('All'),
-                          const SizedBox(width: 8),
-                          _buildSegmentedButton('Online'),
-                          const SizedBox(width: 8),
-                          _buildSegmentedButton('Physical'),
-                        ],
+                const SizedBox(height: 10),
+                // Filter and Sort Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Segmented Button for Filter with horizontal scrolling
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildSegmentedButton(
+                                'All', tutorSlotTab_selectedFilter, (filter) {
+                              tutorSlotTab_selectedFilter = filter;
+                              _applyFiltersAndSortTutorSlot();
+                            }),
+                            const SizedBox(width: 8),
+                            _buildSegmentedButton(
+                                'Online', tutorSlotTab_selectedFilter, (filter) {
+                              tutorSlotTab_selectedFilter = filter;
+                              _applyFiltersAndSortTutorSlot();
+                            }),
+                            const SizedBox(width: 8),
+                            _buildSegmentedButton(
+                                'Physical', tutorSlotTab_selectedFilter, (filter) {
+                              tutorSlotTab_selectedFilter = filter;
+                              _applyFiltersAndSortTutorSlot();
+                            }),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  // Add space between segmented buttons and dropdown
-                  const SizedBox(width: 16), // Adjust the width as needed
-                  // Sort Button fixed on the right
-                  DropdownButton<String>(
-                    value: tutorSlotTab_selectedSortOrder,
-                    icon: const Icon(Icons.arrow_drop_down),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        tutorSlotTab_selectedSortOrder = newValue!;
-                        _applyFiltersAndSort(); // Call the filtering and sorting function
-                      });
-                    },
-                    items: <String>['Upcoming', 'Ended']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              // Display the tutor slots based on selected filter
-              Expanded(
-                child: tutorSlots.isEmpty
-                    ? const Center(
-                  child: Text(
-                    "No created tutor slot found.",
-                    style: TextStyle(fontFamily: 'Montserrat'),
-                  ),
-                ) :
-                ListView.builder(
-                  itemCount: filteredTutorSlots.length, // Use filtered list
-                  itemBuilder: (context, index) {
-                    final slot = filteredTutorSlots[index];
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 6.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          classScheduleWidget(
-                            icon: slot.type == 'Physical'
-                                ? FontAwesomeIcons.locationDot
-                                : FontAwesomeIcons.video,
-                            name: slot.name,
-                            username: "Test",
-                            location: slot.location,
-                            time: "${DateFormat.jm().format(slot.startTime.toLocal())} - ${DateFormat.jm().format(slot.endTime.toLocal())}",
-                            startTime: slot.startTime,
-                            endTime: slot.endTime,
-                            date: slot.date,
-                            type: slot.type,
-                            tutorSlot: slot,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                    // Add space between segmented buttons and dropdown
+                    const SizedBox(width: 16), // Adjust the width as needed
+                    // Sort Button fixed on the right
+                    DropdownButton<String>(
+                      value: tutorSlotTab_selectedSortOrder,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          tutorSlotTab_selectedSortOrder = newValue!;
+                          _applyFiltersAndSortTutorSlot(); // Call the filtering and sorting function
+                        });
+                      },
+                      items: <String>['Upcoming', 'Ended']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                SizedBox(height: 16),
+                // Display the tutor slots based on selected filter
+                Expanded(
+                  child: tutorSlots.isEmpty
+                      ? const Center(
+                    child: Text(
+                      "No created tutor slot found.",
+                      style: TextStyle(fontFamily: 'Montserrat'),
+                    ),
+                  ) :
+                  ListView.builder(
+                    itemCount: filteredTutorSlots.length, // Use filtered list
+                    itemBuilder: (context, index) {
+                      final slot = filteredTutorSlots[index];
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 6.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            classScheduleWidget(
+                              icon: slot.type == 'Physical'
+                                  ? FontAwesomeIcons.locationDot
+                                  : FontAwesomeIcons.video,
+                              name: slot.name,
+                              username: "Test",
+                              location: slot.location,
+                              time: "${DateFormat.jm().format(
+                                  slot.startTime.toLocal())} - ${DateFormat.jm()
+                                  .format(slot.endTime.toLocal())}",
+                              startTime: slot.startTime,
+                              endTime: slot.endTime,
+                              date: slot.date,
+                              type: slot.type,
+                              tutorSlot: slot,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-      // Floating Action Button to add a new tutor slot
-      floatingActionButton: isTutor ?
-      FloatingActionButton(
-        onPressed: () {
-          _showAddTutorSlotBottomSheet(context);
-        },
-        child: Icon(
-          FontAwesomeIcons.plus,
-          color: Colors.white,
-        ),
-        backgroundColor: AppColors.primary,
-        tooltip: 'Add New Tutor Slot',
-      ): null
+        // Floating Action Button to add a new tutor slot
+        floatingActionButton: isTutor ?
+        FloatingActionButton(
+          onPressed: () {
+            _showAddTutorSlotBottomSheet(context);
+          },
+          child: Icon(
+            FontAwesomeIcons.plus,
+            color: Colors.white,
+          ),
+          backgroundColor: AppColors.primary,
+          tooltip: 'Add New Tutor Slot',
+        ) : null
     );
   }
 
 // Build segmented button
-  Widget _buildSegmentedButton(String label) {
+  Widget _buildSegmentedButtonTutorSlot(String label) {
     return ElevatedButton(
       onPressed: () {
         setState(() {
           tutorSlotTab_selectedFilter = label; // Update the selected filter
-          _applyFiltersAndSort(); // Apply filters and sort
+          _applyFiltersAndSortTutorSlot(); // Apply filters and sort
         });
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: tutorSlotTab_selectedFilter == label ? AppColors.primary : AppColors.accent,
+        backgroundColor: tutorSlotTab_selectedFilter == label ? AppColors
+            .primary : AppColors.accent,
       ),
       child: Text(label),
     );
   }
 
 // Apply filtering and sorting
-  void _applyFiltersAndSort() {
+  void _applyFiltersAndSortTutorSlot() {
     // Start with the original tutor slots list
     List<TutorSlot> tempTutorSlots = List.from(tutorSlots);
 
     if (tutorSlotTab_selectedFilter == 'Online') {
-      tempTutorSlots = tempTutorSlots.where((slot) => slot.type == 'Online').toList();
+      tempTutorSlots =
+          tempTutorSlots.where((slot) => slot.type == 'Online').toList();
     } else if (tutorSlotTab_selectedFilter == 'Physical') {
-      tempTutorSlots = tempTutorSlots.where((slot) => slot.type == 'Physical').toList();
+      tempTutorSlots =
+          tempTutorSlots.where((slot) => slot.type == 'Physical').toList();
     }
 
     // // Apply sorting
@@ -1306,11 +1467,75 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
     // Apply sorting
     if (tutorSlotTab_selectedSortOrder == 'Upcoming') {
-      tempTutorSlots = tempTutorSlots.where((slot) => DateTime(slot.date.toLocal().year, slot.date.toLocal().month, slot.date.toLocal().day, slot.endTime.toLocal().hour, slot.endTime.toLocal().minute).isAfter(DateTime.now().toLocal())).toList();
-      tempTutorSlots.sort((a, b) => DateTime(a.date.toLocal().year, a.date.toLocal().month, a.date.toLocal().day, a.endTime.toLocal().hour, a.endTime.toLocal().minute).compareTo(DateTime(b.date.toLocal().year, b.date.toLocal().month, b.date.toLocal().day, b.endTime.toLocal().hour, b.endTime.toLocal().minute)));
+      tempTutorSlots = tempTutorSlots.where((slot) =>
+          DateTime(slot.date
+              .toLocal()
+              .year, slot.date
+              .toLocal()
+              .month, slot.date
+              .toLocal()
+              .day, slot.endTime
+              .toLocal()
+              .hour, slot.endTime
+              .toLocal()
+              .minute).isAfter(DateTime.now().toLocal())).toList();
+      tempTutorSlots.sort((a, b) =>
+          DateTime(a.date
+              .toLocal()
+              .year, a.date
+              .toLocal()
+              .month, a.date
+              .toLocal()
+              .day, a.endTime
+              .toLocal()
+              .hour, a.endTime
+              .toLocal()
+              .minute).compareTo(DateTime(b.date
+              .toLocal()
+              .year, b.date
+              .toLocal()
+              .month, b.date
+              .toLocal()
+              .day, b.endTime
+              .toLocal()
+              .hour, b.endTime
+              .toLocal()
+              .minute)));
     } else if (tutorSlotTab_selectedSortOrder == 'Ended') {
-      tempTutorSlots = tempTutorSlots.where((slot) => DateTime(slot.date.toLocal().year, slot.date.toLocal().month, slot.date.toLocal().day, slot.endTime.toLocal().hour, slot.endTime.toLocal().minute).isBefore(DateTime.now().toLocal())).toList();
-      tempTutorSlots.sort((a, b) => DateTime(b.date.toLocal().year, b.date.toLocal().month, b.date.toLocal().day, b.endTime.toLocal().hour, b.endTime.toLocal().minute).compareTo(DateTime(a.date.toLocal().year, a.date.toLocal().month, a.date.toLocal().day, a.endTime.toLocal().hour, a.endTime.toLocal().minute)));
+      tempTutorSlots = tempTutorSlots.where((slot) =>
+          DateTime(slot.date
+              .toLocal()
+              .year, slot.date
+              .toLocal()
+              .month, slot.date
+              .toLocal()
+              .day, slot.endTime
+              .toLocal()
+              .hour, slot.endTime
+              .toLocal()
+              .minute).isBefore(DateTime.now().toLocal())).toList();
+      tempTutorSlots.sort((a, b) =>
+          DateTime(b.date
+              .toLocal()
+              .year, b.date
+              .toLocal()
+              .month, b.date
+              .toLocal()
+              .day, b.endTime
+              .toLocal()
+              .hour, b.endTime
+              .toLocal()
+              .minute).compareTo(DateTime(a.date
+              .toLocal()
+              .year, a.date
+              .toLocal()
+              .month, a.date
+              .toLocal()
+              .day, a.endTime
+              .toLocal()
+              .hour, a.endTime
+              .toLocal()
+              .minute)));
     }
 
     // Update the filteredTutorSlots list
@@ -1354,7 +1579,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           padding: EdgeInsets.only(
             left: 16.0,
             right: 16.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery
+                .of(context)
+                .viewInsets
+                .bottom,
           ),
           child: Form(
             key: _formKey,
@@ -1406,7 +1634,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
                   // Type (Physical/Online)
                   DropdownButtonFormField<String>(
-                    value: selectedType, // This must match one of the item values or be null
+                    value: selectedType,
+                    // This must match one of the item values or be null
                     decoration: const InputDecoration(
                       labelText: 'Type',
                       border: OutlineInputBorder(),
@@ -1453,7 +1682,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                       );
                       if (pickedDate != null) {
                         setState(() {
-                          dateTutorSlotController.text = pickedDate.toLocal().toString().split(' ')[0];
+                          dateTutorSlotController.text =
+                          pickedDate.toLocal().toString().split(' ')[0];
                           // Clear times if the date changes
                           startTimeTutorSlotController.clear();
                           endTimeTutorSlotController.clear();
@@ -1483,41 +1713,53 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                         readOnly: true,
                         onTap: () async {
                           DateTime now = DateTime.now();
-                          bool isToday = dateTutorSlotController.text == now.toLocal().toString().split(' ')[0];
+                          bool isToday = dateTutorSlotController.text ==
+                              now.toLocal().toString().split(' ')[0];
 
                           TimeOfDay? pickedTime = await showTimePicker(
                             context: context,
                             initialTime: isToday
-                                ? TimeOfDay.fromDateTime(now.add(Duration(minutes: 1))) // Suggest time slightly ahead of current time
-                                : TimeOfDay(hour: 0, minute: 0), // Default to midnight if not today
+                                ? TimeOfDay.fromDateTime(now.add(Duration(
+                                minutes: 1))) // Suggest time slightly ahead of current time
+                                : TimeOfDay(hour: 0,
+                                minute: 0), // Default to midnight if not today
                           );
 
                           if (pickedTime != null) {
                             if (isToday) {
                               // Ensure the time is not in the past
-                              DateTime selectedDateTime = DateTime(now.year, now.month, now.day,
+                              DateTime selectedDateTime = DateTime(
+                                  now.year, now.month, now.day,
                                   pickedTime.hour, pickedTime.minute);
                               if (selectedDateTime.isBefore(now)) {
                                 setFieldState(() {
                                   startTimeTutorSlotController.clear();
-                                  endTimeTutorSlotController.clear(); // Clear end time if start time changes
-                                  startTimeErrorMessage = 'Start time must not be in the past';
+                                  endTimeTutorSlotController
+                                      .clear(); // Clear end time if start time changes
+                                  startTimeErrorMessage =
+                                  'Start time must not be in the past';
                                 });
                                 return;
                               }
                             }
                             setState(() {
                               // startTimeTutorSlotController.text = pickedTime.format(context);
-                              startTimeTutorSlotController.text = formatTimeOfDay24Hour(pickedTime);
-                              endTimeTutorSlotController.clear(); // Clear end time if start time changes
-                              startTimeErrorMessage = null; // Clear error message
+                              startTimeTutorSlotController.text =
+                                  formatTimeOfDay24Hour(pickedTime);
+                              endTimeTutorSlotController
+                                  .clear(); // Clear end time if start time changes
+                              startTimeErrorMessage =
+                              null; // Clear error message
                               endTimeErrorMessage = null; // Clear error message
                             });
 
                             setFieldState(() {
-                              startTimeTutorSlotController.text = formatTimeOfDay24Hour(pickedTime);
-                              endTimeTutorSlotController.clear(); // Clear end time if start time changes
-                              startTimeErrorMessage = null; // Clear error message
+                              startTimeTutorSlotController.text =
+                                  formatTimeOfDay24Hour(pickedTime);
+                              endTimeTutorSlotController
+                                  .clear(); // Clear end time if start time changes
+                              startTimeErrorMessage =
+                              null; // Clear error message
                               endTimeErrorMessage = null; // Clear error message
                             });
                           }
@@ -1548,33 +1790,40 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                         onTap: () async {
                           TimeOfDay? pickedTime = await showTimePicker(
                             context: context,
-                            initialTime: selectedStartTimeFromText(startTimeTutorSlotController.text) ?? TimeOfDay(hour: 0, minute: 0),
+                            initialTime: selectedStartTimeFromText(
+                                startTimeTutorSlotController.text) ??
+                                TimeOfDay(hour: 0, minute: 0),
                           );
 
                           if (pickedTime != null) {
                             TimeOfDay? startTime =
-                            selectedStartTimeFromText(startTimeTutorSlotController.text);
+                            selectedStartTimeFromText(
+                                startTimeTutorSlotController.text);
 
                             print("startTime: " + startTime.toString());
                             print("endTime: " + pickedTime.toString());
                             if (startTime != null &&
                                 (pickedTime.hour < startTime.hour ||
                                     (pickedTime.hour == startTime.hour &&
-                                        pickedTime.minute <= startTime.minute))) {
+                                        pickedTime.minute <=
+                                            startTime.minute))) {
                               setFieldState(() {
                                 endTimeTutorSlotController.clear();
-                                endTimeErrorMessage = 'End time must be later than start time.';
+                                endTimeErrorMessage =
+                                'End time must be later than start time.';
                               });
                               return;
                             }
 
                             setState(() {
-                              endTimeTutorSlotController.text = formatTimeOfDay24Hour(pickedTime);
+                              endTimeTutorSlotController.text =
+                                  formatTimeOfDay24Hour(pickedTime);
                               endTimeErrorMessage = null; // Clear error message
                             });
 
                             setFieldState(() {
-                              endTimeTutorSlotController.text = formatTimeOfDay24Hour(pickedTime);
+                              endTimeTutorSlotController.text =
+                                  formatTimeOfDay24Hour(pickedTime);
                               endTimeErrorMessage = null; // Clear error message
                             });
                           }
@@ -1594,9 +1843,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                   TextFormField(
                     controller: locationTutorSlotController,
                     decoration: const InputDecoration(
-                        labelText: "Platform @ Location",
+                      labelText: "Platform @ Location",
                       border: OutlineInputBorder(),
-                        hintText: "Enter Platform @ Location",
+                      hintText: "Enter Platform @ Location",
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -1674,19 +1923,39 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   }) {
     // Parse the date and time to create a DateTime object
     DateTime classStartTime = DateTime(
-      date.toLocal().year,
-      date.toLocal().month,
-      date.toLocal().day,
-      startTime.toLocal().hour,
-      startTime.toLocal().minute,
+      date
+          .toLocal()
+          .year,
+      date
+          .toLocal()
+          .month,
+      date
+          .toLocal()
+          .day,
+      startTime
+          .toLocal()
+          .hour,
+      startTime
+          .toLocal()
+          .minute,
     );
 
     DateTime classEndTime = DateTime(
-      date.toLocal().year,
-      date.toLocal().month,
-      date.toLocal().day,
-      endTime.toLocal().hour,
-      endTime.toLocal().minute,
+      date
+          .toLocal()
+          .year,
+      date
+          .toLocal()
+          .month,
+      date
+          .toLocal()
+          .day,
+      endTime
+          .toLocal()
+          .hour,
+      endTime
+          .toLocal()
+          .minute,
     );
 
     // DateTime classDateTime = DateTime.parse('$date');
@@ -1722,7 +1991,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16.0, vertical: 8.0),
           title: Row(
             children: [
               Icon(icon, color: AppColors.primary, size: 24),
@@ -1749,7 +2019,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0, vertical: 4.0),
                             child: Text(
                               type,
                               style: const TextStyle(
@@ -1764,57 +2035,19 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                         SizedBox(width: 6),
                         Container(
                           child: Builder(
-                              builder: (context) {
-                                if (isOngoing)
-                                  return Card(
-                                    color: Colors.green,
-                                    margin: const EdgeInsets.only(bottom: 16.0),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    child: const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                                      child: Text(
-                                        'Live',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.white,
-                                          fontFamily: 'Montserrat',
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                if(isPast)
-                                  return Card(
-                                    color: Colors.grey[500]!,
-                                    margin: const EdgeInsets.only(bottom: 16.0),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    child: const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                                      child: Text(
-                                        'Ended',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.white,
-                                          fontFamily: 'Montserrat',
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  );
+                            builder: (context) {
+                              if (isOngoing)
                                 return Card(
-                                  color: Colors.green[200]!,
+                                  color: Colors.green,
                                   margin: const EdgeInsets.only(bottom: 16.0),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10.0, vertical: 4.0),
                                     child: Text(
-                                      'Upcoming',
+                                      'Live',
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: Colors.white,
@@ -1824,7 +2057,48 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                                     ),
                                   ),
                                 );
-                              },
+                              if (isPast)
+                                return Card(
+                                  color: Colors.grey[500]!,
+                                  margin: const EdgeInsets.only(bottom: 16.0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10.0, vertical: 4.0),
+                                    child: Text(
+                                      'Ended',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                        fontFamily: 'Montserrat',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              return Card(
+                                color: Colors.green[200]!,
+                                margin: const EdgeInsets.only(bottom: 16.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 10.0, vertical: 4.0),
+                                  child: Text(
+                                    'Upcoming',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ],
@@ -1836,7 +2110,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Date: ${DateFormat('dd/MM/yyyy, EEEE').format(tutorSlot.date.toLocal())}',
+                      'Date: ${DateFormat('dd/MM/yyyy, EEEE').format(
+                          tutorSlot.date.toLocal())}',
                       style: TextStyle(color: Colors.grey[700], fontSize: 14),
                     ),
                     SizedBox(height: 4),
@@ -1857,7 +2132,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     );
   }
 
-  void _showClassScheduleDetail(BuildContext context, TutorSlot tutorSlot, IconData tutorSlotType, bool isPast, bool isOngoing) {
+  void _showClassScheduleDetail(BuildContext context, TutorSlot tutorSlot,
+      IconData tutorSlotType, bool isPast, bool isOngoing) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -1911,7 +2187,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10.0, vertical: 4.0),
                                   child: Text(
                                     'Tutor Slot',
                                     style: const TextStyle(
@@ -1930,12 +2207,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                                     if (isOngoing)
                                       return Card(
                                         color: Colors.green,
-                                        margin: const EdgeInsets.only(bottom: 16.0),
+                                        margin: const EdgeInsets.only(
+                                            bottom: 16.0),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8.0),
+                                          borderRadius: BorderRadius.circular(
+                                              8.0),
                                         ),
                                         child: const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10.0, vertical: 4.0),
                                           child: Text(
                                             'Live',
                                             style: TextStyle(
@@ -1947,15 +2227,18 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                                           ),
                                         ),
                                       );
-                                    if(isPast)
+                                    if (isPast)
                                       return Card(
                                         color: Colors.grey[500]!,
-                                        margin: const EdgeInsets.only(bottom: 16.0),
+                                        margin: const EdgeInsets.only(
+                                            bottom: 16.0),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8.0),
+                                          borderRadius: BorderRadius.circular(
+                                              8.0),
                                         ),
                                         child: const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10.0, vertical: 4.0),
                                           child: Text(
                                             'Ended',
                                             style: TextStyle(
@@ -1969,12 +2252,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                                       );
                                     return Card(
                                       color: Colors.green[200]!,
-                                      margin: const EdgeInsets.only(bottom: 16.0),
+                                      margin: const EdgeInsets.only(
+                                          bottom: 16.0),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius: BorderRadius.circular(
+                                            8.0),
                                       ),
                                       child: const Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 10.0, vertical: 4.0),
                                         child: Text(
                                           'Upcoming',
                                           style: TextStyle(
@@ -1994,22 +2280,30 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                           SizedBox(height: 4),
                           Text(
                             'Location: ${tutorSlot.location}',
-                            style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                            style: TextStyle(
+                                color: Colors.grey[700], fontSize: 14),
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Date: ${DateFormat('dd/MM/yyyy, EEEE').format(tutorSlot.date.toLocal())}',
-                            style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                            'Date: ${DateFormat('dd/MM/yyyy, EEEE').format(
+                                tutorSlot.date.toLocal())}',
+                            style: TextStyle(
+                                color: Colors.grey[700], fontSize: 14),
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Time: ${DateFormat.jm().format(tutorSlot.startTime.toLocal())} - ${DateFormat.jm().format(tutorSlot.endTime.toLocal())}',
-                            style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                            'Time: ${DateFormat.jm().format(
+                                tutorSlot.startTime.toLocal())} - ${DateFormat
+                                .jm().format(tutorSlot.endTime.toLocal())}',
+                            style: TextStyle(
+                                color: Colors.grey[700], fontSize: 14),
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Description: ${tutorSlot.desc ?? 'No description provided.'}',
-                            style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                            'Description: ${tutorSlot.desc ??
+                                'No description provided.'}',
+                            style: TextStyle(
+                                color: Colors.grey[700], fontSize: 14),
                           ),
                         ],
                       ),
@@ -2031,9 +2325,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                   IconButton(
                     onPressed: () {
                       // Copy class schedule details to clipboard
-                      Clipboard.setData(ClipboardData(text: tutorSlot.desc ?? 'No description provided.'));
+                      Clipboard.setData(ClipboardData(
+                          text: tutorSlot.desc ?? 'No description provided.'));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Tutor slot details copied to clipboard')),
+                        const SnackBar(content: Text(
+                            'Tutor slot details copied to clipboard')),
                       );
                     },
                     icon: const Icon(FontAwesomeIcons.copy, size: 20,),
@@ -2049,7 +2345,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   }
 
   // Function to show a dialog for adding a folder
-  void _showEditTutorSlotBottomSheet(BuildContext context, TutorSlot tutorSlot) {
+  void _showEditTutorSlotBottomSheet(BuildContext context,
+      TutorSlot tutorSlot) {
     String? startTimeErrorMessage; // Error message for invalid Start Time
     String? endTimeErrorMessage; // Error message for invalid End Time
 
@@ -2076,9 +2373,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     nameTutorSlotController.text = tutorSlot.name;
     descTutorSlotController.text = tutorSlot.desc ?? "";
     selectedType = tutorSlot.type;
-    dateTutorSlotController.text = tutorSlot.date.toLocal().toString().split(' ')[0];
-    startTimeTutorSlotController.text = formatTimeOfDay24Hour(TimeOfDay.fromDateTime(tutorSlot.startTime.toLocal()));
-    endTimeTutorSlotController.text = formatTimeOfDay24Hour(TimeOfDay.fromDateTime(tutorSlot.endTime.toLocal()));
+    dateTutorSlotController.text =
+    tutorSlot.date.toLocal().toString().split(' ')[0];
+    startTimeTutorSlotController.text = formatTimeOfDay24Hour(
+        TimeOfDay.fromDateTime(tutorSlot.startTime.toLocal()));
+    endTimeTutorSlotController.text = formatTimeOfDay24Hour(
+        TimeOfDay.fromDateTime(tutorSlot.endTime.toLocal()));
     locationTutorSlotController.text = tutorSlot.location;
 
     print('start time: ' + tutorSlot.endTime.toLocal().toString());
@@ -2094,7 +2394,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           padding: EdgeInsets.only(
             left: 16.0,
             right: 16.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: MediaQuery
+                .of(context)
+                .viewInsets
+                .bottom,
           ),
           child: Form(
             key: _formKey,
@@ -2146,7 +2449,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
                   // Type (Physical/Online)
                   DropdownButtonFormField<String>(
-                    value: selectedType, // This must match one of the item values or be null
+                    value: selectedType,
+                    // This must match one of the item values or be null
                     decoration: const InputDecoration(
                       labelText: 'Type',
                       border: OutlineInputBorder(),
@@ -2193,7 +2497,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                       );
                       if (pickedDate != null) {
                         setState(() {
-                          dateTutorSlotController.text = pickedDate.toLocal().toString().split(' ')[0];
+                          dateTutorSlotController.text =
+                          pickedDate.toLocal().toString().split(' ')[0];
                           // Clear times if the date changes
                           startTimeTutorSlotController.clear();
                           endTimeTutorSlotController.clear();
@@ -2223,41 +2528,53 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                         readOnly: true,
                         onTap: () async {
                           DateTime now = DateTime.now();
-                          bool isToday = dateTutorSlotController.text == now.toLocal().toString().split(' ')[0];
+                          bool isToday = dateTutorSlotController.text ==
+                              now.toLocal().toString().split(' ')[0];
 
                           TimeOfDay? pickedTime = await showTimePicker(
                             context: context,
                             initialTime: isToday
-                                ? TimeOfDay.fromDateTime(now.add(Duration(minutes: 1))) // Suggest time slightly ahead of current time
-                                : TimeOfDay(hour: 0, minute: 0), // Default to midnight if not today
+                                ? TimeOfDay.fromDateTime(now.add(Duration(
+                                minutes: 1))) // Suggest time slightly ahead of current time
+                                : TimeOfDay(hour: 0,
+                                minute: 0), // Default to midnight if not today
                           );
 
                           if (pickedTime != null) {
                             if (isToday) {
                               // Ensure the time is not in the past
-                              DateTime selectedDateTime = DateTime(now.year, now.month, now.day,
+                              DateTime selectedDateTime = DateTime(
+                                  now.year, now.month, now.day,
                                   pickedTime.hour, pickedTime.minute);
                               if (selectedDateTime.isBefore(now)) {
                                 setFieldState(() {
                                   startTimeTutorSlotController.clear();
-                                  endTimeTutorSlotController.clear(); // Clear end time if start time changes
-                                  startTimeErrorMessage = 'Start time must not be in the past';
+                                  endTimeTutorSlotController
+                                      .clear(); // Clear end time if start time changes
+                                  startTimeErrorMessage =
+                                  'Start time must not be in the past';
                                 });
                                 return;
                               }
                             }
                             setState(() {
                               // startTimeTutorSlotController.text = pickedTime.format(context);
-                              startTimeTutorSlotController.text = formatTimeOfDay24Hour(pickedTime);
-                              endTimeTutorSlotController.clear(); // Clear end time if start time changes
-                              startTimeErrorMessage = null; // Clear error message
+                              startTimeTutorSlotController.text =
+                                  formatTimeOfDay24Hour(pickedTime);
+                              endTimeTutorSlotController
+                                  .clear(); // Clear end time if start time changes
+                              startTimeErrorMessage =
+                              null; // Clear error message
                               endTimeErrorMessage = null; // Clear error message
                             });
 
                             setFieldState(() {
-                              startTimeTutorSlotController.text = formatTimeOfDay24Hour(pickedTime);
-                              endTimeTutorSlotController.clear(); // Clear end time if start time changes
-                              startTimeErrorMessage = null; // Clear error message
+                              startTimeTutorSlotController.text =
+                                  formatTimeOfDay24Hour(pickedTime);
+                              endTimeTutorSlotController
+                                  .clear(); // Clear end time if start time changes
+                              startTimeErrorMessage =
+                              null; // Clear error message
                               endTimeErrorMessage = null; // Clear error message
                             });
                           }
@@ -2288,33 +2605,40 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                         onTap: () async {
                           TimeOfDay? pickedTime = await showTimePicker(
                             context: context,
-                            initialTime: selectedStartTimeFromText(startTimeTutorSlotController.text) ?? TimeOfDay(hour: 0, minute: 0),
+                            initialTime: selectedStartTimeFromText(
+                                startTimeTutorSlotController.text) ??
+                                TimeOfDay(hour: 0, minute: 0),
                           );
 
                           if (pickedTime != null) {
                             TimeOfDay? startTime =
-                            selectedStartTimeFromText(startTimeTutorSlotController.text);
+                            selectedStartTimeFromText(
+                                startTimeTutorSlotController.text);
 
                             print("startTime: " + startTime.toString());
                             print("endTime: " + pickedTime.toString());
                             if (startTime != null &&
                                 (pickedTime.hour < startTime.hour ||
                                     (pickedTime.hour == startTime.hour &&
-                                        pickedTime.minute <= startTime.minute))) {
+                                        pickedTime.minute <=
+                                            startTime.minute))) {
                               setFieldState(() {
                                 endTimeTutorSlotController.clear();
-                                endTimeErrorMessage = 'End time must be later than start time.';
+                                endTimeErrorMessage =
+                                'End time must be later than start time.';
                               });
                               return;
                             }
 
                             setState(() {
-                              endTimeTutorSlotController.text = formatTimeOfDay24Hour(pickedTime);
+                              endTimeTutorSlotController.text =
+                                  formatTimeOfDay24Hour(pickedTime);
                               endTimeErrorMessage = null; // Clear error message
                             });
 
                             setFieldState(() {
-                              endTimeTutorSlotController.text = formatTimeOfDay24Hour(pickedTime);
+                              endTimeTutorSlotController.text =
+                                  formatTimeOfDay24Hour(pickedTime);
                               endTimeErrorMessage = null; // Clear error message
                             });
                           }
@@ -2395,10 +2719,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                               selectedType = "Online";
                               initializeData();
                             });
-
                           }
                         },
-                        child: const Text("Edit Tutor Slot"),
+                        child: const Text("Edit"),
                       ),
                     ],
                   ),
@@ -2420,9 +2743,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
         return AlertDialog(
           title: const Text('Confirm Deletion'),
           content: Column(
-            mainAxisSize: MainAxisSize.min, // Make the dialog size wrap its content
+            mainAxisSize: MainAxisSize.min,
+            // Make the dialog size wrap its content
             children: [
-              const Text('Are you sure you want to delete this tutor slot? This action cannot be undone.'),
+              const Text(
+                  'Are you sure you want to delete this tutor slot? This action cannot be undone.'),
             ],
           ),
           actions: <Widget>[
@@ -2436,8 +2761,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
               onPressed: () {
                 _deleteTutorSlot(tutorSlot); // Call the delete course function
                 Navigator.pop(context); // Close the bottom sheet
-                Navigator.pop(context); // Close the bottom sheet (tutorslot detail)
-                Navigator.pop(context); // Close the bottom sheet (tutorslot detail)
+                Navigator.pop(
+                    context); // Close the bottom sheet (tutorslot detail)
+                Navigator.pop(
+                    context); // Close the bottom sheet (tutorslot detail)
                 // Clear all fields before closing
 
                 setState(() {
@@ -2459,13 +2786,433 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     );
   }
 
+  // Apply filters and sorting
+  void _applyFiltersAndSortReview() {
+    setState(() {
+      // Filter reviews
+      if (reviewTab_selectedFilter == 'All') {
+        filteredReviews = reviews;
+      } else {
+        int filterStars = int.parse(
+            reviewTab_selectedFilter.split(' ')[0]); // e.g., '5 Star' -> 5
+        filteredReviews =
+            reviews.where((review) => review.rating == filterStars).toList();
+      }
+
+      // Sort reviews
+      if (reviewTab_selectedSortOrder == 'Newest') {
+        filteredReviews.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+      } else {
+        filteredReviews.sort((a, b) => a.createdAt!.compareTo(b.createdAt!));
+      }
+    });
+  }
+
   // Reviews Tab
   Widget _buildReviewsTab() {
-    return Center(
-      child: Text(
-        "Reviews will be displayed here.",
-        style: const TextStyle(fontFamily: 'Montserrat', fontSize: 16),
+    // State for filtering and sorting
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Reviews List
+          RefreshIndicator(
+            onRefresh: initializeData,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              // Reserve space for text field
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Reviews",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Montserrat',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Second Card: Total Joined, Average Rating
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 16.0),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Average Rating",
+                              style: TextStyle(
+                                  fontSize: 16, fontFamily: 'Montserrat'),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                for (int i = 0; i <
+                                    widget.course.averageRating.floor(); i++)
+                                  const Icon(FontAwesomeIcons.solidStar,
+                                      color: Colors.amber),
+                                if ((widget.course.averageRating % 1) >= 0.5)
+                                  const Icon(FontAwesomeIcons.starHalfStroke,
+                                      color: Colors.amber),
+                                for (int i = 0; i < (5 -
+                                    widget.course.averageRating.ceil()); i++)
+                                  const Icon(FontAwesomeIcons.star,
+                                      color: Colors.amber),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              widget.course.averageRating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontFamily: 'Montserrat',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Filter and Sort Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              _buildSegmentedButton(
+                                  'All', reviewTab_selectedFilter, (filter) {
+                                reviewTab_selectedFilter = filter;
+                                _applyFiltersAndSortReview();
+                              }),
+                              const SizedBox(width: 8),
+                              for (int i = 5; i >= 1; i--)
+                                _buildSegmentedButton(
+                                    '$i Star', reviewTab_selectedFilter, (filter) {
+                                  reviewTab_selectedFilter = filter;
+                                  _applyFiltersAndSortReview();
+                                }),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      DropdownButton<String>(
+                        value: reviewTab_selectedSortOrder,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            reviewTab_selectedSortOrder = newValue;
+                            _applyFiltersAndSortReview();
+                          }
+                        },
+                        items: <String>['Newest', 'Oldest']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Reviews List
+                  if (filteredReviews.isNotEmpty)
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: filteredReviews.length,
+                        itemBuilder: (context, index) =>
+                            _buildReviewCard(filteredReviews[index]),
+                      ),
+                    )
+                  else
+                    const Expanded(
+                      child: Center(
+                        child: Text(
+                          "No review found.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          // Fixed Text Field at Bottom
+          if(isStudent)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Card(
+                margin: const EdgeInsets.all(0),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+                ),
+                color: AppColors.primary,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 12.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: commentReviewController,
+                          decoration: const InputDecoration(
+                            hintText: 'Add your review...',
+                            hintStyle: TextStyle(color: Colors.white54),
+                            border: InputBorder.none,
+                          ),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                          icon: const Icon(Icons.send, color: AppColors.primary),
+                          onPressed: () {
+                            if (commentReviewController.text.isNotEmpty) {
+                              // _submitReview(_commentController.text);
+                              commentReviewController.clear();
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
+    );
+  }
+
+// Build Review Card
+  Widget _buildReviewCard(UserCourse review) {
+    return GestureDetector(
+      onTap: () => _showReviewDetail(review),
+      child: Card(
+        // color: Colors.grey[100],
+        margin: const EdgeInsets.symmetric(vertical: 4.0),
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Username, Date, and Star Rating Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        review!.user?.name ?? "null",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (review!.roleId == 1)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Card(
+                            color: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                                vertical: 4.0,
+                              ),
+                              child: Text(
+                                'Tutor',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  Text(
+                    DateFormat('dd/MM/yyyy hh:mm a').format(review.updatedAt!),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Star Rating Row
+              Row(
+                children: [
+                  for (int i = 0; i < review.rating!; i++)
+                    const Icon(FontAwesomeIcons.solidStar, color: Colors.amber,
+                        size: 18),
+                  for (int i = 0; i < (5 - review.rating!); i++)
+                    const Icon(
+                        FontAwesomeIcons.star, color: Colors.amber, size: 18),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Review Comment (if available)
+              if (review.commentReview != null)
+                Text(
+                  review.commentReview!,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Show Review Details
+  void _showReviewDetail(UserCourse review) {
+    final bool canDelete = (userCourse!.id == review.id);
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Gray swipe indicator at the top
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(2.0),
+                  ),
+                ),
+              ),
+              // Review details
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        review!.user!.name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (review!.roleId == 1)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Card(
+                            color: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                                vertical: 4.0,
+                              ),
+                              child: Text(
+                                'Tutor',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  Text(
+                    DateFormat('dd/MM/yyyy hh:mm a').format(review.updatedAt!),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Star Rating Row
+              Row(
+                children: [
+                  for (int i = 0; i < review.rating!; i++)
+                    const Icon(Icons.star, color: Colors.amber, size: 18),
+                  for (int i = 0; i < (5 - review.rating!); i++)
+                    const Icon(Icons.star_border, color: Colors.amber, size: 18),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Review Comment
+              if (review.commentReview != null)
+                Text(
+                  review.commentReview!,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              const SizedBox(height: 16),
+
+              // Action buttons at the bottom-right
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (canDelete)
+                    IconButton(
+                      onPressed: () {
+                        // _showDeleteConfirmation(context, () {
+                        //   _deleteReview(review);
+                        // });
+                      },
+                      icon: const Icon(FontAwesomeIcons.trash, size: 20),
+                      tooltip: 'Delete Review',
+                    ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -3,13 +3,13 @@ class User {
   final String name;
   final String email;
   final String username;
-  final String? emailVerifiedAt;
+  final DateTime? emailVerifiedAt;
   final String? phoneNum;
-  final String? createdAt;
-  final String? updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
   final String? bio;
   final int totalFollower;
-  final String averageRating;
+  final double averageRating;
   final String? socialLink;
   final String? image;
   final int verificationStatus;
@@ -39,13 +39,21 @@ class User {
       name: json['name'],
       email: json['email'],
       username: json['username'],
-      emailVerifiedAt: json['email_verified_at'],
+      emailVerifiedAt: json['email_verified_at'] != null
+          ? DateTime.parse(json['email_verified_at'] as String)
+          : null,
       phoneNum: json['phone_num'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
       bio: json['bio'],
       totalFollower: json['total_follower'],
-      averageRating: json['average_rating'],
+      averageRating: json['average_rating'] is String
+          ? double.parse(json['average_rating'] as String)
+          : (json['average_rating'] as num).toDouble(),
       socialLink: json['social_link'],
       image: json['image'],
       verificationStatus: json['verification_status'],
