@@ -24,7 +24,7 @@ class CourseDetailPage extends StatefulWidget {
   _CourseDetailPageState createState() => _CourseDetailPageState();
 }
 
-class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerProviderStateMixin, RouteAware {
+class _CourseDetailPageState extends State<CourseDetailPage> with TickerProviderStateMixin, RouteAware {
   late TabController _tabController;
   final TextEditingController nameLessonController = TextEditingController();
   final TextEditingController descLessonController = TextEditingController();
@@ -37,9 +37,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   final TextEditingController endTimeTutorSlotController = TextEditingController();
   final TextEditingController locationTutorSlotController = TextEditingController();
 
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
   final TextEditingController commentReviewController = TextEditingController();
-
-
+  int selectedRating = 0; // Stores selected star rating (1-5)
 
   String selectedType = "Online";
   TimeOfDay? selectedStartTime;
@@ -72,6 +73,34 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
     super.initState();
     _tabController = TabController(
         length: 4, vsync: this); // 4 tabs: About, Lessons, Tutor Slot, Reviews
+
+    // Listen for tab changes
+    _tabController.addListener(() {
+      if (_tabController.index == 3) {
+        // Trigger animation when "Reviews" tab is selected
+        _animationController.forward();
+      } else {
+        // Reset animation if switching away from "Reviews"
+        _animationController.reset();
+      }
+    });
+
+    // Initialize Animation Controller
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500), // Animation duration
+    );
+
+    // Slide Animation from bottom
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1), // Starts off-screen at the bottom
+      end: const Offset(0, 0), // Ends at its position
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    ));
+
+
     initializeData();
   }
 
@@ -86,9 +115,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
   Future<void> initializeData() async {
     await loadUser();
+    fetchCourse();
     fetchUserCourse();
     fetchLessons();
     fetchTutorSlots();
+    //animationReviewField();
     fetchUserCourseReview();
   }
 
@@ -103,6 +134,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
   void dispose() {
     routeObserver.unsubscribe(this); // Unsubscribe to avoid memory leaks
     _tabController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -126,6 +158,30 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       print('Error loading user: $e');
       setState(() {
         // context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> fetchCourse() async {
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    int course_id = widget.course.id;
+    //print("course_id: " + course_id.toString());
+    try {
+      final data = await apiService.index_course_courseid(token, course_id);
+      setState(() {
+        // Extract boolean values from the response
+        widget.course = Course.fromJson(data['course']);
+      });
+    } catch (e) {
+      setState(() {
+        print("Response: " + e.toString());
+      });
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
       });
     }
   }
@@ -544,6 +600,72 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
       setState(() {
         print("Response: " + e.toString());
       });
+    } finally {
+      setState(() {
+        context.loaderOverlay.hide();
+      });
+    }
+  }
+
+  Future<void> _updateReview(int is_delete) async {
+    String commentReview = commentReviewController.text.trim();
+    int rating = selectedRating;
+
+    if(is_delete == 1) {
+      // Check if userCourse is not null before accessing its properties
+      if (userCourse != null) {
+        commentReview = userCourse!.commentReview ?? ''; // Use empty string if null
+        rating = userCourse!.rating?.toInt() ?? 0; // Use 0 if null
+      } else {
+        // Handle the case where userCourse is null
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('User  course data is not available.'),
+          ),
+        );
+        return; // Exit the function early
+      }
+    }
+
+    // Perform course creation logic here
+    setState(() {
+      context.loaderOverlay.show();
+    });
+
+    try {
+      // Call the API
+      await apiService.update_review(token, userCourse!.id, rating, commentReview, is_delete);
+
+      if(is_delete != 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Review deleted successfully',
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Review created/updated successfully',
+            ),
+          ),
+        );
+      }
+      setState(() {
+        initializeData();
+      });
+      //widget.onCourseCreated(); // Notify parent to refresh
+      // Navigator.pop(context); // Navigate back to the previous page
+
+    } catch (e) {
+      // Extract meaningful error messages if available
+      final errorMsg = e.toString().replaceFirst('Exception: ', '\n');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lesson creation failed: $errorMsg\n')),
+      );
+      print(errorMsg);
     } finally {
       setState(() {
         context.loaderOverlay.hide();
@@ -986,7 +1108,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      updateJoinOrLeave(0);
+                      _showLeaveCourseConfirmationDialog();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -1025,6 +1147,56 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
           ),
         ),
       ),
+    );
+  }
+
+  // Show delete confirmation dialog
+  void _showLeaveCourseConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Leaving'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            // Make the dialog size wrap its content
+            children: [
+              const Text(
+                  'Are you sure you want to leave? Feel free to rate this course before leaving :)'),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                updateJoinOrLeave(0);
+                Navigator.pop(context);
+
+                setState(() {
+                  initializeData();
+                });
+              },
+              child: const Text('Leave'),
+            ),
+            TextButton(
+              onPressed: () {
+                bool hasUserReviewed = reviews.any((review) => review.id == userCourse?.id);
+
+                if(hasUserReviewed)
+                  _showReviewDetailsBottomSheet(context);
+                if(!hasUserReviewed)
+                  _showAddReviewBottomSheet(context);
+              },
+              child: const Text('Rate course'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -1369,7 +1541,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                 SizedBox(height: 16),
                 // Display the tutor slots based on selected filter
                 Expanded(
-                  child: tutorSlots.isEmpty
+                  child: filteredTutorSlots.isEmpty
                       ? const Center(
                     child: Text(
                       "No created tutor slot found.",
@@ -2810,204 +2982,507 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
 
   // Reviews Tab
   Widget _buildReviewsTab() {
-    // State for filtering and sorting
+    bool hasUserReviewed = reviews.any((review) => review.id == userCourse?.id);
+    int tempSelectedRating = selectedRating;
+
     return Scaffold(
       body: Stack(
         children: [
-          // Reviews List
-          RefreshIndicator(
-            onRefresh: initializeData,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              // Reserve space for text field
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Reviews",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Montserrat',
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Second Card: Total Joined, Average Rating
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Text(
-                              "Average Rating",
-                              style: TextStyle(
-                                  fontSize: 16, fontFamily: 'Montserrat'),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+          Column(
+            children: [
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: initializeData,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Reviews",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // Average Rating Card
+                        Card(
+                          margin: const EdgeInsets.only(bottom: 16.0),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                for (int i = 0; i <
-                                    widget.course.averageRating.floor(); i++)
-                                  const Icon(FontAwesomeIcons.solidStar,
-                                      color: Colors.amber),
-                                if ((widget.course.averageRating % 1) >= 0.5)
-                                  const Icon(FontAwesomeIcons.starHalfStroke,
-                                      color: Colors.amber),
-                                for (int i = 0; i < (5 -
-                                    widget.course.averageRating.ceil()); i++)
-                                  const Icon(FontAwesomeIcons.star,
-                                      color: Colors.amber),
+                                const Text(
+                                  "Average Rating",
+                                  style: TextStyle(fontSize: 16, fontFamily: 'Montserrat'),
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    for (int i = 0; i < widget.course.averageRating.floor(); i++)
+                                      const Icon(FontAwesomeIcons.solidStar, color: Colors.amber),
+                                    if ((widget.course.averageRating % 1) >= 0.5)
+                                      const Icon(FontAwesomeIcons.starHalfStroke, color: Colors.amber),
+                                    for (int i = 0; i < (5 - widget.course.averageRating.ceil()); i++)
+                                      const Icon(FontAwesomeIcons.star, color: Colors.amber),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  widget.course.averageRating.toStringAsFixed(1),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ],
                             ),
-                            const SizedBox(height: 10),
-                            Text(
-                              widget.course.averageRating.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontFamily: 'Montserrat',
-                                fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        // Filter and Sort Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    _buildSegmentedButton(
+                                        'All', reviewTab_selectedFilter, (filter) {
+                                      reviewTab_selectedFilter = filter;
+                                      _applyFiltersAndSortReview();
+                                    }),
+                                    const SizedBox(width: 8),
+                                    for (int i = 5; i >= 1; i--)
+                                      _buildSegmentedButton(
+                                          '$i Star', reviewTab_selectedFilter, (filter) {
+                                        reviewTab_selectedFilter = filter;
+                                        _applyFiltersAndSortReview();
+                                      }),
+                                  ],
+                                ),
                               ),
+                            ),
+                            const SizedBox(width: 16),
+                            DropdownButton<String>(
+                              value: reviewTab_selectedSortOrder,
+                              icon: const Icon(Icons.arrow_drop_down),
+                              onChanged: (String? newValue) {
+                                if (newValue != null) {
+                                  reviewTab_selectedSortOrder = newValue;
+                                  _applyFiltersAndSortReview();
+                                }
+                              },
+                              items: <String>['Newest', 'Oldest']
+                                  .map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ),
-                  // Filter and Sort Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              _buildSegmentedButton(
-                                  'All', reviewTab_selectedFilter, (filter) {
-                                reviewTab_selectedFilter = filter;
-                                _applyFiltersAndSortReview();
-                              }),
-                              const SizedBox(width: 8),
-                              for (int i = 5; i >= 1; i--)
-                                _buildSegmentedButton(
-                                    '$i Star', reviewTab_selectedFilter, (filter) {
-                                  reviewTab_selectedFilter = filter;
-                                  _applyFiltersAndSortReview();
-                                }),
-                            ],
+                        const SizedBox(height: 16),
+                        // Reviews List
+                        Expanded(
+                          child: reviews.isEmpty
+                              ? const Center(
+                            child: Text(
+                              "No review found.",
+                              style: TextStyle(fontFamily: 'Montserrat'),
+                            ),
+                          ) :
+                          ListView.builder(
+                            itemCount: filteredReviews.length,
+                            itemBuilder: (context, index) => _buildReviewCard(filteredReviews[index]),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      DropdownButton<String>(
-                        value: reviewTab_selectedSortOrder,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            reviewTab_selectedSortOrder = newValue;
-                            _applyFiltersAndSortReview();
-                          }
-                        },
-                        items: <String>['Newest', 'Oldest']
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Reviews List
-                  if (filteredReviews.isNotEmpty)
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: filteredReviews.length,
-                        itemBuilder: (context, index) =>
-                            _buildReviewCard(filteredReviews[index]),
-                      ),
-                    )
-                  else
-                    const Expanded(
-                      child: Center(
-                        child: Text(
-                          "No review found.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
-                ],
+                  ),
+                ),
               ),
+            ],
+          ),
+        ],
+      ),
+      floatingActionButton: isStudent ?
+      FloatingActionButton(
+        onPressed: () {
+          if(hasUserReviewed)
+            _showReviewDetailsBottomSheet(context);
+          if(!hasUserReviewed)
+            _showAddReviewBottomSheet(context);
+        },
+        child: const Icon(
+          FontAwesomeIcons.star,
+          color: Colors.white,
+        ),
+        backgroundColor: AppColors.primary,
+        tooltip: 'View Your Rating',
+      ): null,
+    );
+  }
+
+  void _showReviewDetailsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 16.0),
+                const Center(
+                  child: Text(
+                    "You already rate this course.",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Star Rating
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (int i = 0; i < userCourse!.rating!; i++)
+                      const Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 18),
+                    for (int i = 0; i < (5 - userCourse!.rating!); i++)
+                      const Icon(FontAwesomeIcons.star, color: Colors.amber, size: 18),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Review Comment (if available)
+                if (userCourse!.commentReview != null)
+                  Center(
+                    child: Text(
+                      userCourse!.commentReview!,
+
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _showEditReviewBottomSheet(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: const Text("Edit Rating"),
+                  ),
+                ),
+                // const SizedBox(height: 12),
+                // SizedBox(
+                //   width: double.infinity,
+                //   child: ElevatedButton(
+                //     onPressed: () {
+                //       _showDeleteReviewConfirmationDialog();
+                //     },
+                //     style: ElevatedButton.styleFrom(
+                //       backgroundColor: Colors.red,
+                //       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                //       textStyle: const TextStyle(
+                //         fontSize: 16,
+                //         fontFamily: 'Montserrat',
+                //         fontWeight: FontWeight.bold,
+                //       ),
+                //     ),
+                //     child: const Text("Delete"),
+                //   ),
+                // ),
+                const SizedBox(height: 16.0),
+              ],
             ),
           ),
-          // Fixed Text Field at Bottom
-          if(isStudent)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Card(
-                margin: const EdgeInsets.all(0),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-                ),
-                color: AppColors.primary,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 12.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: commentReviewController,
-                          decoration: const InputDecoration(
-                            hintText: 'Add your review...',
-                            hintStyle: TextStyle(color: Colors.white54),
-                            border: InputBorder.none,
-                          ),
-                          style: const TextStyle(color: Colors.white),
-                        ),
+        );
+      },
+    );
+  }
+
+  void _showAddReviewBottomSheet(BuildContext context) {
+    int tempSelectedRating = selectedRating;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (BuildContext context) {
+
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 16.0),
+                    const Text(
+                      "Do you enjoy this course?",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 8),
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: IconButton(
-                          icon: const Icon(Icons.send, color: AppColors.primary),
+                    ),
+                    const SizedBox(height: 8),
+                    // Star Rating
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        5,
+                            (index) => IconButton(
+                          icon: Icon(
+                            tempSelectedRating > index
+                                ? FontAwesomeIcons.solidStar
+                                : FontAwesomeIcons.star,
+                            color: Colors.amber,
+                          ),
                           onPressed: () {
-                            if (commentReviewController.text.isNotEmpty) {
-                              // _submitReview(_commentController.text);
-                              commentReviewController.clear();
-                            }
+                            setState(() {
+                              tempSelectedRating = index + 1;
+                            });
                           },
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: commentReviewController,
+                            decoration: const InputDecoration(
+                              hintText: 'Add a comment (optional)',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (tempSelectedRating > 0) {
+                              // Submit the review
+                              setState(() {
+                                selectedRating = tempSelectedRating; // Update global rating
+                              });
+                              // _submitReview(selectedRating, commentReviewController.text);
+                              _updateReview(0);
+                              commentReviewController.clear();
+                              selectedRating = 0;
+                              Navigator.pop(context);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please select a rating'),
+                                ),
+                              );
+                            }
+                          },
+                          child: const Text("Post"),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16.0),
+                  ],
                 ),
               ),
-            ),
-        ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showEditReviewBottomSheet(BuildContext context, ) {
+    commentReviewController.text = userCourse!.commentReview ?? "";
+    selectedRating = userCourse!.rating!.toInt();
+    int tempSelectedRating = selectedRating;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
+      builder: (BuildContext context) {
+
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 16.0),
+                    const Text(
+                      "Edit your rating for this course.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Star Rating
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        5,
+                            (index) => IconButton(
+                          icon: Icon(
+                            tempSelectedRating > index
+                                ? FontAwesomeIcons.solidStar
+                                : FontAwesomeIcons.star,
+                            color: Colors.amber,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              tempSelectedRating = index + 1;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: commentReviewController,
+                            decoration: const InputDecoration(
+                              hintText: 'Add a comment (optional)',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (tempSelectedRating > 0) {
+                              // Submit the review
+                              setState(() {
+                                selectedRating = tempSelectedRating; // Update global rating
+                              });
+                              // _submitReview(selectedRating, commentReviewController.text);
+                              _updateReview(0);
+                              commentReviewController.clear();
+                              selectedRating = 0;
+                              Navigator.pop(context);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please select a rating'),
+                                ),
+                              );
+                            }
+                          },
+                          child: const Text("Post"),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16.0),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Show delete confirmation dialog
+  void _showDeleteReviewConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            // Make the dialog size wrap its content
+            children: [
+              const Text(
+                  'Are you sure you want to delete your review?'),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _updateReview(1);
+                Navigator.pop(context); // Close the bottom sheet
+                Navigator.pop(context);
+
+                setState(() {
+                  commentReviewController.clear();
+                  selectedRating = 0;
+                  initializeData();
+                });
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
     );
   }
 
 // Build Review Card
   Widget _buildReviewCard(UserCourse review) {
     return GestureDetector(
-      onTap: () => _showReviewDetail(review),
+      // onTap: () => _showReviewDetail(review),
       child: Card(
         // color: Colors.grey[100],
         margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -3030,7 +3505,31 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (review!.roleId == 1)
+                      if (review!.status == 0)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Card(
+                            color: Colors.grey[400],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                                vertical: 4.0,
+                              ),
+                              child: Text(
+                                'ex member',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if(review!.status == 1 && isStudent)
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Card(
@@ -3038,14 +3537,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> with SingleTickerPr
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.0),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(
                                 horizontal: 8.0,
                                 vertical: 4.0,
                               ),
                               child: Text(
-                                'Tutor',
-                                style: const TextStyle(
+                                'member',
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,

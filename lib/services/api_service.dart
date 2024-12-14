@@ -12,7 +12,7 @@ class ApiService {
   // final String domainUrl = 'https://{domain}';
 
   //development
-  final String domainUrl = 'https://53b5-2001-e68-8208-be00-d440-77bb-a872-9a72.ngrok-free.app';
+  final String domainUrl = 'https://9ff9-2001-e68-8200-8300-ac3d-f765-15cd-e426.ngrok-free.app';
   late final String baseUrl;
 
   ApiService() {
@@ -331,6 +331,34 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> index_course_courseid(String token, int course_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/course/index_course_courseid'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'course_id': course_id,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch courses');
+        } else {
+          throw Exception('Failed to fetch courses: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching courses: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> index_user_course(String token, int course_id) async {
     try {
       final response = await http.post(
@@ -441,6 +469,64 @@ class ApiService {
       throw Exception('Error fetching user courses (review): $e');
     }
   }
+
+  Future<Map<String, dynamic>> update_review(String token, int user_course_id, int rating, String comment_review, int is_delete) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/course/update_review'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'user_course_id': user_course_id,
+          'rating': rating,
+          'comment_review': comment_review,
+          'is_delete': is_delete,
+        }),
+      );
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Parse and return the updated course data
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+
+          // Ensure 'message' exist in the response
+          if (responseData.containsKey('message')) {
+            return responseData;
+          } else {
+            throw Exception('Invalid response structure: ${response.body}');
+          }
+        } else {
+          throw Exception('Empty response body on success');
+        }
+      } else {
+        // Handle error responses
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> errorData = json.decode(response.body.trim());
+
+          // If errors are present in the response, process them
+          if (errorData.containsKey('errors')) {
+            final errors = errorData['errors'] as Map<String, dynamic>;
+            String errorMessage = errors.values.join(', ');
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error handling
+            throw Exception(errorData['message'] ?? 'Failed to update user courses (review)');
+          }
+        }
+        throw Exception('Unexpected response format or empty response body');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Error updating user courses (review): $e');
+    }
+  }
+
 
   // SECTION END: COURSE
 
