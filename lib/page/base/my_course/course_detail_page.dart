@@ -1500,13 +1500,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                               tutorSlotTab_selectedFilter = filter;
                               _applyFiltersAndSortTutorSlot();
                             }),
-                            const SizedBox(width: 8),
+                            // const SizedBox(width: 8),
                             _buildSegmentedButton(
                                 'Online', tutorSlotTab_selectedFilter, (filter) {
                               tutorSlotTab_selectedFilter = filter;
                               _applyFiltersAndSortTutorSlot();
                             }),
-                            const SizedBox(width: 8),
+                            // const SizedBox(width: 8),
                             _buildSegmentedButton(
                                 'Physical', tutorSlotTab_selectedFilter, (filter) {
                               tutorSlotTab_selectedFilter = filter;
@@ -3062,7 +3062,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                       reviewTab_selectedFilter = filter;
                                       _applyFiltersAndSortReview();
                                     }),
-                                    const SizedBox(width: 8),
+                                    // const SizedBox(width: 8),
                                     for (int i = 5; i >= 1; i--)
                                       _buildSegmentedButton(
                                           '$i Star', reviewTab_selectedFilter, (filter) {

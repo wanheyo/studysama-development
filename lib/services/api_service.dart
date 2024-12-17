@@ -12,7 +12,7 @@ class ApiService {
   // final String domainUrl = 'https://{domain}';
 
   //development
-  final String domainUrl = 'https://9ff9-2001-e68-8200-8300-ac3d-f765-15cd-e426.ngrok-free.app';
+  final String domainUrl = 'https://7d75-115-132-55-55.ngrok-free.app';
   late final String baseUrl;
 
   ApiService() {
@@ -21,24 +21,56 @@ class ApiService {
 
   // SECTION START: USER
 
-  Future<List<User>> getUsers() async {
+  Future<Map<String, dynamic>> index_all_user(String token) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/users/index'),
+        Uri.parse('$baseUrl/users/index_all'),
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $token',
         },
       );
 
       if (response.statusCode == 200) {
-        List<dynamic> jsonData = json.decode(response.body);
-        return jsonData.map((json) => User.fromJson(json)).toList();
+        return json.decode(response.body);
       } else {
-        throw Exception('Failed to load users: ${response.statusCode}');
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch users');
+        } else {
+          throw Exception('Failed to fetch users: ${response.statusCode}');
+        }
       }
     } catch (e) {
       throw Exception('Error fetching users: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> index_user(String token, int? user_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/users/index_user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'user_id': user_id
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch user');
+        } else {
+          throw Exception('Failed to fetch user: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching user: $e');
     }
   }
 
@@ -222,8 +254,7 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> course_update(
-      String token, int course_id, String name, String desc, int status) async {
+  Future<Map<String, dynamic>> course_update(String token, int course_id, String name, String desc, int status) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/course/update'),
