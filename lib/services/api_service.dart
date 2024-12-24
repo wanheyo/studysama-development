@@ -18,7 +18,7 @@ class ApiService {
   late final String baseUrl;
 
   final openAIUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
-  final String openAIKey = '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';
+  final String openAIKey = '';
 
   ApiService() {
     baseUrl = domainUrl + '/api/studysama';
