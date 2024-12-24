@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:studysama/models/user.dart';
+
 class Course {
   final int id;
   final String name;
@@ -12,6 +14,7 @@ class Course {
   final DateTime createdAt;
   final DateTime updatedAt;
   final int? role_id;
+  User? tutor;
 
   Course({
     required this.id,
@@ -25,6 +28,7 @@ class Course {
     required this.createdAt,
     required this.updatedAt,
     this.role_id,
+    this.tutor
   });
 
   // Factory constructor to create a Course instance from JSON
@@ -44,6 +48,7 @@ class Course {
       updatedAt: DateTime.parse(json['updated_at'] as String),
 
       role_id: json['role_id'] as int?,
+      tutor: json['tutor'] as User?, //user
     );
   }
 
@@ -62,6 +67,7 @@ class Course {
       'updated_at': updatedAt.toIso8601String(),
 
       'role_id': role_id,
+      'tutor': tutor,
     };
   }
 

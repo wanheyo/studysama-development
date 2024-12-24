@@ -6,14 +6,19 @@ import '../models/login_response.dart';
 import '../models/user.dart';
 import 'package:http_parser/http_parser.dart'; // For MIME types
 import 'package:path/path.dart' as p;
+import 'package:html/parser.dart' as html;
+
 
 class ApiService {
   //production
   // final String domainUrl = 'https://{domain}';
 
   //development
-  final String domainUrl = 'https://7d75-115-132-55-55.ngrok-free.app';
+  final String domainUrl = 'https://ac15-2001-e68-821b-8300-3d96-c442-99b7-aa45.ngrok-free.app';
   late final String baseUrl;
+
+  final openAIUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
+  final String openAIKey = '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';
 
   ApiService() {
     baseUrl = domainUrl + '/api/studysama';
@@ -135,6 +140,87 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> user_update(String token, String? username, String? name, String? bio, String? email, String? phoneNum, File? picked_image, int? status) async {
+    if(picked_image != null) {
+      print(picked_image.path.toString());
+    }
+
+    try {
+      // Set up the request
+      final uri = Uri.parse('$baseUrl/users/update');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add headers
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      // Add form fields only if they are not null
+      if (username != null) request.fields['username'] = username;
+      if (name != null) request.fields['name'] = name;
+      if (bio != null) request.fields['bio'] = bio;
+      if (email != null) request.fields['email'] = email;
+      if (phoneNum != null) request.fields['phone_num'] = phoneNum;
+      if (status != null) request.fields['status'] = status.toString();
+
+      // Attach the file if it exists
+      if (picked_image != null) {
+        final mimeType = lookupMimeType(picked_image.path) ?? 'application/octet-stream';
+
+        request.files.add(await http.MultipartFile.fromPath(
+          'image', // This key should match what the server expects
+          picked_image.path,
+          contentType: MediaType.parse(mimeType),
+        ));
+      }
+
+      // Send the request
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Parse and return the updated course data
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> responseData = json.decode(response.body.trim());
+          print('Success: $responseData');
+
+          // Ensure 'message' and 'course' exist in the response
+          if (responseData.containsKey('message') &&
+              responseData.containsKey('user')) {
+            return responseData;
+          } else {
+            throw Exception('Invalid response structure: ${response.body}');
+          }
+        } else {
+          throw Exception('Empty response body on success');
+        }
+      } else {
+        // Handle error responses
+        if (response.body.isNotEmpty) {
+          final Map<String, dynamic> errorData = json.decode(response.body.trim());
+
+          // If errors are present in the response, process them
+          if (errorData.containsKey('errors')) {
+            final errors = errorData['errors'] as List<dynamic>;
+            String errorMessage = errors.join(', ');
+            throw Exception(errorMessage.trim());
+          } else {
+            // Fallback error handling
+            throw Exception(errorData['message'] ?? 'Failed to update user');
+          }
+        }
+        throw Exception('Unexpected response format or empty response body');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception(e.toString());
+    }
+  }
+
   Future<LoginResponse> login(String usernameOrEmail, String password) async {
     try {
       final response = await http.post(
@@ -197,6 +283,62 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error logging out: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> index_follow(String token, int? user_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/users/index_follow'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'user_id': user_id
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch user follow');
+        } else {
+          throw Exception('Failed to fetch user follow: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching user follow: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> update_follow(String token, int? user_followed_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/users/update_follow'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'user_followed_id': user_followed_id
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch update follow');
+        } else {
+          throw Exception('Failed to fetch update follow: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching update follow: $e');
     }
   }
 
@@ -337,7 +479,7 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> index_course(String token) async {
+  Future<Map<String, dynamic>> index_course(String token, int? user_id) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/course/index_course'),
@@ -345,6 +487,9 @@ class ApiService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
+        body: jsonEncode({
+          'user_id': user_id
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -1219,4 +1364,116 @@ class ApiService {
   }
 
 // SECTION END: TUTOR SLOT
+
+// SECTION START: OPEN AI
+
+  Future<Map<String, dynamic>> generateQuizFromUrl(String url) async {
+    String textContent = url;
+
+    try {
+      final openAiResponse = await http.post(
+        openAIUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $openAIKey',
+        },
+        body: jsonEncode({
+          'model': 'gpt-3.5-turbo',
+          'messages': [
+            {
+              'role': 'system',
+              'content': 'You are an assistant that generates multiple-choice quizzes based on input text.',
+            },
+            {
+              'role': 'user',
+              'content': '''
+            Generate 5 multiple-choice questions based on the following url:
+            $textContent
+            Each question should have 4 options with one correct answer. Provide the response in this structure:
+            Question: [Question Text]
+            Options: [Option1; Option2; Option3; Option4]
+            Answer: [Correct answer index of option]
+            Response should be like this, the answer should be an index of the option, ignore space in response except in context of title, question, options and answer
+            
+          ''',
+            },
+          ],
+          'max_tokens': 800,
+          'temperature': 0.7,
+        }),
+      );
+
+      // Log the raw response body for debugging
+      print('OpenAI Raw Response: ${openAiResponse.body}');
+
+      if (openAiResponse.statusCode == 200) {
+        final data = jsonDecode(openAiResponse.body);
+
+        // Verify the presence of 'choices' and 'message' keys
+        if (data.containsKey('choices') && data['choices'].isNotEmpty) {
+          final message = data['choices'][0]['message'];
+          if (message != null && message.containsKey('content')) {
+            final rawText = message['content'];
+            print('Raw Text from OpenAI: $rawText');
+
+            // Process the raw text into structured format
+            final questions = _processQuizText(rawText);
+
+            final response = {
+              "title": "Quiz from $url",
+              "data": questions,
+            };
+
+            // Debugging output
+            print('Quiz Title: ${response["title"]}');
+            print('Quiz Data: ${response["data"]}');
+
+            return response;
+          } else {
+            throw Exception('Invalid OpenAI response: Missing "content" in "message".');
+          }
+        } else {
+          throw Exception('Invalid OpenAI response: Missing "choices" or "message".');
+        }
+      } else {
+        throw Exception('Failed to generate quiz: ${openAiResponse.body}');
+      }
+    } catch (e) {
+      // Log the error for debugging
+      print('Error in generateQuizFromUrl: $e');
+      rethrow;
+    }
+  }
+
+  // Helper function to parse raw text into structured format
+  List<Map<String, dynamic>> _processQuizText(String rawText) {
+    final lines = rawText.split('\n').where((line) => line.trim().isNotEmpty).toList();
+    final questions = <Map<String, dynamic>>[];
+
+    for (int i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith("Question: ")) {
+        final questionText = lines[i].replaceFirst("Question: ", "").trim();
+        final options = lines[i + 1]
+            .replaceFirst("Options: ", "")
+            .replaceAll("[", "")
+            .replaceAll("]", "")
+            .split(';')
+            .map((e) => e.trim())
+            .toList();
+        final answerIndex = int.tryParse(lines[i + 2].replaceFirst("Answer: ", "").trim());
+
+        if (answerIndex != null && answerIndex >= 0 && answerIndex < options.length) {
+          questions.add({
+            "question": questionText,
+            "options": options,
+            "answer": answerIndex,
+          });
+        }
+      }
+    }
+
+    return questions;
+  }
+
+// SECTION END: OPEN AI
 }

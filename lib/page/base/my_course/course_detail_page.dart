@@ -14,6 +14,7 @@ import '../../../models/lesson.dart';
 import '../../../models/user.dart';
 import '../../../services/api_service.dart';
 import '../../../utils/colors.dart';
+import '../general_profile_page.dart';
 import 'lesson_page.dart';
 
 class CourseDetailPage extends StatefulWidget {
@@ -47,6 +48,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
+  String get domainURL => apiService.domainUrl;
 
   List<Lesson> lessons = [];
   List<TutorSlot> tutorSlots = [];
@@ -59,6 +61,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
 
   String token = "";
   bool isGrid = false; // Toggle state for grid or list view in lessons
+  bool isLoading = false;
 
   String tutorSlotTab_selectedFilter = 'All'; // Default filter
   String tutorSlotTab_selectedSortOrder = 'Upcoming'; // Default sort order
@@ -115,12 +118,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
 
   Future<void> initializeData() async {
     await loadUser();
-    fetchCourse();
-    fetchUserCourse();
-    fetchLessons();
-    fetchTutorSlots();
+    await fetchCourse();
+    await fetchUserCourse();
+    await fetchLessons();
+    await fetchTutorSlots();
     //animationReviewField();
-    fetchUserCourseReview();
+    await fetchUserCourseReview();
   }
 
   @override
@@ -165,6 +168,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
   Future<void> fetchCourse() async {
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     int course_id = widget.course.id;
@@ -182,6 +186,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -189,6 +194,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
   Future<void> fetchUserCourse() async {
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     int course_id = widget.course.id;
@@ -214,6 +220,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -221,6 +228,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
   Future<void> fetchLessons() async {
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     int course_id = widget.course.id;
@@ -239,6 +247,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -251,6 +260,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     // Perform course creation logic here
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     try {
@@ -279,6 +289,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -329,6 +340,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
   Future<void> fetchTutorSlots() async {
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     int course_id = widget.course.id;
@@ -349,6 +361,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -387,6 +400,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     // Perform course creation logic here
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     try {
@@ -425,6 +439,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -463,6 +478,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     // Perform course creation logic here
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     try {
@@ -496,6 +512,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -534,6 +551,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     // Perform course creation logic here
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     try {
@@ -567,6 +585,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -574,6 +593,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
   Future<void> fetchUserCourseReview() async {
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     int course_id = widget.course.id;
@@ -603,6 +623,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -630,6 +651,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     // Perform course creation logic here
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     try {
@@ -669,6 +691,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -765,7 +788,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
           indicatorWeight: 5,
         ),
       ),
-      body: LoaderOverlay(
+      body: isLoading
+          ? Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primary,
+        ),
+      )
+          : LoaderOverlay(
         child: TabBarView(
           controller: _tabController,
           children: [
@@ -1023,11 +1052,28 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 8.0),
-                                  child: Text(
-                                    tutor?.name ?? "null",
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      if(isTutor) {
+                                        //widget.onTabChange(3);
+                                      } else {
+                                        // Navigate to user detail page
+                                        if(tutor != null) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => GeneralProfilePage(user: tutor!),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    child: Text(
+                                      tutor?.username ?? "null",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -1056,6 +1102,98 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                 ),
                               ],
                             ),
+                            // Card(
+                            //   elevation: 2,
+                            //   margin: const EdgeInsets.symmetric(vertical: 8),
+                            //   shape: RoundedRectangleBorder(
+                            //     borderRadius: BorderRadius.circular(12),
+                            //   ),
+                            //   child: Padding(
+                            //     padding: const EdgeInsets.all(12.0),
+                            //     child: Row(
+                            //       children: [
+                            //         // Circular Profile Picture Placeholder
+                            //         Container(
+                            //           width: 60,
+                            //           height: 60,
+                            //           decoration: BoxDecoration(
+                            //             shape: BoxShape.circle,
+                            //             color: Colors.grey[300],
+                            //             image: tutor?.image != null
+                            //                 ? DecorationImage(
+                            //               image: NetworkImage(domainURL + '/storage/${tutor?.image!}',),
+                            //               fit: BoxFit.cover,
+                            //             )
+                            //                 : null,
+                            //           ),
+                            //           child: tutor?.image == null
+                            //               ? Center(
+                            //             // child: Text(
+                            //             //   tutor?.username.isNotEmpty
+                            //             //       ? tutor!.username[0].toUpperCase()
+                            //             //       : '?',
+                            //             //   style: TextStyle(
+                            //             //     fontSize: 24,
+                            //             //     fontWeight: FontWeight.bold,
+                            //             //     color: Colors.black54,
+                            //             //   ),
+                            //             // ),
+                            //           )
+                            //               : null,
+                            //         ),
+                            //         SizedBox(width: 12),
+                            //         // User Info Column
+                            //         Expanded(
+                            //           child: Column(
+                            //             crossAxisAlignment: CrossAxisAlignment.start,
+                            //             children: [
+                            //               Text(
+                            //                 tutor?.name ?? "null",
+                            //                 style: TextStyle(
+                            //                   fontSize: 16,
+                            //                   fontWeight: FontWeight.bold,
+                            //                 ),
+                            //                 maxLines: 1,
+                            //                 overflow: TextOverflow.ellipsis,
+                            //               ),
+                            //               SizedBox(height: 4),
+                            //               // Bio (if exists)
+                            //               if (tutor?.bio != null)
+                            //                 Text(
+                            //                   tutor?.bio! ?? "null",
+                            //                   style: TextStyle(
+                            //                     fontSize: 14,
+                            //                     color: Colors.grey[600],
+                            //                   ),
+                            //                   maxLines: 1,
+                            //                   overflow: TextOverflow.ellipsis,
+                            //                 ),
+                            //               SizedBox(height: 4),
+                            //               // Followers
+                            //               Row(
+                            //                 children: [
+                            //                   Icon(
+                            //                     FontAwesomeIcons.userGroup,
+                            //                     size: 16,
+                            //                     color: Colors.grey[600],
+                            //                   ),
+                            //                   SizedBox(width: 10),
+                            //                   Text(
+                            //                     '${tutor?.totalFollower} Followers',
+                            //                     style: TextStyle(
+                            //                       fontSize: 12,
+                            //                       color: Colors.grey[600],
+                            //                     ),
+                            //                   ),
+                            //                 ],
+                            //               ),
+                            //             ],
+                            //           ),
+                            //         ),
+                            //       ],
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ],
@@ -3499,7 +3637,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   Row(
                     children: [
                       Text(
-                        review!.user?.name ?? "null",
+                        review!.user?.username ?? "null",
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

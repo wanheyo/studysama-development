@@ -110,8 +110,8 @@ class _SignupPageState extends State<SignupPage> {
                       if (value.length < 6) {
                         return 'Username must be at least 6 characters';
                       }
-                      if (value.length > 30) {
-                        return 'Username must be at most 30 characters';
+                      if (value.length > 16) {
+                        return 'Username must be at most 16 characters';
                       }
                       return null;
                     },

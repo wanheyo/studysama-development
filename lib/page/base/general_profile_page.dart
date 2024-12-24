@@ -2,22 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:studysama/models/user_follow.dart';
+import 'package:studysama/page/base/profile/edit_profile.dart';
 
 import '../../../models/course.dart';
 import '../../../models/user.dart';
 import '../../../models/user_course.dart';
 import '../../../services/api_service.dart';
 import '../../../utils/colors.dart';
-import '../my_course/course_detail_page.dart';
-import 'edit_profile.dart';
+import '../../models/user_follow.dart';
+import 'my_course/course_detail_page.dart';
 
-class ProfilePage extends StatefulWidget {
+class GeneralProfilePage extends StatefulWidget {
+  final User user;
+  const GeneralProfilePage({required this.user, Key? key}) : super(key: key);
+
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  _GeneralProfilePageState createState() => _GeneralProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStateMixin {
+class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -26,6 +29,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
 
   List<UserFollow> userFollower = [];
   List<UserFollow> userFollowing = [];
+  bool isFollowedByYou = false;
 
   List<Course> createdCourses = [];
   List<UserCourse> createdUserCourses = []; //tutor
@@ -34,8 +38,10 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   List<UserCourse> joinedUserCourses = []; //tutor
 
   String token = "";
-  User? user;
+  User? userNow;
   bool isLoading = true; // Add a loading state
+
+  String responseMessage = "";
 
   @override
   void initState() {
@@ -50,6 +56,10 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     await fetchUser();
     await fetchUserFollow();
     fetchCourses();
+    //
+    // // Apply filters for both Created and Joined Courses
+    // _applyFiltersAndSortCourse(true);  // Filter created courses
+    // _applyFiltersAndSortCourse(false); // Filter joined courses
   }
 
   @override
@@ -107,7 +117,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     try {
       final data = await apiService.index_user(token, null);
       setState(() {
-        user = User.fromJson(data['user']);
+        userNow = User.fromJson(data['user']);
         isLoading = false; // Set loading to false once data is fetched
       });
     } catch (e) {
@@ -127,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
 
     // print('token: ' + token);
     try {
-      final data = await apiService.index_course(token, null);
+      final data = await apiService.index_course(token, widget.user.id);
 
       final tutorCreatedMap = {
         for (var file in (data['tutors_created'] as List))
@@ -201,7 +211,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     });
 
     try {
-      final data = await apiService.index_follow(token, null);
+      final data = await apiService.index_follow(token, widget.user.id);
 
       setState(() {
         userFollowing = (data['user_following'] as List)
@@ -211,6 +221,11 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
         userFollower = (data['user_follower'] as List)
             .map((json) => UserFollow.fromJson(json))
             .toList();
+
+        for(UserFollow uf in userFollower) {
+          if(uf.userFollowerId == userNow?.id)
+            isFollowedByYou = true;
+        }
 
       });
     } catch (e) {
@@ -222,6 +237,40 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
       setState(() {
         // context.loaderOverlay.hide();
         isLoading = false;
+      });
+    }
+  }
+
+  Future<void> updateFollow() async {
+    setState(() {
+      // context.loaderOverlay.show();
+      // isLoading = true;
+      // errorMessage = null;
+    });
+
+    try {
+      final data = await apiService.update_follow(token, widget.user.id);
+
+      setState(() {
+        responseMessage = data['message'];
+
+        print(responseMessage);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseMessage)),
+        );
+
+        isFollowedByYou = false;
+      });
+    } catch (e) {
+      setState(() {
+        // errorMessage = e.toString();
+        print("Response: " + e.toString());
+      });
+    } finally {
+      setState(() {
+        // context.loaderOverlay.hide();
+        // isLoading = false;
+        initializeData();
       });
     }
   }
@@ -240,6 +289,18 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "@" + widget.user.username,
+          style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: Column(
         children: <Widget>[
           // Top Purple Section
@@ -257,18 +318,18 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Username
-                            Text(
-                              '@' + (user?.username ?? 'null'),
-                              style: TextStyle(
-                                fontFamily: 'Montserrat',
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                              overflow: TextOverflow.ellipsis, // Handle long names
-                            ),
-                            SizedBox(height: 16),
+                            // // Username
+                            // Text(
+                            //   '@' + (widget.user.username ?? 'null'),
+                            //   style: TextStyle(
+                            //     fontFamily: 'Montserrat',
+                            //     fontWeight: FontWeight.bold,
+                            //     color: Colors.white,
+                            //     fontSize: 14,
+                            //   ),
+                            //   overflow: TextOverflow.ellipsis, // Handle long names
+                            // ),
+                            // SizedBox(height: 16),
                             // Circular Profile Picture Placeholder
                             Container(
                               width: 80,
@@ -276,18 +337,18 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.grey[300],
-                                image: user?.image != null
+                                image: widget.user.image != null
                                     ? DecorationImage(
-                                  image: NetworkImage(domainURL + '/storage/${user!.image!}',),
+                                  image: NetworkImage(domainURL + '/storage/${widget.user.image!}',),
                                   fit: BoxFit.cover,
                                 )
                                     : null,
                               ),
-                              child: user?.image == null
+                              child: widget.user.image == null
                                   ? Center(
                                 child: Text(
-                                  user?.username != null
-                                      ? user!.username[0].toUpperCase()
+                                  widget.user.username != null
+                                      ? widget.user.username[0].toUpperCase()
                                       : '?',
                                   style: TextStyle(
                                     fontSize: 24,
@@ -319,21 +380,16 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                               children: [
                                 _buildResponsiveButton(
                                   context,
-                                  'Edit Profile',
+                                  isFollowedByYou ? 'Followed' : 'Follow',
                                   screenWidth,
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => EditProfilePage(user: user!),
-                                      ),
-                                    );
+                                    updateFollow();
                                   },
                                 ),
                                 SizedBox(width: screenWidth * 0.02),
                                 _buildResponsiveButton(
                                   context,
-                                  'Share Profile',
+                                  'Share',
                                   screenWidth,
                                   onPressed: () {
                                     // Share profile action
@@ -385,7 +441,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                     Icon(FontAwesomeIcons.solidUser, color: AppColors.primary),
                                     SizedBox(width: 8),
                                     Text(
-                                      user?.name ?? 'null',
+                                      widget.user.name ?? 'null',
                                       style: TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 14,
@@ -402,7 +458,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                     SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        user?.bio ?? 'No bio available',
+                                        widget.user.bio ?? 'No bio available',
                                         style: TextStyle(
                                           fontFamily: 'Montserrat',
                                           fontSize: 12,
@@ -418,7 +474,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                     Icon(FontAwesomeIcons.solidEnvelope, color: AppColors.primary),
                                     SizedBox(width: 8),
                                     Text(
-                                      user?.email ?? 'null',
+                                      widget.user.email ?? 'null',
                                       style: TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 12,
@@ -433,7 +489,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                     Icon(FontAwesomeIcons.phone, color: AppColors.primary),
                                     SizedBox(width: 8),
                                     Text(
-                                      user?.phoneNum ?? '-',
+                                      widget.user.phoneNum ?? '-',
                                       style: TextStyle(
                                         fontFamily: 'Montserrat',
                                         fontSize: 12,
@@ -479,7 +535,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
           // Tab Bar View Section
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator(color: AppColors.primary,))
+                ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                 : TabBarView(
               controller: _tabController,
               children: [
@@ -553,77 +609,6 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // _buildSearchBar(),
-            // SizedBox(height: 6),
-            // Filter and Sort Row
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   children: [
-            //     // Segmented Button for Filter with horizontal scrolling
-            //     Expanded(
-            //       child: SingleChildScrollView(
-            //         scrollDirection: Axis.horizontal,
-            //         child: Row(
-            //           children: [
-            //             if(isCreatedCourses)
-            //               _buildSegmentedButton(
-            //                   'All', createdCourseTab_selectedFilter, (filter) {
-            //                 createdCourseTab_selectedFilter = filter;
-            //                 _applyFiltersAndSortCourse(isCreatedCourses);
-            //               }),
-            //
-            //             if(!isCreatedCourses)
-            //               _buildSegmentedButton(
-            //                   'All', joinedCourseTab_selectedFilter, (filter) {
-            //                 joinedCourseTab_selectedFilter = filter;
-            //                 _applyFiltersAndSortCourse(isCreatedCourses);
-            //               }),
-            //
-            //             if(isCreatedCourses)
-            //               for (int i = 5; i >= 1; i--)
-            //                 _buildSegmentedButton(
-            //                     '$i Star', createdCourseTab_selectedFilter, (filter) {
-            //                   createdCourseTab_selectedFilter = filter;
-            //                   _applyFiltersAndSortCourse(isCreatedCourses);
-            //                 }),
-            //
-            //             if(!isCreatedCourses)
-            //               for (int i = 5; i >= 1; i--)
-            //                 _buildSegmentedButton(
-            //                     '$i Star', joinedCourseTab_selectedFilter, (filter) {
-            //                   joinedCourseTab_selectedFilter = filter;
-            //                   _applyFiltersAndSortCourse(isCreatedCourses);
-            //                 }),
-            //           ],
-            //         ),
-            //       ),
-            //     ),
-            //     // Add space between segmented buttons and dropdown
-            //     const SizedBox(width: 16), // Adjust the width as needed
-            //     // Sort Button fixed on the right
-            //     DropdownButton<String>(
-            //       value: isCreatedCourses ? createdCourseTab_selectedSortOrder : joinedCourseTab_selectedSortOrder,
-            //       icon: const Icon(Icons.arrow_drop_down),
-            //       onChanged: (String? newValue) {
-            //         setState(() {
-            //           if(isCreatedCourses)
-            //             createdCourseTab_selectedSortOrder = newValue!;
-            //           _applyFiltersAndSortCourse(isCreatedCourses);
-            //         });
-            //       },
-            //       items: <String>['Newest', 'Oldest', 'Most Joined', 'Least Joined']
-            //           .map<DropdownMenuItem<String>>((String value) {
-            //         return DropdownMenuItem<String>(
-            //           value: value,
-            //           child: Text(value),
-            //         );
-            //       }).toList(),
-            //     ),
-            //   ],
-            // ),
-            // SizedBox(height: 16),
-            // if (isCreatedCourses) _buildCreateCourseButton(),
-            // SizedBox(height: 16),
             // Courses List
             Expanded(
               child: courses.isEmpty
@@ -686,104 +671,104 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Course Name
-                                  Text(
-                                    course.name,
-                                    style: TextStyle(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  // _highlightedText(
-                                  //   course.name,
-                                  //   _searchTerm,
-                                  //   defaultStyle: TextStyle(
-                                  //     color: Colors.black,
-                                  //     fontWeight: FontWeight.bold,
-                                  //     fontSize: 16,
-                                  //   ),
-                                  // ),
-                                  const SizedBox(height: 8),
-                                  if(course.desc != null)
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Course Name
                                     Text(
-                                      course.desc!,
+                                      course.name,
                                       style: TextStyle(
-                                        color: Colors.grey[700],
-                                        fontSize: 14,
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                      // _highlightedText(
-                                      //   course.desc!,
-                                      //   _searchTerm,
-                                      //   defaultStyle: TextStyle(
-                                      //     color: Colors.grey[700],
-                                      //     fontSize: 14,
-                                      //   ),
-                                      // ),
-
-                                  SizedBox(height: 8),
-                                  // Total Joined and Rating
-                                  Row(
-                                    children: [
+                                    // _highlightedText(
+                                    //   course.name,
+                                    //   _searchTerm,
+                                    //   defaultStyle: TextStyle(
+                                    //     color: Colors.black,
+                                    //     fontWeight: FontWeight.bold,
+                                    //     fontSize: 16,
+                                    //   ),
+                                    // ),
+                                    const SizedBox(height: 8),
+                                    if(course.desc != null)
                                       Text(
-                                        course.tutor?.username ?? "null",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "|",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "${course.totalJoined} Joined",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "|",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "${formatDate(
-                                            course.createdAt.toLocal())}",
+                                        course.desc!,
                                         style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
+                                          color: Colors.grey[700],
+                                          fontSize: 14,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      Spacer(flex: 5,),
-                                      Row(
-                                        children: [
-                                          Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 18),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            course.averageRating.toStringAsFixed(1),
-                                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                                    // _highlightedText(
+                                    //   course.desc!,
+                                    //   _searchTerm,
+                                    //   defaultStyle: TextStyle(
+                                    //     color: Colors.grey[700],
+                                    //     fontSize: 14,
+                                    //   ),
+                                    // ),
+
+                                    SizedBox(height: 8),
+                                    // Total Joined and Rating
+                                    Row(
+                                      children: [
+                                        Text(
+                                          course.tutor?.username ?? "null",
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          "|",
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          "${course.totalJoined} Joined",
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          "|",
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          "${formatDate(
+                                              course.createdAt.toLocal())}",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  // const SizedBox(height: 8),
-                                  // // Created Date
-                                  // Text(
-                                  //   "Created on: ${course.createdAt}",
-                                  //   style: TextStyle(
-                                  //     fontSize: 12,
-                                  //     color: Colors.grey[600],
-                                  //   ),
-                                  // ),
-                                ],
-                              )
+                                        ),
+                                        Spacer(flex: 5,),
+                                        Row(
+                                          children: [
+                                            Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 18),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              course.averageRating.toStringAsFixed(1),
+                                              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    // const SizedBox(height: 8),
+                                    // // Created Date
+                                    // Text(
+                                    //   "Created on: ${course.createdAt}",
+                                    //   style: TextStyle(
+                                    //     fontSize: 12,
+                                    //     color: Colors.grey[600],
+                                    //   ),
+                                    // ),
+                                  ],
+                                )
                             ),
                           ],
                         ),

@@ -20,14 +20,19 @@ class _BasePageState extends State<BasePage> {
   // Selected index for bottom navigation bar
   int _selectedIndex = 0;
 
-  // List of pages for bottom navigation
-  final List<Widget> _pages = [
-    HomePage(),
-    AiPage(),
-    FindPage(),
-    MyCoursePage(),
-    ProfilePage(),
-  ];
+  late List<Widget> _pages; // Declare without initialization
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the _pages list here
+    _pages = [
+      HomePage(onTabChange: _onItemTapped),
+      FindPage(onTabChange: _onItemTapped), // Pass the callback here
+      MyCoursePage(),
+      ProfilePage(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -41,7 +46,7 @@ class _BasePageState extends State<BasePage> {
       appBar: AppBar(
         title: Row(
           children: [
-            SizedBox(width: 10),
+            // SizedBox(width: 10),
             Text(
               'StudySama',
               style: TextStyle(
@@ -75,12 +80,12 @@ class _BasePageState extends State<BasePage> {
               ];
             },
           ),
-          if (_selectedIndex == 4) // Index for Profile Page
+          if (_selectedIndex == 3) // Index for Profile Page
             IconButton(
               icon: Icon(
-                Icons.settings,
+                FontAwesomeIcons.gear,
                 color: Colors.white,
-                size: 28,
+                // size: 28,
               ),
               onPressed: () {
                 Navigator.push(
@@ -100,10 +105,10 @@ class _BasePageState extends State<BasePage> {
             icon: Icon(FontAwesomeIcons.house),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.robot),
-            label: 'Chatbot',
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(FontAwesomeIcons.robot),
+          //   label: 'Chatbot',
+          // ),
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.magnifyingGlass),
             label: 'Find',

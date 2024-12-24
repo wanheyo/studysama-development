@@ -16,6 +16,7 @@ import '../../../models/course.dart';
 import '../../../models/resource.dart';
 import '../../../models/user.dart';
 import '../../../services/api_service.dart';
+import 'ai_quiz_page.dart';
 
 class ResourcePage extends StatefulWidget {
   final ApiService apiService = ApiService();
@@ -386,6 +387,52 @@ class _ResourcePageState extends State<ResourcePage> {
                   ),
                   const SizedBox(height: 16),
                   buildResourceInfoSection(),
+
+                  if(widget.resource.link != null) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  AIQuizPage(resource: widget.resource),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32.0, vertical: 12.0),
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align items
+                          children: [
+                            const Text(
+                              "Generate AI Quiz",
+                              style: TextStyle(
+                                color: Colors.white, // Change text color
+                                fontSize: 16.0, // Change font size
+                                fontWeight: FontWeight.bold, // Change font weight
+                              ),
+                            ),
+                            const Icon(
+                              FontAwesomeIcons.robot, // Use the AI icon from FontAwesome
+                              color: Colors.white, // Change icon color
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
                   // Second Card (Comments Section)
                   Card(
                     margin: const EdgeInsets.only(bottom: 16.0),
@@ -862,7 +909,7 @@ class _ResourcePageState extends State<ResourcePage> {
                   Row(
                     children: [
                       Text(
-                        comment.userCourse!.user!.name,
+                        comment.userCourse!.user!.username,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

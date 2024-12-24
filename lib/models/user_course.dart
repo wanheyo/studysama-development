@@ -1,5 +1,7 @@
 import 'package:studysama/models/user.dart';
 
+import 'course.dart';
+
 class UserCourse {
   final int id;
   final int userId;
@@ -11,6 +13,7 @@ class UserCourse {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   User? user;
+  Course? course;
   // ResourceFile? resourceFile; // Optional associated file
 
 
@@ -24,7 +27,8 @@ class UserCourse {
     required this.status,
     this.createdAt,
     this.updatedAt,
-    this.user
+    this.user,
+    this.course,
   });
 
   // Factory method to create a Lesson object from a JSON map

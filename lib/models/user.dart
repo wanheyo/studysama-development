@@ -12,6 +12,7 @@ class User {
   final double averageRating;
   final String? socialLink;
   final String? image;
+  final DateTime? lastChangedAt;
   final int verificationStatus;
   final int status;
 
@@ -29,6 +30,7 @@ class User {
     required this.averageRating,
     this.socialLink,
     this.image,
+    this.lastChangedAt,
     required this.verificationStatus,
     required this.status,
   });
@@ -56,6 +58,9 @@ class User {
           : (json['average_rating'] as num).toDouble(),
       socialLink: json['social_link'],
       image: json['image'],
+      lastChangedAt: json['last_changed_at'] != null
+          ? DateTime.parse(json['last_changed_at'] as String)
+          : null,
       verificationStatus: json['verification_status'],
       status: json['status'],
     );

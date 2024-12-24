@@ -1,11 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/page/auth/login_page.dart'; // Import your LoginPage
-import 'package:studysama/utils/colors.dart'; // Import your AppColors
+import 'package:studysama/utils/colors.dart';
 
-class SettingsPage extends StatelessWidget {
+import '../../../services/api_service.dart'; // Import your AppColors
+
+class SettingsPage extends StatefulWidget {
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final ApiService apiService = ApiService();
+  String token = "";
+
+  @override
+  void initState() {
+    super.initState();
+    loadUser (); // Call loadUser  when the page is opened
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future<void> loadUser () async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final tokenString = prefs.getString('token');
+      if (tokenString != null) {
+        setState(() {
+          token = tokenString; // Update the state with the loaded token
+        });
+      }
+    } catch (e) {
+      print('Error loading user: $e');
+    }
+  }
+
   // Function to handle logout
-  Future<void> _logout(BuildContext context) async {
+  Future<void> _showLogOutConfirmation(BuildContext context) async {
     // Show the confirmation dialog
     showDialog(
       context: context,
@@ -25,6 +61,7 @@ class SettingsPage extends StatelessWidget {
             TextButton(
               onPressed: () async {
                 // Clear shared preferences (you can also clear specific data if needed)
+                _logout();
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.clear(); // Clear all data from SharedPreferences
 
@@ -43,6 +80,29 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
+  Future<void> _logout() async {
+    try {
+      // Call the API and get the updated course data
+      await apiService.logout(token);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('User logout successfully!'),
+        ),
+      );
+    } catch (e) {
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Course update failed: $errorMsg')),
+      );
+      print(errorMsg);
+    } finally {
+      // setState(() {
+      //   context.loaderOverlay.hide();
+      // });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,23 +110,23 @@ class SettingsPage extends StatelessWidget {
         title: Text('Settings', style: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('My Profile'),
+              leading: Icon(FontAwesomeIcons.arrowRightFromBracket),
+              title: Text(
+                "Log Out",
+                style: TextStyle(fontFamily: 'Montserrat'),
+              ),
               onTap: () {
-
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
-              onTap: () {
-                _logout(context);  // Trigger logout confirmation on tap
+                _showLogOutConfirmation(context);  // Trigger logout confirmation on tap
               },
             ),
           ],

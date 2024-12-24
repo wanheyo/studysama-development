@@ -5,6 +5,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:studysama/models/user_course.dart';
+import 'package:studysama/page/base/general_profile_page.dart';
+import 'package:studysama/page/base/profile/profile_page.dart';
 import 'package:studysama/utils/colors.dart';
 
 import '../../../models/course.dart';
@@ -14,6 +17,10 @@ import '../my_course/course_detail_page.dart';
 import '../my_course/create_course_page.dart';
 
 class FindPage extends StatefulWidget {
+  final Function(int) onTabChange; // Callback function to change tab
+
+  const FindPage({required this.onTabChange, Key? key}) : super(key: key);
+
   @override
   _FindPageState createState() => _FindPageState();
 }
@@ -22,7 +29,9 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
   late TabController _tabController;
 
   List<Course> courses = [];
+  List<UserCourse> userCourses = []; //tutor
   List<User> users = [];
+
   bool isLoading = true;
   String? errorMessage;
 
@@ -38,8 +47,9 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
+  String get domainURL => apiService.domainUrl;
 
-  User? user;
+  User? userNow;
   int user_id = 0;
   String token = "";
 
@@ -52,6 +62,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
 
   Future<void> initializeData() async {
     await loadUser();
+    await fetchUser();
     await fetchCourses();
     _applyFiltersAndSortCourse();  // Filter created courses
     await fetchUsers();
@@ -65,8 +76,23 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
   }
 
   String formatDate(DateTime date) {
-    final DateFormat dateFormat = DateFormat("dd/MM/yyyy hh:mm a");
-    return dateFormat.format(date);
+    final Duration difference = DateTime.now().difference(date);
+
+    if (difference.inSeconds < 60) {
+      return '${difference.inSeconds} seconds ago';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} minutes ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} hours ago';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inDays < 365) {
+      final months = difference.inDays ~/ 30;
+      return '$months ${months > 1 ? 'months' : 'month'} ago';
+    } else {
+      final years = difference.inDays ~/ 365;
+      return '$years ${years > 1 ? 'years' : 'year'} ago';
+    }
   }
 
   Future<void> loadUser() async {
@@ -88,6 +114,27 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
     }
   }
 
+  Future<void> fetchUser() async {
+    setState(() {
+      context.loaderOverlay.show();
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final data = await apiService.index_user(token, null);
+      setState(() {
+        userNow = User.fromJson(data['user']);
+        isLoading = false; // Set loading to false once data is fetched
+      });
+    } catch (e) {
+      print("Response: " + e.toString());
+      setState(() {
+        isLoading = false; // Set loading to false even if there's an error
+      });
+    }
+  }
+
   Future<void> fetchCourses() async {
     setState(() {
       context.loaderOverlay.show();
@@ -98,10 +145,31 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
     // print('token: ' + token);
     try {
       final data = await apiService.index_all_course(token);
+
+      final tutorMap = {
+        for (var file in (data['tutors'] as List))
+          file['id']: User.fromJson(file)
+      };
+
       setState(() {
         courses = (data['courses'] as List)
             .map((json) => Course.fromJson(json))
             .toList();
+
+        userCourses = (data['user_courses'] as List)
+            .map((json) {
+          final userCourse = UserCourse.fromJson(json);
+          userCourse.user = tutorMap[userCourse.userId];
+          return userCourse;
+        }).toList();
+
+        for(int i = 0; i < courses.length; i++) {
+          for (UserCourse uc in userCourses) {
+            if (courses[i].id == uc.courseId) {
+              courses[i].tutor = uc.user;
+            }
+          }
+        }
 
         //print('course: ' + courses.toString());
       });
@@ -111,10 +179,10 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
         print("Response: " + e.toString());
       });
     } finally {
-      setState(() {
-        context.loaderOverlay.hide();
-        isLoading = false;
-      });
+      // setState(() {
+      //   context.loaderOverlay.hide();
+      //   isLoading = false;
+      // });
     }
   }
 
@@ -152,8 +220,11 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
     if (searchTerm.isEmpty) return courses;
 
     return courses.where((course) {
-      return course.name.toLowerCase().contains(searchTerm.toLowerCase()) ||
-          (course.desc?.toLowerCase().contains(searchTerm.toLowerCase()) ?? false);
+      final nameMatches = course.name.toLowerCase().contains(searchTerm.toLowerCase());
+      final descMatches = (course.desc?.toLowerCase().contains(searchTerm.toLowerCase()) ?? false);
+      final tutorMatches = (course.tutor?.username.toLowerCase().contains(searchTerm.toLowerCase()) ?? false);
+
+      return nameMatches || descMatches || tutorMatches;
     }).toList();
   }
 
@@ -557,11 +628,27 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
                                   // Total Joined and Rating
                                   Row(
                                     children: [
+                                      _highlightedText(
+                                        course.tutor?.username ?? "null",
+                                        _searchTerm,
+                                        defaultStyle: TextStyle(fontSize: 12, color: Colors.grey[600])
+                                      ),
+                                      Spacer(),
+                                      Text(
+                                        "|",
+                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                      ),
+                                      Spacer(),
                                       Text(
                                         "${course.totalJoined} Joined",
                                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                                       ),
-                                      SizedBox(width: 10),
+                                      Spacer(),
+                                      Text(
+                                        "|",
+                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                      ),
+                                      Spacer(),
                                       Text(
                                         "${formatDate(
                                             course.createdAt.toLocal())}",
@@ -570,7 +657,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
                                           color: Colors.grey[600],
                                         ),
                                       ),
-                                      Spacer(),
+                                      Spacer(flex: 5,),
                                       Row(
                                         children: [
                                           Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 18),
@@ -658,7 +745,17 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
                   final user = filteredUser[index];
                   return GestureDetector(
                     onTap: () {
-                      // Navigate to user detail page
+                      if(userNow!.id == user.id) {
+                        widget.onTabChange(3);
+                      } else {
+                        // Navigate to user detail page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GeneralProfilePage(user: user),
+                          ),
+                        );
+                      }
                     },
                     child: Card(
                       elevation: 2,
@@ -679,7 +776,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
                                 color: Colors.grey[300],
                                 image: user.image != null
                                     ? DecorationImage(
-                                  image: NetworkImage(user.image!),
+                                  image: NetworkImage(domainURL + '/storage/${user.image!}',),
                                   fit: BoxFit.cover,
                                 )
                                     : null,
@@ -687,8 +784,8 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
                               child: user.image == null
                                   ? Center(
                                 child: Text(
-                                  user.name.isNotEmpty
-                                      ? user.name[0].toUpperCase()
+                                  user.username.isNotEmpty
+                                      ? user.username[0].toUpperCase()
                                       : '?',
                                   style: TextStyle(
                                     fontSize: 24,
@@ -707,7 +804,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
                                 children: [
                                   // Name
                                   _highlightedText(
-                                    user.name,
+                                    user.username,
                                     _searchTerm,
                                     defaultStyle: TextStyle(
                                       color: Colors.black,

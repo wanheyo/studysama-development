@@ -52,6 +52,10 @@ dependencies:
   url_launcher: ^6.3.1
   any_link_preview: ^3.0.2
   open_file: ^3.5.10
+  image_picker: ^1.1.2
+  image_cropper: ^8.1.0
+  phone_numbers_parser: ^9.0.3
+  html: ^0.15.5
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +97,10 @@ flutter:
      - assets/recipe.jpeg
      - assets/math.jpeg
      - assets/science.jpeg
+     - assets/learn.png
+     - assets/teach.png
+     - assets/connect.png
+     - assets/achievement.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

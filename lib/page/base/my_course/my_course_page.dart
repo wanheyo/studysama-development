@@ -10,6 +10,7 @@ import 'package:studysama/utils/colors.dart';
 import '../../../models/course.dart';
 import '../../../models/tutor_slot.dart';
 import '../../../models/user.dart';
+import '../../../models/user_course.dart';
 import '../../../services/api_service.dart';
 import 'course_detail_page.dart';
 import 'create_course_page.dart';
@@ -22,8 +23,13 @@ class MyCoursePage extends StatefulWidget {
 class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  List<Course> courses = [];
   List<Course> createdCourses = [];
+  List<UserCourse> createdUserCourses = []; //tutor
+
   List<Course> joinedCourses = [];
+  List<UserCourse> joinedUserCourses = []; //tutor
+
   bool isLoading = true;
   String? errorMessage;
 
@@ -69,8 +75,23 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
   }
 
   String formatDate(DateTime date) {
-    final DateFormat dateFormat = DateFormat("dd/MM/yyyy hh:mm a");
-    return dateFormat.format(date);
+    final Duration difference = DateTime.now().difference(date);
+
+    if (difference.inSeconds < 60) {
+      return '${difference.inSeconds} seconds ago';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} minutes ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} hours ago';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inDays < 365) {
+      final months = difference.inDays ~/ 30;
+      return '$months ${months > 1 ? 'months' : 'month'} ago';
+    } else {
+      final years = difference.inDays ~/ 365;
+      return '$years ${years > 1 ? 'years' : 'year'} ago';
+    }
   }
 
   Future<void> loadUser() async {
@@ -107,14 +128,56 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
 
     // print('token: ' + token);
     try {
-      final data = await apiService.index_course(token);
+      final data = await apiService.index_course(token, null);
+
+      final tutorCreatedMap = {
+        for (var file in (data['tutors_created'] as List))
+          file['id']: User.fromJson(file)
+      };
+
+      final tutorJoinedMap = {
+        for (var file in (data['tutors_joined'] as List))
+          file['id']: User.fromJson(file)
+      };
+
       setState(() {
         createdCourses = (data['created_course'] as List)
             .map((json) => Course.fromJson(json))
             .toList();
+
+        createdUserCourses = (data['user_courses_created'] as List)
+            .map((json) {
+          final userCourse = UserCourse.fromJson(json);
+          userCourse.user = tutorCreatedMap[userCourse.userId];
+          return userCourse;
+        }).toList();
+
+        for(int i = 0; i < createdCourses.length; i++) {
+          for (UserCourse uc in createdUserCourses) {
+            if (createdCourses[i].id == uc.courseId) {
+              createdCourses[i].tutor = uc.user;
+            }
+          }
+        }
+
         joinedCourses = (data['joined_course'] as List)
             .map((json) => Course.fromJson(json))
             .toList();
+
+        joinedUserCourses = (data['user_courses_joined'] as List)
+            .map((json) {
+          final userCourse = UserCourse.fromJson(json);
+          userCourse.user = tutorJoinedMap[userCourse.userId];
+          return userCourse;
+        }).toList();
+
+        for(int i = 0; i < joinedCourses.length; i++) {
+          for (UserCourse uc in joinedUserCourses) {
+            if (joinedCourses[i].id == uc.courseId) {
+              joinedCourses[i].tutor = uc.user;
+            }
+          }
+        }
 
         // _applyFiltersAndSortCourse(true);
       });
@@ -544,11 +607,27 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
                                   // Total Joined and Rating
                                   Row(
                                     children: [
+                                      _highlightedText(
+                                          course.tutor?.username ?? "null",
+                                          _searchTerm,
+                                          defaultStyle: TextStyle(fontSize: 12, color: Colors.grey[600])
+                                      ),
+                                      Spacer(),
+                                      Text(
+                                        "|",
+                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                      ),
+                                      Spacer(),
                                       Text(
                                         "${course.totalJoined} Joined",
                                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                                       ),
-                                      SizedBox(width: 10),
+                                      Spacer(),
+                                      Text(
+                                        "|",
+                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                      ),
+                                      Spacer(),
                                       Text(
                                         "${formatDate(
                                             course.createdAt.toLocal())}",
@@ -557,7 +636,7 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
                                           color: Colors.grey[600],
                                         ),
                                       ),
-                                      Spacer(),
+                                      Spacer(flex: 5,),
                                       Row(
                                         children: [
                                           Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 18),
