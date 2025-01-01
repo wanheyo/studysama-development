@@ -303,21 +303,24 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         ),
                         Spacer(),
                         // Follower and Post Information
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                _buildStatColumn('Followers', userFollower.length.toString() ?? '0', screenWidth),
-                                SizedBox(width: screenWidth * 0.05),
-                                _buildStatColumn('Following', userFollowing.length.toString() ?? '0', screenWidth),
-                              ],
-                            ),
-                            SizedBox(height: screenHeight * 0.02),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _buildResponsiveButton(
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildStatColumn('Followers', userFollower.length.toString() ?? '0', screenWidth),
+                              SizedBox(width: screenWidth * 0.05),
+                              _buildStatColumn('Following', userFollowing.length.toString() ?? '0', screenWidth),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: (screenWidth - screenWidth * 0.05) / 2, // Match the width of Followers/Following column
+                                child: _buildResponsiveButton(
                                   context,
                                   'Edit Profile',
                                   screenWidth,
@@ -330,19 +333,11 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                     );
                                   },
                                 ),
-                                SizedBox(width: screenWidth * 0.02),
-                                _buildResponsiveButton(
-                                  context,
-                                  'Share Profile',
-                                  screenWidth,
-                                  onPressed: () {
-                                    // Share profile action
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                       ] else ...[
                         // Blank content while loading
                         Expanded(
