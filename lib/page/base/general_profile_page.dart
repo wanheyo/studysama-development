@@ -386,15 +386,6 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
                                     updateFollow();
                                   },
                                 ),
-                                SizedBox(width: screenWidth * 0.02),
-                                _buildResponsiveButton(
-                                  context,
-                                  'Share',
-                                  screenWidth,
-                                  onPressed: () {
-                                    // Share profile action
-                                  },
-                                ),
                               ],
                             ),
                           ],
