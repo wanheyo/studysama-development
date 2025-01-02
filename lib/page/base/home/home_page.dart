@@ -19,6 +19,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState  extends  State<HomePage> {
   final ApiService apiService = ApiService();
+  String get domainURL => apiService.domainUrl;
   String token = "";
 
   List<Course> courses = [];
@@ -163,368 +164,366 @@ class _HomePageState  extends  State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      // backgroundColor: Colors.grey[100],
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Welcome Section
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16),
-                  margin: EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'WELCOME TO StudySama!',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'Where you can learn a lot of new things.',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Section
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16),
+                margin: EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-
-                // Features Section
-                Text(
-                  'Features',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'WELCOME TO StudySama!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Where you can learn a lot of new things.',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 10),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      featureCard(
-                        title: 'LEARN',
-                        subtitle: 'Find and access quality study resources shared by others.',
-                        image: 'assets/learn.png',
-                      ),
-                      const SizedBox(width: 16),
-                      featureCard(
-                        title: 'TEACH',
-                        subtitle: 'Share your knowledge and help others succeed.',
-                        image: 'assets/teach.png',
-                      ),
-                      const SizedBox(width: 16),
-                      featureCard(
-                        title: 'CONNECT',
-                        subtitle: 'Connect with fellow learners and educators.',
-                        image: 'assets/connect.png',
-                      ),
-                      const SizedBox(width: 16),
-                      featureCard(
-                        title: 'ACHIEVE',
-                        subtitle: 'Track your progress and unlock exclusive rewards.',
-                        image: 'assets/achievement.png',
-                      ),
-                    ],
-                  ),
+              ),
+
+              // Features Section
+              Text(
+                'Features',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-                SizedBox(height: 20),
-
-                // Popular Courses Section
-                Text(
-                  'Most Popular Courses',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    featureCard(
+                      title: 'LEARN',
+                      subtitle: 'Find and access quality study resources shared by others.',
+                      image: 'assets/learn.png',
+                    ),
+                    const SizedBox(width: 16),
+                    featureCard(
+                      title: 'TEACH',
+                      subtitle: 'Share your knowledge and help others succeed.',
+                      image: 'assets/teach.png',
+                    ),
+                    const SizedBox(width: 16),
+                    featureCard(
+                      title: 'CONNECT',
+                      subtitle: 'Connect with fellow learners and educators.',
+                      image: 'assets/connect.png',
+                    ),
+                    const SizedBox(width: 16),
+                    featureCard(
+                      title: 'ACHIEVE',
+                      subtitle: 'Track your progress and unlock exclusive rewards.',
+                      image: 'assets/achievement.png',
+                    ),
+                  ],
                 ),
-                SizedBox(height: 10),
-                if (isLoading) // Show loading indicator if loading
-                  Center(child: CircularProgressIndicator(color: AppColors.primary,))
-                else
-                // Use PageView for horizontal scrolling
-                  Column(
-                    children: [
-                      Container(
-                        height: 310, // Set a fixed height for the course list
-                        child: PageView.builder(
-                          controller: _pageControllerMostJoined,
-                          itemCount: mostJoinedCourses.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index < mostJoinedCourses.length) {
-                              return buildCourseCard(mostJoinedCourses[index]);
-                            } else {
-                              return Center(
-                                child: TextButton(
-                                  onPressed: () {
-                                    // Navigate to the view more page or perform an action
-                                    widget.onTabChange(1);
-                                  },
-                                  child: const Text("View More"),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      // Page indicators
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(mostJoinedCourses.length + 1, (index) {
-                          return Container(
-                            margin: EdgeInsets.symmetric(horizontal: 4.0),
-                            width: 8.0,
-                            height: 8.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _currentPageMostJoined == index
-                                  ? AppColors.primary
-                                  : Colors.grey,
-                            ),
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
+              ),
+              SizedBox(height: 20),
 
-                SizedBox(height: 20),
-
-                // Highest Rated Courses Section
-                Text(
-                  'Highest Rated Courses',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+              // Popular Courses Section
+              Text(
+                'Most Popular Courses',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-                SizedBox(height: 10),
-                if (isLoading)
-                  Center(child: CircularProgressIndicator(color: AppColors.primary,))
-                else
-                  Column(
-                    children: [
-                      Container(
-                        height: 310, // Set a fixed height for the course list
-                        child: PageView.builder(
-                          controller: _pageControllerHighestRated,
-                          itemCount: highestRatedCourses.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index < highestRatedCourses.length) {
-                              return buildCourseCard(highestRatedCourses[index]);
-                            } else {
-                              return Center(
-                                child: TextButton(
-                                  onPressed: () {
-                                    // Navigate to the view more page or perform an action
-                                    widget.onTabChange(1);
-                                  },
-                                  child: const Text("View More"),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      // Page indicators
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(highestRatedCourses.length + 1, (index) {
-                          return Container(
-                            margin: EdgeInsets.symmetric(horizontal: 4.0),
-                            width: 8.0,
-                            height: 8.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _currentPageHighestRated == index
-                                  ? AppColors.primary
-                                  : Colors.grey,
-                            ),
-                          );
-                        }),
-                      ),
-                      SizedBox(height: 10),
-                    ],
-                  ),
-
-                SizedBox(height: 20),
-
-                // About Section
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16),
-                  margin: EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'ABOUT US',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'BITU3923 WORKSHOP II',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'The “StudySama” Platform is a mobile-based solution aimed at improving access to quality education through peer learning.',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
+              ),
+              SizedBox(height: 10),
+              if (isLoading) // Show loading indicator if loading
+                Center(child: CircularProgressIndicator(color: AppColors.primary,))
+              else
+              // Use PageView for horizontal scrolling
+                Column(
+                  children: [
+                    Container(
+                      height: 310, // Set a fixed height for the course list
+                      child: PageView.builder(
+                        controller: _pageControllerMostJoined,
+                        itemCount: mostJoinedCourses.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index < mostJoinedCourses.length) {
+                            return buildCourseCard(mostJoinedCourses[index]);
+                          } else {
+                            return Center(
+                              child: TextButton(
+                                onPressed: () {
+                                  // Navigate to the view more page or perform an action
+                                  widget.onTabChange(2);
+                                },
+                                child: const Text("View More"),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'This platform aligns with SDG 4 (Quality Education) by providing students the opportunity to either offer or receive tutoring in specific subjects, fostering an inclusive learning environment.',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'The project addresses the challenges faced by students in accessing affordable and effective educational support.',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'With many students unable to afford private tutoring, this platform offers a cost-effective alternative by leveraging peer expertise.',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    // Page indicators
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(mostJoinedCourses.length + 1, (index) {
+                        return Container(
+                          margin: EdgeInsets.symmetric(horizontal: 4.0),
+                          width: 8.0,
+                          height: 8.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentPageMostJoined == index
+                                ? AppColors.primary
+                                : Colors.grey,
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
                 ),
 
-                // // Class Schedules Section
-                // Text(
-                //   'Class Schedules',
-                //   style: TextStyle(
-                //     color: AppColors.primary,
-                //     fontSize: 20,
-                //     fontWeight: FontWeight.bold,
-                //   ),
-                // ),
-                // SizedBox(height: 10),
-                //
-                // // Physical Classes at the Top
-                // Container(
-                //   padding: EdgeInsets.all(16),
-                //   decoration: BoxDecoration(
-                //     color: Colors.blue[50], // Light blue for Physical
-                //     borderRadius: BorderRadius.circular(10),
-                //   ),
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       Text(
-                //         'Physical Classes',
-                //         style: TextStyle(
-                //           color: AppColors.primary,
-                //           fontSize: 18,
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //       SizedBox(height: 10),
-                //       classScheduleWidget(
-                //         icon: Icons.location_on,
-                //         courseName: 'CODING',
-                //         username: 'Alice',
-                //         location: 'Room 101, Main Building',
-                //         time: '10:00 AM - 12:00 PM',
-                //         date: 'Monday, Dec 10th',
-                //       ),
-                //       SizedBox(height: 10),
-                //       classScheduleWidget(
-                //         icon: Icons.location_on,
-                //         courseName: 'LANGUAGE',
-                //         username: 'Bob',
-                //         location: 'Room 202, Science Block',
-                //         time: '11:00 AM - 1:00 PM',
-                //         date: 'Tuesday, Dec 11th',
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                //
-                // SizedBox(height: 20),
-                //
-                // // Online Classes at the Bottom
-                // Container(
-                //   padding: EdgeInsets.all(16),
-                //   decoration: BoxDecoration(
-                //     color: Colors.green[50], // Light green for Online
-                //     borderRadius: BorderRadius.circular(10),
-                //   ),
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       Text(
-                //         'Online Classes',
-                //         style: TextStyle(
-                //           color: AppColors.primary,
-                //           fontSize: 18,
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //       SizedBox(height: 10),
-                //       classScheduleWidget(
-                //         icon: Icons.video_call,
-                //         courseName: 'SCIENCE',
-                //         username: 'Siti',
-                //         location: 'Zoom Meeting',
-                //         time: '2:00 PM - 4:00 PM',
-                //         date: 'Wednesday, Dec 12th',
-                //       ),
-                //     ],
-                //   ),
-                // ),
+              SizedBox(height: 20),
 
-              ],
-            ),
+              // Highest Rated Courses Section
+              Text(
+                'Highest Rated Courses',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              if (isLoading)
+                Center(child: CircularProgressIndicator(color: AppColors.primary,))
+              else
+                Column(
+                  children: [
+                    Container(
+                      height: 310, // Set a fixed height for the course list
+                      child: PageView.builder(
+                        controller: _pageControllerHighestRated,
+                        itemCount: highestRatedCourses.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index < highestRatedCourses.length) {
+                            return buildCourseCard(highestRatedCourses[index]);
+                          } else {
+                            return Center(
+                              child: TextButton(
+                                onPressed: () {
+                                  // Navigate to the view more page or perform an action
+                                  widget.onTabChange(1);
+                                },
+                                child: const Text("View More"),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    // Page indicators
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(highestRatedCourses.length + 1, (index) {
+                        return Container(
+                          margin: EdgeInsets.symmetric(horizontal: 4.0),
+                          width: 8.0,
+                          height: 8.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentPageHighestRated == index
+                                ? AppColors.primary
+                                : Colors.grey,
+                          ),
+                        );
+                      }),
+                    ),
+                    SizedBox(height: 10),
+                  ],
+                ),
+
+              SizedBox(height: 20),
+
+              // About Section
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16),
+                margin: EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ABOUT US',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'BITU3923 WORKSHOP II',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'The “StudySama” Platform is a mobile-based solution aimed at improving access to quality education through peer learning.',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'This platform aligns with SDG 4 (Quality Education) by providing students the opportunity to either offer or receive tutoring in specific subjects, fostering an inclusive learning environment.',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'The project addresses the challenges faced by students in accessing affordable and effective educational support.',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'With many students unable to afford private tutoring, this platform offers a cost-effective alternative by leveraging peer expertise.',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+
+              // // Class Schedules Section
+              // Text(
+              //   'Class Schedules',
+              //   style: TextStyle(
+              //     color: AppColors.primary,
+              //     fontSize: 20,
+              //     fontWeight: FontWeight.bold,
+              //   ),
+              // ),
+              // SizedBox(height: 10),
+              //
+              // // Physical Classes at the Top
+              // Container(
+              //   padding: EdgeInsets.all(16),
+              //   decoration: BoxDecoration(
+              //     color: Colors.blue[50], // Light blue for Physical
+              //     borderRadius: BorderRadius.circular(10),
+              //   ),
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Text(
+              //         'Physical Classes',
+              //         style: TextStyle(
+              //           color: AppColors.primary,
+              //           fontSize: 18,
+              //           fontWeight: FontWeight.bold,
+              //         ),
+              //       ),
+              //       SizedBox(height: 10),
+              //       classScheduleWidget(
+              //         icon: Icons.location_on,
+              //         courseName: 'CODING',
+              //         username: 'Alice',
+              //         location: 'Room 101, Main Building',
+              //         time: '10:00 AM - 12:00 PM',
+              //         date: 'Monday, Dec 10th',
+              //       ),
+              //       SizedBox(height: 10),
+              //       classScheduleWidget(
+              //         icon: Icons.location_on,
+              //         courseName: 'LANGUAGE',
+              //         username: 'Bob',
+              //         location: 'Room 202, Science Block',
+              //         time: '11:00 AM - 1:00 PM',
+              //         date: 'Tuesday, Dec 11th',
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              //
+              // SizedBox(height: 20),
+              //
+              // // Online Classes at the Bottom
+              // Container(
+              //   padding: EdgeInsets.all(16),
+              //   decoration: BoxDecoration(
+              //     color: Colors.green[50], // Light green for Online
+              //     borderRadius: BorderRadius.circular(10),
+              //   ),
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Text(
+              //         'Online Classes',
+              //         style: TextStyle(
+              //           color: AppColors.primary,
+              //           fontSize: 18,
+              //           fontWeight: FontWeight.bold,
+              //         ),
+              //       ),
+              //       SizedBox(height: 10),
+              //       classScheduleWidget(
+              //         icon: Icons.video_call,
+              //         courseName: 'SCIENCE',
+              //         username: 'Siti',
+              //         location: 'Zoom Meeting',
+              //         time: '2:00 PM - 4:00 PM',
+              //         date: 'Wednesday, Dec 12th',
+              //       ),
+              //     ],
+              //   ),
+              // ),
+
+            ],
           ),
         ),
       ),
@@ -538,69 +537,64 @@ class _HomePageState  extends  State<HomePage> {
     required String image,
     // required int totalJoined,
   }) {
-    return Container(
-      width: 250,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-          ),
-        ],
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20), // Rounded corners
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Image.asset(
-                image,
-                fit: BoxFit.cover,
-                height: 140,
-                width: double.infinity,
+      child: SizedBox(
+        width: 250,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Image.asset(
+                  image,
+                  fit: BoxFit.cover,
+                  height: 140,
+                  width: double.infinity,
+                ),
               ),
             ),
-          ),
-          // Details
-          Padding(
-            padding: const EdgeInsets.all(14.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+            // Details
+            Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 14,
+                  SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                SizedBox(height: 8),
-                // Text(
-                //   '$totalJoined Enrolled',
-                //   style: TextStyle(
-                //     fontSize: 12,
-                //     color: Colors.grey[600],
-                //   ),
-                // ),
-              ],
+                  SizedBox(height: 8),
+                  // Text(
+                  //   '$totalJoined Enrolled',
+                  //   style: TextStyle(
+                  //     fontSize: 12,
+                  //     color: Colors.grey[600],
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -620,16 +614,26 @@ class _HomePageState  extends  State<HomePage> {
       },
       child: Container(
         child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), // Rounded corners
+          ),
           color: Colors.white,
           margin: const EdgeInsets.only(bottom: 16.0, right: 4, left: 4),
-          elevation: 3,
+          elevation: 2,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Full-Width Placeholder Image (Optional if `course.image` is available)
               ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                child: Container(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                child: course.image != null
+                    ? Image.network(
+                  domainURL + '/storage/${course.image}',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: 180,
+                )
+                    : Container(
                   width: double.infinity,
                   height: 180,
                   color: Colors.grey[300], // Blank grey background
@@ -638,7 +642,7 @@ class _HomePageState  extends  State<HomePage> {
                       course.name,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Colors.black54,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -738,7 +742,7 @@ class _HomePageState  extends  State<HomePage> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.2),
@@ -752,7 +756,7 @@ class _HomePageState  extends  State<HomePage> {
         children: [
           // Full-Width Course Image
           ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             child: Image.asset(
               image,
               fit: BoxFit.cover,
@@ -838,7 +842,7 @@ class _HomePageState  extends  State<HomePage> {
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.2),

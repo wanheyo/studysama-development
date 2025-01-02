@@ -5,7 +5,9 @@ import 'package:any_link_preview/any_link_preview.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:open_file/open_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,6 +44,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
   String get domainURL => apiService.domainUrl;
+
   String token = "";
   bool isTutor = false;
   bool isStudent = false;
@@ -55,6 +58,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
   bool isFileUploadSelected = true; // Declare at class level
   String fileName = "Attach File";
 
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -91,7 +95,8 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
   Future<void> initializeData() async {
     await loadUser();
     //fetchUserCourse();
-    fetchResources(); // Simulate fetching resources for the lesson
+    await fetchResources(); // Simulate fetching resources for the lesson
+    isLoading = false;
   }
 
   Future<void> loadUser() async {
@@ -116,6 +121,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
   Future<void> fetchUserCourse() async {
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     int course_id = widget.course.id;
@@ -134,6 +140,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -150,6 +157,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
     // Perform course creation logic here
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     try {
@@ -178,6 +186,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
         Navigator.pop(context);
 
         nameController.clear();
@@ -196,6 +205,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
   Future<void> fetchResources() async {
     setState(() {
       context.loaderOverlay.show();
+      isLoading = true;
     });
 
     try {
@@ -237,6 +247,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
     } finally {
       setState(() {
         context.loaderOverlay.hide();
+        isLoading = false;
       });
     }
   }
@@ -389,24 +400,30 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                   fontFamily: 'Montserrat',
                 ),
               ),
-              if(resources.isNotEmpty)
-                const SizedBox(height: 10),
-              ...resources.map((resource) => buildResourceCard(resource)).toList(),
-              if(resources.isEmpty)
-                const SizedBox(
-                  height: 350, // Minimum height to ensure proper placement
-                  child: Center(
-                    child: Text(
-                      "No resource found.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 16,
-                        color: Colors.grey,
+              if(isLoading) ...[
+                const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
+              ] else ...[
+                if(resources.isNotEmpty)
+                  const SizedBox(height: 10),
+                ...resources.map((resource) => buildResourceCard(resource)).toList(),
+                if(resources.isEmpty)
+                  const SizedBox(
+                    height: 350, // Minimum height to ensure proper placement
+                    child: Center(
+                      child: Text(
+                        "No resource found.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ),
-                ),
+              ]
             ],
           ),
         ),
@@ -430,22 +447,77 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
+
+        Future<File> compressImage(File file) async {
+          final targetPath = file.absolute.path.replaceAll(
+            file.absolute.path.split('/').last,
+            'compressed_${file.absolute.path.split('/').last}',
+          );
+
+          final compressedFile = await FlutterImageCompress.compressAndGetFile(
+            file.absolute.path,
+            targetPath,
+            quality: 70, // Adjust quality as needed
+          );
+          return File(compressedFile!.path); // Convert XFile to File
+        }
+
+        Future<void> cropAndCompressImage(File imageFile) async {
+          final croppedImage = await ImageCropper().cropImage(
+            sourcePath: imageFile.path,
+            // aspectRatio: CropAspectRatio(ratioX: 16, ratioY: 9),
+            compressFormat: ImageCompressFormat.jpg,
+            compressQuality: 100,
+            uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: 'Crop Image',
+                toolbarColor: AppColors.primary,
+                toolbarWidgetColor: Colors.white,
+                lockAspectRatio: true,
+              ),
+              IOSUiSettings(
+                title: 'Crop Image',
+              ),
+            ],
+          );
+
+          if (croppedImage != null) {
+            final compressedImage = await compressImage(File(croppedImage.path));
+            setState(() {
+              selectedFile = compressedImage;
+              fileName = selectedFile!.path.split('/').last;
+            });
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Image cropping failed!")),
+            );
+          }
+        }
+
         Future<void> pickFile() async {
           final result = await FilePicker.platform.pickFiles(
             type: FileType.custom,
             allowedExtensions: [
-              'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx',
-              'png', 'jpg', 'jpeg'
+              'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg'
             ],
           );
 
           if (result != null) {
             if (result.files.single.size <= 5 * 1024 * 1024) {
-              selectedFile = File(result.files.single.path!);
-              fileName = result.files.single.name; // Update with selected file name
+              final fileExtension = result.files.single.extension;
+              if (['png', 'jpg', 'jpeg'].contains(fileExtension)) {
+                // If the file is an image, call the pickImage function
+                await cropAndCompressImage(File(result.files.single.path!));
+              } else {
+                // Otherwise, handle the file as usual
+                selectedFile = File(result.files.single.path!);
+                setState(() {
+                  fileName = result.files.single.name; // Update with selected file name
+                });
+              }
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("File size exceeds the 5MB limit!")),
@@ -540,9 +612,11 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
               
                       TextFormField(
                         controller: nameController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText : 'Resource Name',
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           hintText: 'Example: My Personal Note',
                         ),
                         validator: (value) {
@@ -556,18 +630,22 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                       TextFormField(
                         controller: descController,
                         maxLines: 3,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Description (optional)',
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10.0),
                       DropdownButtonFormField<int>(
                         value: category,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Category',
                           hintText: 'It is note? Or an assignment?',
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
                         items: const [
                           DropdownMenuItem(value: 1, child: Text("Note")),
@@ -585,9 +663,11 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                       if (!isFileUploadSelected) ...[
                         TextFormField(
                           controller: linkController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Link',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                           ),
                           validator: (value) {
                             if (!isFileUploadSelected && (value == null || value.isEmpty)) {
@@ -704,7 +784,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
           margin: const EdgeInsets.only(bottom: 16.0),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: SizedBox(
             width: double.infinity,
@@ -750,7 +830,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
           margin: const EdgeInsets.only(bottom: 16.0),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: SizedBox(
             width: double.infinity,
@@ -804,8 +884,8 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
         String thumbnailUrl = 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
         thumbnail = ClipRRect(
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(8.0),
-            topRight: Radius.circular(8.0),
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
           child: Image.network(
             thumbnailUrl,
@@ -818,8 +898,8 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
         // Generic link preview
         thumbnail = ClipRRect(
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(8.0),
-            topRight: Radius.circular(8.0),
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
           child: AnyLinkPreview(
             link: resource.link!,
@@ -876,8 +956,8 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
       // File preview using open_file
       thumbnail = ClipRRect(
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(8.0),
-          topRight: Radius.circular(8.0),
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
         child: GestureDetector(
           onTap: () {
@@ -902,7 +982,18 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
             width: double.infinity,
             color: Colors.grey[300], // Background color for the file preview
             child: Center(
-              child: Column(
+              child: resource.resourceFile != null && ['jpg', 'jpeg', 'png'].contains(resource.resourceFile!.type.toLowerCase())
+              ? Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  color: Colors.grey[300],
+                  image: DecorationImage(
+                    image: NetworkImage(domainURL + '/storage/${resource.resourceFile!.name}'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+              : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
@@ -958,9 +1049,9 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
       child: Card(
         color: Colors.white,
         margin: const EdgeInsets.only(bottom: 16.0),
-        elevation: 3,
+        elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -986,7 +1077,7 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                     color: cardColor,
                     margin: const EdgeInsets.only(bottom: 16.0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
@@ -1008,23 +1099,23 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (resource.resourceFile != null) ...[
-                      Row(
-                        children: [
-                          const Icon(
-                            FontAwesomeIcons.download,
-                            size: 20,
-                            color: Colors.black,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            "${resource.resourceFile!.totalDownload}",
-                            style: const TextStyle(fontSize: 12, color: Colors.black,),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 16),
-                    ],
+                    // if (resource.resourceFile != null) ...[
+                    //   Row(
+                    //     children: [
+                    //       const Icon(
+                    //         FontAwesomeIcons.download,
+                    //         size: 20,
+                    //         color: Colors.black,
+                    //       ),
+                    //       const SizedBox(width: 4),
+                    //       Text(
+                    //         "${resource.resourceFile!.totalDownload}",
+                    //         style: const TextStyle(fontSize: 12, color: Colors.black,),
+                    //       ),
+                    //     ],
+                    //   ),
+                    //   const SizedBox(width: 16),
+                    // ],
                     Row(
                       children: [
                         Icon(
@@ -1061,20 +1152,20 @@ class _LessonPageState extends State<LessonPage> with RouteAware {
   // Helper function to determine file type icon
   IconData getFileIcon(String fileType) {
     switch (fileType.toLowerCase()) {
-      case '.pdf':
+      case 'pdf':
         return FontAwesomeIcons.filePdf;
-      case '.doc':
-      case '.docx':
+      case 'doc':
+      case 'docx':
         return FontAwesomeIcons.fileWord;
-      case '.ppt':
-      case '.pptx':
+      case 'ppt':
+      case 'pptx':
         return FontAwesomeIcons.filePowerpoint;
-      case '.xls':
-      case '.xlsx':
+      case 'xls':
+      case 'xlsx':
         return FontAwesomeIcons.fileExcel;
-      case '.png':
-      case '.jpg':
-      case '.jpeg':
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
         return FontAwesomeIcons.fileImage; // Assuming you have an icon for images
       default:
         return FontAwesomeIcons.file;

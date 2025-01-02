@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/utils/colors.dart';
@@ -26,6 +30,9 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
   User? user;
   int user_id = 0;
   String token = "";
+
+  File? selectedImage; // Stores the selected or cropped image
+  final ImagePicker _picker = ImagePicker();
 
   Future<void> loadUser() async {
     try {
@@ -67,7 +74,7 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
 
     try {
       // Call the API
-      await apiService.course_store(token, name, desc);
+      await apiService.course_store(token, name, desc, selectedImage);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -93,6 +100,64 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
     }
   }
 
+  Future<void> pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final fileSize = await pickedFile.length();
+      if (fileSize <= 5 * 1024 * 1024) {
+        cropImage(File(pickedFile.path));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Image size exceeds 5MB!")),
+        );
+      }
+    }
+  }
+
+  Future<void> cropImage(File? imageFile) async {
+    if (imageFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("No image selected for cropping!")),
+      );
+      return;
+    }
+
+    final croppedImage = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      aspectRatio: CropAspectRatio(ratioX: 16, ratioY: 9),
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 100,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: AppColors.primary,
+          toolbarWidgetColor: Colors.white,
+          lockAspectRatio: true,
+        ),
+        IOSUiSettings(
+          title: 'Crop Image',
+        ),
+      ],
+    );
+
+    if (croppedImage != null) {
+      final compressedImage = await compressImage(File(croppedImage.path));
+      setState(() {
+        selectedImage = compressedImage;
+      });
+    }
+  }
+
+  Future<File> compressImage(File file) async {
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      file.absolute.path + '_compressed.jpg',
+      quality: 70, // Adjust quality as needed
+    );
+    return File(compressedFile!.path); // Convert XFile to File
+  }
+
   @override
   void initState() {
     super.initState();
@@ -115,12 +180,6 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
           children: [
             const Text(
               'Create Course',
-              // style: TextStyle(
-              //   fontFamily: 'Montserrat',
-              //   fontWeight: FontWeight.bold,
-              //   color: Colors.white,
-              //   fontSize: 18,
-              // ),
             ),
           ],
         ),
@@ -134,17 +193,67 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
       body: LoaderOverlay(
         child: Form(
           key: _formKey, // Associate the form key with the Form widget
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.grey[300],
+                          image: selectedImage != null
+                              ? DecorationImage(
+                            image: FileImage(selectedImage!),
+                            fit: BoxFit.cover,
+                          )
+                              : null,
+                        ),
+                        child: selectedImage == null
+                            ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.image,
+                                color: Colors.black54,
+                                size: 50,
+                              ),
+                              Text('(Optional)')
+                            ]
+                          ),
+                        )
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 10,
+                        right: 10,
+                        child: InkWell(
+                          onTap: pickImage,
+                          child: CircleAvatar(
+                            radius: 25,
+                            backgroundColor: AppColors.secondary,
+                            child: Icon(FontAwesomeIcons.camera, color: Colors.white, size: 20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
                 // Course Name Field
                 TextFormField(
                   controller: nameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Course Name',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     hintText: 'Enter course name',
                   ),
                   validator: (value) {
@@ -158,21 +267,25 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
                 // Description Field
                 TextFormField(
                   controller: descriptionController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Description (Optional)',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     hintText: 'Enter course description',
                   ),
                   maxLines: 3, // Allows for a multi-line description
                 ),
-                const Spacer(),
+                const SizedBox(height: 16),
                 // Create Button
-                ElevatedButton(
-                  onPressed: _createCourse,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: Center(
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _createCourse,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: AppColors.primary
+                    ),
                     child: const Text(
                       'Create Course',
                       style: TextStyle(

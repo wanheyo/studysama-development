@@ -6,7 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/models/tutor_slot.dart';
+import 'package:studysama/models/user_badge.dart';
 import 'package:studysama/models/user_course.dart';
+import 'package:studysama/page/base/general_user_list_page.dart';
 import 'package:studysama/page/base/my_course/manage_course_page.dart';
 import '../../../main.dart';
 import '../../../models/course.dart';
@@ -70,6 +72,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
   String reviewTab_selectedFilter = 'All'; // Default filter
   String reviewTab_selectedSortOrder = 'Newest'; // Default sort order
   List<UserCourse> filteredReviews = [];
+
+  UserBadge? userBadge;
 
   @override
   void initState() {
@@ -304,6 +308,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     try {
       final data = await apiService.update_user_course(
           token, course_id, status);
+
+      // setState(() {
+      //   userBadge = UserBadge.fromJson(data['userBadgeNewCreated']);
+      // });
 
       String message;
       if (status == 0)
@@ -784,7 +792,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
               fontFamily: 'Montserrat',
               fontSize: 16,
               color: Colors.white),
-          indicatorColor: AppColors.background,
+          indicatorColor: AppColors.secondary,
           indicatorWeight: 5,
         ),
       ),
@@ -813,7 +821,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     return GestureDetector(
       onTap: () => onPressed(label),
       child: Card(
-        color: selected == label ? AppColors.primary : Colors.grey[200],
+        color: selected == label ? AppColors.secondary : Colors.grey[200],
         elevation: 1,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -838,13 +846,39 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                child: course.image != null
+                    ? Image.network(
+                  domainURL + '/storage/${course.image}',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: 180,
+                )
+                    : Container(
+                  width: double.infinity,
+                  height: 180,
+                  color: Colors.grey[300], // Blank grey background
+                  child: Center(
+                    child: Text(
+                      course.name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
               // First Card: Title, Description
               Card(
                 margin: const EdgeInsets.only(bottom: 16.0),
                 elevation: 0, // No shadow
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
                 ),
                 child: SizedBox(
                   width: double.infinity,
@@ -887,7 +921,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                 margin: const EdgeInsets.only(bottom: 16.0),
                 elevation: 0, // No shadow
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: SizedBox(
                   width: double.infinity,
@@ -902,22 +936,37 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                           // Space between title-value pairs
                           children: [
                             // Total Joined Column
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text(
-                                  "Total Joined",
-                                  style: TextStyle(
-                                      fontSize: 16, fontFamily: 'Montserrat'),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                // splashColor: AppColors.primary,
+                                borderRadius: BorderRadius.circular(20),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => GeneralUserListPage(title: "List of member", course: course,),
+                                    ),
+                                  );
+                                },
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      "Total Joined",
+                                      style: TextStyle(
+                                          fontSize: 16, fontFamily: 'Montserrat'),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      "${course.totalJoined}",
+                                      style: const TextStyle(fontSize: 20,
+                                          fontFamily: 'Montserrat',
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  "${course.totalJoined}",
-                                  style: const TextStyle(fontSize: 20,
-                                      fontFamily: 'Montserrat',
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
+                              ),
                             ),
                             // Average Rating Column
                             Column(
@@ -950,7 +999,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                 margin: const EdgeInsets.only(bottom: 16.0),
                 elevation: 0, // No shadow
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: SizedBox(
                   width: double.infinity,
@@ -1030,7 +1079,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                 margin: const EdgeInsets.only(bottom: 16.0),
                 elevation: 0, // No shadow
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: SizedBox(
                   width: double.infinity,
@@ -1042,158 +1091,70 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                         // Status Section
                         Row(
                           children: [
-                            Row(
-                              children: [
-                                Text(
-                                  'Tutor/Creator: ',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      if(isTutor) {
-                                        //widget.onTabChange(3);
-                                      } else {
-                                        // Navigate to user detail page
-                                        if(tutor != null) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => GeneralProfilePage(user: tutor!),
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    },
-                                    child: Text(
-                                      tutor?.username ?? "null",
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Card(
-                                    color: AppColors.primary,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0,
-                                        vertical: 4.0,
-                                      ),
-                                      child: Text(
-                                        'Tutor',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
+                            Text(
+                              'Tutor/Creator: ',
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(20),
+                                onTap: () {
+                                  if(isTutor) {
+                                    //widget.onTabChange(3);
+                                  } else {
+                                    // Navigate to user detail page
+                                    if(tutor != null) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => GeneralProfilePage(user: tutor!),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                child: Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 8.0),
+                                        child: Text(
+                                          tutor?.username ?? "null",
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 8.0),
+                                        child: Card(
+                                          color: AppColors.primary,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8.0,
+                                              vertical: 4.0,
+                                            ),
+                                            child: Text(
+                                              'Tutor',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                 ),
-                              ],
+                              ),
                             ),
-                            // Card(
-                            //   elevation: 2,
-                            //   margin: const EdgeInsets.symmetric(vertical: 8),
-                            //   shape: RoundedRectangleBorder(
-                            //     borderRadius: BorderRadius.circular(12),
-                            //   ),
-                            //   child: Padding(
-                            //     padding: const EdgeInsets.all(12.0),
-                            //     child: Row(
-                            //       children: [
-                            //         // Circular Profile Picture Placeholder
-                            //         Container(
-                            //           width: 60,
-                            //           height: 60,
-                            //           decoration: BoxDecoration(
-                            //             shape: BoxShape.circle,
-                            //             color: Colors.grey[300],
-                            //             image: tutor?.image != null
-                            //                 ? DecorationImage(
-                            //               image: NetworkImage(domainURL + '/storage/${tutor?.image!}',),
-                            //               fit: BoxFit.cover,
-                            //             )
-                            //                 : null,
-                            //           ),
-                            //           child: tutor?.image == null
-                            //               ? Center(
-                            //             // child: Text(
-                            //             //   tutor?.username.isNotEmpty
-                            //             //       ? tutor!.username[0].toUpperCase()
-                            //             //       : '?',
-                            //             //   style: TextStyle(
-                            //             //     fontSize: 24,
-                            //             //     fontWeight: FontWeight.bold,
-                            //             //     color: Colors.black54,
-                            //             //   ),
-                            //             // ),
-                            //           )
-                            //               : null,
-                            //         ),
-                            //         SizedBox(width: 12),
-                            //         // User Info Column
-                            //         Expanded(
-                            //           child: Column(
-                            //             crossAxisAlignment: CrossAxisAlignment.start,
-                            //             children: [
-                            //               Text(
-                            //                 tutor?.name ?? "null",
-                            //                 style: TextStyle(
-                            //                   fontSize: 16,
-                            //                   fontWeight: FontWeight.bold,
-                            //                 ),
-                            //                 maxLines: 1,
-                            //                 overflow: TextOverflow.ellipsis,
-                            //               ),
-                            //               SizedBox(height: 4),
-                            //               // Bio (if exists)
-                            //               if (tutor?.bio != null)
-                            //                 Text(
-                            //                   tutor?.bio! ?? "null",
-                            //                   style: TextStyle(
-                            //                     fontSize: 14,
-                            //                     color: Colors.grey[600],
-                            //                   ),
-                            //                   maxLines: 1,
-                            //                   overflow: TextOverflow.ellipsis,
-                            //                 ),
-                            //               SizedBox(height: 4),
-                            //               // Followers
-                            //               Row(
-                            //                 children: [
-                            //                   Icon(
-                            //                     FontAwesomeIcons.userGroup,
-                            //                     size: 16,
-                            //                     color: Colors.grey[600],
-                            //                   ),
-                            //                   SizedBox(width: 10),
-                            //                   Text(
-                            //                     '${tutor?.totalFollower} Followers',
-                            //                     style: TextStyle(
-                            //                       fontSize: 12,
-                            //                       color: Colors.grey[600],
-                            //                     ),
-                            //                   ),
-                            //                 ],
-                            //               ),
-                            //             ],
-                            //           ),
-                            //         ),
-                            //       ],
-                            //     ),
-                            //   ),
-                            // ),
                           ],
                         ),
                       ],
@@ -1438,7 +1399,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
         return Padding(
@@ -1473,9 +1434,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   // Lesson Name
                   TextFormField(
                     controller: nameLessonController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Lesson Name',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       hintText: 'Enter lesson name',
                     ),
                     validator: (value) {
@@ -1491,9 +1454,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   TextFormField(
                     controller: descLessonController,
                     maxLines: 3,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Description (optional)',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10.0),
@@ -1502,9 +1467,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   TextFormField(
                     controller: learnOutcomeLessonController,
                     maxLines: 3,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Learning Outcome (optional)',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16.0),
@@ -1564,8 +1531,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
       child: ClipPath(
         clipper: FolderClipper(), // Custom clipper for folder shape
         child: Card(
-          elevation: 3,
-          //color: AppColors.accent, // Folder-like color
+          elevation: 2,
+          color: AppColors.background2, // Folder-like color
           child: Padding(
             padding: const EdgeInsets.all(14.0),
             child: Column(
@@ -1882,7 +1849,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
         return Padding(
@@ -1917,9 +1884,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   // Lesson Name
                   TextFormField(
                     controller: nameTutorSlotController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Tutor Slot Title',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       hintText: 'Enter tutor slot title',
                     ),
                     validator: (value) {
@@ -1935,9 +1904,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   TextFormField(
                     controller: descTutorSlotController,
                     maxLines: 3,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Description (optional)',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10.0),
@@ -1946,9 +1917,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   DropdownButtonFormField<String>(
                     value: selectedType,
                     // This must match one of the item values or be null
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Type',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                     items: [
                       DropdownMenuItem(
@@ -1977,9 +1950,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   // Date Picker
                   TextFormField(
                     controller: dateTutorSlotController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Date',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       hintText: 'Select date',
                     ),
                     readOnly: true,
@@ -2016,7 +1991,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                         controller: startTimeTutorSlotController,
                         decoration: InputDecoration(
                           labelText: 'Start Time',
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           hintText: 'Select start time',
                           errorText: startTimeErrorMessage,
                         ),
@@ -2092,7 +2069,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                         controller: endTimeTutorSlotController,
                         decoration: InputDecoration(
                           labelText: 'End Time',
-                          border: const OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           hintText: 'Select end time',
                           errorText: endTimeErrorMessage, // Dynamically updated error message
                         ),
@@ -2152,9 +2131,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   // Location
                   TextFormField(
                     controller: locationTutorSlotController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: "Platform @ Location",
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       hintText: "Enter Platform @ Location",
                     ),
                     validator: (value) {
@@ -2296,9 +2277,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     return GestureDetector(
       child: Card(
         color: isPast ? Colors.grey[300] : Colors.white, // Gray out if past
-        elevation: 3,
+        elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(
@@ -2326,7 +2307,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                           color: cardColor,
                           margin: const EdgeInsets.only(bottom: 16.0),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                            borderRadius: BorderRadius.circular(20),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -2351,7 +2332,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                   color: Colors.green,
                                   margin: const EdgeInsets.only(bottom: 16.0),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: const Padding(
                                     padding: EdgeInsets.symmetric(
@@ -2372,7 +2353,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                   color: Colors.grey[500]!,
                                   margin: const EdgeInsets.only(bottom: 16.0),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: const Padding(
                                     padding: EdgeInsets.symmetric(
@@ -2392,7 +2373,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                 color: Colors.green[200]!,
                                 margin: const EdgeInsets.only(bottom: 16.0),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: const Padding(
                                   padding: EdgeInsets.symmetric(
@@ -2447,7 +2428,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return Padding(
@@ -2464,7 +2445,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   margin: const EdgeInsets.only(bottom: 16.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(2.0),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
               ),
@@ -2494,7 +2475,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                 color: Colors.blue[300]!,
                                 margin: const EdgeInsets.only(bottom: 16.0),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -2521,7 +2502,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                             bottom: 16.0),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
-                                              8.0),
+                                              20),
                                         ),
                                         child: const Padding(
                                           padding: EdgeInsets.symmetric(
@@ -2544,7 +2525,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                             bottom: 16.0),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
-                                              8.0),
+                                              20),
                                         ),
                                         child: const Padding(
                                           padding: EdgeInsets.symmetric(
@@ -2566,7 +2547,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                                           bottom: 16.0),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
-                                            8.0),
+                                            20),
                                       ),
                                       child: const Padding(
                                         padding: EdgeInsets.symmetric(
@@ -2697,7 +2678,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
         return Padding(
@@ -2732,9 +2713,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   // Lesson Name
                   TextFormField(
                     controller: nameTutorSlotController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Tutor Slot Title',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       hintText: 'Enter tutor slot title',
                     ),
                     validator: (value) {
@@ -2750,9 +2733,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   TextFormField(
                     controller: descTutorSlotController,
                     maxLines: 3,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Description (optional)',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10.0),
@@ -2761,9 +2746,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   DropdownButtonFormField<String>(
                     value: selectedType,
                     // This must match one of the item values or be null
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Type',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                     items: [
                       DropdownMenuItem(
@@ -2792,9 +2779,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   // Date Picker
                   TextFormField(
                     controller: dateTutorSlotController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Date',
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       hintText: 'Select date',
                     ),
                     readOnly: true,
@@ -2831,7 +2820,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                         controller: startTimeTutorSlotController,
                         decoration: InputDecoration(
                           labelText: 'Start Time',
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           hintText: 'Select start time',
                           errorText: startTimeErrorMessage,
                         ),
@@ -2907,7 +2898,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                         controller: endTimeTutorSlotController,
                         decoration: InputDecoration(
                           labelText: 'End Time',
-                          border: const OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           hintText: 'Select end time',
                           errorText: endTimeErrorMessage, // Dynamically updated error message
                         ),
@@ -2967,9 +2960,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   // Location
                   TextFormField(
                     controller: locationTutorSlotController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: "Platform @ Location",
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       hintText: "Enter Platform @ Location",
                     ),
                     validator: (value) {
@@ -3150,7 +3145,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                           margin: const EdgeInsets.only(bottom: 16.0),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                            borderRadius: BorderRadius.circular(20),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
@@ -3278,7 +3273,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
         return Padding(
@@ -3380,7 +3375,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
 
@@ -3431,9 +3426,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                         Expanded(
                           child: TextField(
                             controller: commentReviewController,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               hintText: 'Add a comment (optional)',
-                              border: OutlineInputBorder(),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
                             ),
                           ),
                         ),
@@ -3482,7 +3479,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
 
@@ -3533,9 +3530,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                         Expanded(
                           child: TextField(
                             controller: commentReviewController,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               hintText: 'Add a comment (optional)',
-                              border: OutlineInputBorder(),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
                             ),
                           ),
                         ),
@@ -3624,7 +3623,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
       child: Card(
         // color: Colors.grey[100],
         margin: const EdgeInsets.symmetric(vertical: 4.0),
-        elevation: 3,
+        elevation: 2,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
@@ -3649,7 +3648,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                           child: Card(
                             color: Colors.grey[400],
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Padding(
                               padding: EdgeInsets.symmetric(
@@ -3667,13 +3666,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                             ),
                           ),
                         ),
-                      if(review!.status == 1 && isStudent)
+                      if(review!.status == 1)
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Card(
                             color: AppColors.primary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Padding(
                               padding: EdgeInsets.symmetric(
@@ -3740,7 +3739,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return Padding(
@@ -3757,7 +3756,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                   margin: const EdgeInsets.only(bottom: 16.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(2.0),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
               ),
@@ -3780,7 +3779,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                           child: Card(
                             color: AppColors.primary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(

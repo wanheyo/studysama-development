@@ -14,11 +14,11 @@ class ApiService {
   // final String domainUrl = 'https://{domain}';
 
   //development
-  final String domainUrl = 'https://ac15-2001-e68-821b-8300-3d96-c442-99b7-aa45.ngrok-free.app';
+  final String domainUrl = 'http://khairulvps.cloud';
   late final String baseUrl;
 
   final openAIUrl = Uri.parse('https://api.openai.com/v1/chat/completions');
-  final String openAIKey = '';
+  final String openAIKey = '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';
 
   ApiService() {
     baseUrl = domainUrl + '/api/studysama';
@@ -347,22 +347,58 @@ class ApiService {
 
   // SECTION START: COURSE
 
-  Future<void> course_store(String token, String name, String desc) async {
+  Future<void> course_store(String token, String name, String desc, File? picked_image) async {
+    if(picked_image != null) {
+      print(picked_image.path.toString());
+    }
+
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/course/store'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'name': name,
-          'desc': desc,
-        }),
-      );
+      // Set up the request
+      final uri = Uri.parse('$baseUrl/course/store');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add headers
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      // Add form fields only if they are not null
+      request.fields['name'] = name;
+      request.fields['desc'] = desc;
+
+      // Attach the file if it exists
+      if (picked_image != null) {
+        final mimeType = lookupMimeType(picked_image.path) ?? 'application/octet-stream';
+
+        request.files.add(await http.MultipartFile.fromPath(
+          'image', // This key should match what the server expects
+          picked_image.path,
+          contentType: MediaType.parse(mimeType),
+        ));
+      }
+
+      // Send the request
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
       print("Status Code: ${response.statusCode}");
       print("Response Body: ${response.body}");
+
+      // final response = await http.post(
+      //   Uri.parse('$baseUrl/course/store'),
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Authorization': 'Bearer $token',
+      //   },
+      //   body: jsonEncode({
+      //     'name': name,
+      //     'desc': desc,
+      //   }),
+      // );
+      //
+      // print("Status Code: ${response.statusCode}");
+      // print("Response Body: ${response.body}");
 
       if (response.statusCode == 201) {
         // Handle success
@@ -396,24 +432,62 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> course_update(String token, int course_id, String name, String desc, int status) async {
+  Future<Map<String, dynamic>> course_update(String token, int course_id, String name, String desc, int status, File? picked_image) async {
+    if(picked_image != null) {
+      print(picked_image.path.toString());
+    }
+
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/course/update'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'course_id': course_id,
-          'name': name,
-          'desc': desc,
-          'status': status,
-        }),
-      );
+      // Set up the request
+      final uri = Uri.parse('$baseUrl/course/update');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add headers
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      });
+
+      // Add form fields only if they are not null
+      request.fields['course_id'] = course_id.toString();
+      request.fields['name'] = name;
+      request.fields['desc'] = desc;
+      request.fields['status'] = status.toString();
+
+      // Attach the file if it exists
+      if (picked_image != null) {
+        final mimeType = lookupMimeType(picked_image.path) ?? 'application/octet-stream';
+
+        request.files.add(await http.MultipartFile.fromPath(
+          'image', // This key should match what the server expects
+          picked_image.path,
+          contentType: MediaType.parse(mimeType),
+        ));
+      }
+
+      // Send the request
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
       print("Status Code: ${response.statusCode}");
       print("Response Body: ${response.body}");
+
+      // final response = await http.post(
+      //   Uri.parse('$baseUrl/course/update'),
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Authorization': 'Bearer $token',
+      //   },
+      //   body: jsonEncode({
+      //     'course_id': course_id,
+      //     'name': name,
+      //     'desc': desc,
+      //     'status': status,
+      //   }),
+      // );
+      //
+      // print("Status Code: ${response.statusCode}");
+      // print("Response Body: ${response.body}");
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         // Parse and return the updated course data
@@ -703,6 +777,61 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> index_user_course_join(String token, int course_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/course/index_user_course_join'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'course_id': course_id,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch users course join');
+        } else {
+          throw Exception('Failed to fetch users course join: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching users course join: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> index_user_badge(String token, int? user_id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/users/index_user_badge'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'user_id': user_id
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          throw Exception(responseData['message'] ?? 'Failed to fetch user badges');
+        } else {
+          throw Exception('Failed to fetch user badges: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error fetching user badges: $e');
+    }
+  }
 
   // SECTION END: COURSE
 
@@ -977,7 +1106,7 @@ class ApiService {
     if(picked_file != null) {
       print(picked_file.path.toString());
       file_name = p.basename(picked_file.path);
-      file_type = p.extension(picked_file.path);
+      file_type = p.extension(picked_file.path).replaceAll('.', '');
     }
 
     try {
@@ -1007,6 +1136,7 @@ class ApiService {
         request.fields['file_id'] = file_id.toString();
 
       request.fields['file_name'] = file_name;
+      request.fields['file_type'] = file_type;
 
       // Attach the file if it exists
       if (picked_file != null) {
@@ -1367,9 +1497,7 @@ class ApiService {
 
 // SECTION START: OPEN AI
 
-  Future<Map<String, dynamic>> generateQuizFromUrl(String url) async {
-    String textContent = url;
-
+  Future<Map<String, dynamic>> generateQuizFromUrl(String textContent) async {;
     try {
       final openAiResponse = await http.post(
         openAIUrl,
@@ -1387,18 +1515,20 @@ class ApiService {
             {
               'role': 'user',
               'content': '''
-            Generate 5 multiple-choice questions based on the following url:
+            Generate 5 multiple-choice questions based on the following url/content(subject/topic):
             $textContent
             Each question should have 4 options with one correct answer. Provide the response in this structure:
             Question: [Question Text]
             Options: [Option1; Option2; Option3; Option4]
             Answer: [Correct answer index of option]
-            Response should be like this, the answer should be an index of the option, ignore space in response except in context of title, question, options and answer
-            
+            Response should be like this, the answer should be an index of the option.
+            Also make sure the answer index not repetition (all 5 question have A (0 index) option answer).
+            Example = [{question: What is Apple?, options: [Vegetable, Fruit, Water, Bread], answer: 1}]
+            Please follow this instruction and example i provided or else my cat died :(
           ''',
             },
           ],
-          'max_tokens': 800,
+          'max_tokens': 1000,
           'temperature': 0.7,
         }),
       );
@@ -1420,7 +1550,7 @@ class ApiService {
             final questions = _processQuizText(rawText);
 
             final response = {
-              "title": "Quiz from $url",
+              "title": "Quiz from $textContent",
               "data": questions,
             };
 

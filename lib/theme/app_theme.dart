@@ -12,7 +12,9 @@ class AppTheme {
     ),
     cardTheme: CardTheme(
       color: AppColors.background2,
-
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20), // Rounded corners
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -20,7 +22,7 @@ class AppTheme {
         foregroundColor: Colors.white, // Button text color
         textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16, fontWeight: FontWeight.bold,),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // Rounded corners
+          borderRadius: BorderRadius.circular(20), // Rounded corners
         ),
         //padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
@@ -38,7 +40,7 @@ class AppTheme {
         side: BorderSide(color: AppColors.primary, width: 2), // Border color and width
         textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16, fontWeight: FontWeight.bold,),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // Rounded corners
+          borderRadius: BorderRadius.circular(20), // Rounded corners
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
@@ -63,7 +65,7 @@ class AppTheme {
         foregroundColor: Colors.white, // Button text color
         textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16, fontWeight: FontWeight.bold,),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // Rounded corners
+          borderRadius: BorderRadius.circular(20), // Rounded corners
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
@@ -81,7 +83,7 @@ class AppTheme {
         side: BorderSide(color: AppColors.accent, width: 2), // Border color and width
         textStyle: TextStyle(fontFamily: 'Montserrat', fontSize: 16, fontWeight: FontWeight.bold,),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // Rounded corners
+          borderRadius: BorderRadius.circular(20), // Rounded corners
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),

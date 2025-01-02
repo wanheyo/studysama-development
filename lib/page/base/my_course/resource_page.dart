@@ -276,6 +276,22 @@ class _ResourcePageState extends State<ResourcePage> {
     }
   }
 
+  bool _isWebPageLink(String url) {
+    final uri = Uri.parse(url);
+    final mediaExtensions = ['.mp4', '.mp3', '.jpg', '.jpeg', '.png', '.gif', '.avi', '.mov', '.wmv'];
+    final mediaDomains = ['youtube.com', 'youtu.be', 'vimeo.com', 'soundcloud.com'];
+
+    if (mediaExtensions.any((ext) => uri.path.endsWith(ext))) {
+      return false;
+    }
+
+    if (mediaDomains.any((domain) => uri.host.contains(domain))) {
+      return false;
+    }
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget thumbnail = _buildThumbnail();
@@ -354,7 +370,7 @@ class _ResourcePageState extends State<ResourcePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(20),
                       child: Container(
                           color: Colors.white,
                           child: GestureDetector(
@@ -388,57 +404,112 @@ class _ResourcePageState extends State<ResourcePage> {
                   const SizedBox(height: 16),
                   buildResourceInfoSection(),
 
-                  if(widget.resource.link != null) ...[
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  AIQuizPage(resource: widget.resource),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32.0, vertical: 12.0),
-                          textStyle: const TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold,
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: (widget.resource.link != null && _isWebPageLink(widget.resource.link!))
+                          ? () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AIQuizPage(resource: widget.resource),
                           ),
+                        );
+                      }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: (widget.resource.link != null && _isWebPageLink(widget.resource.link!))
+                            ? AppColors.primary
+                            : Colors.grey,
+                        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Montserrat',
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align items
-                          children: [
-                            const Text(
-                              "Generate AI Quiz",
-                              style: TextStyle(
-                                color: Colors.white, // Change text color
-                                fontSize: 16.0, // Change font size
-                                fontWeight: FontWeight.bold, // Change font weight
-                              ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align items
+                        children: [
+                          const Text(
+                            "Generate AI Quiz",
+                            style: TextStyle(
+                              color: Colors.white, // Change text color
+                              fontSize: 16.0, // Change font size
+                              fontWeight: FontWeight.bold, // Change font weight
                             ),
-                            const Icon(
-                              FontAwesomeIcons.robot, // Use the AI icon from FontAwesome
-                              color: Colors.white, // Change icon color
+                          ),
+                          const Icon(
+                            FontAwesomeIcons.robot, // Use the AI icon from FontAwesome
+                            color: Colors.white, // Change icon color
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (widget.resource.link == null) ... [
+                    const SizedBox(height: 6),
+                    Card(
+                      color: Colors.yellow[100],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Icon(FontAwesomeIcons.circleInfo, color: Colors.yellow[800]),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "File resources are currently not supported for the AI-generated quiz.",
+                                style: TextStyle(
+                                  color: Colors.yellow[800],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
                   ],
+                  if (widget.resource.link != null && !_isWebPageLink(widget.resource.link!)) ... [
+                    const SizedBox(height: 6),
+                    Card(
+                      color: Colors.yellow[100],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Icon(FontAwesomeIcons.circleInfo, color: Colors.yellow[800]),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "The resource link is a media link (video, image, audio, etc.) currently not supported for the AI-generated quiz.",
+                                style: TextStyle(
+                                  color: Colors.yellow[800],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 16),
 
                   // Second Card (Comments Section)
                   Card(
                     margin: const EdgeInsets.only(bottom: 16.0),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: SizedBox(
                       width: double.infinity,
@@ -463,13 +534,13 @@ class _ResourcePageState extends State<ResourcePage> {
                                 // Metadata on the Right
                                 Row(
                                   children: [
-                                    if (widget.resource.resourceFile != null) ...[
-                                      _buildDataRow(
-                                        icon: FontAwesomeIcons.download,
-                                        value: "${widget.resource.resourceFile!.totalDownload}",
-                                      ),
-                                      const SizedBox(width: 16),
-                                    ],
+                                    // if (widget.resource.resourceFile != null) ...[
+                                    //   _buildDataRow(
+                                    //     icon: FontAwesomeIcons.download,
+                                    //     value: "${widget.resource.resourceFile!.totalDownload}",
+                                    //   ),
+                                    //   const SizedBox(width: 16),
+                                    // ],
                                     _buildDataRow(
                                       icon: FontAwesomeIcons.comment,
                                       value: "${comments.length}",
@@ -484,14 +555,27 @@ class _ResourcePageState extends State<ResourcePage> {
                                         color: Colors.black,
                                       ),
                                       onPressed: () async {
-                                            final Uri uri = Uri.parse(widget.resource.link!);
-                                            if (await canLaunchUrl(uri)) {
-                                              await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                            } else {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(content: Text("Could not open link")
-                                            ),
-                                          );
+                                        if(widget.resource.resourceFile != null) {
+                                          final Uri uri = Uri.parse(domainURL + '/storage/${widget.resource.resourceFile!.name}',);
+                                          if (await canLaunchUrl(uri)) {
+                                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text("Could not download file")),
+                                            );
+                                          }
+                                        }
+
+                                        if(widget.resource.link != null) {
+                                          final Uri uri = Uri.parse(widget.resource.link!);
+                                          if (await canLaunchUrl(uri)) {
+                                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text("Could not open link")
+                                              ),
+                                            );
+                                          }
                                         }
                                       },
                                     ),
@@ -513,7 +597,6 @@ class _ResourcePageState extends State<ResourcePage> {
                                     child: Row(
                                       children: [
                                         _buildSegmentedButton('All'),
-                                        const SizedBox(width: 8),
                                         _buildSegmentedButton('Tutor'),
                                       ],
                                     ),
@@ -579,7 +662,7 @@ class _ResourcePageState extends State<ResourcePage> {
                                       decoration: InputDecoration(
                                         hintText: "Add a comment...",
                                         border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8.0),
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
                                       ),
                                     ),
@@ -593,7 +676,7 @@ class _ResourcePageState extends State<ResourcePage> {
                                       backgroundColor: AppColors.primary,
                                       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
                                     ),
                                     child: const Text("Post"),
@@ -610,7 +693,7 @@ class _ResourcePageState extends State<ResourcePage> {
                                       decoration: InputDecoration(
                                         hintText: "You must join the course to comment.",
                                         border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8.0),
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
                                       ),
                                     ),
@@ -628,7 +711,7 @@ class _ResourcePageState extends State<ResourcePage> {
                                       backgroundColor: Colors.grey, // Disabled button color
                                       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
                                     ),
                                     child: const Text("Post"),
@@ -672,7 +755,7 @@ class _ResourcePageState extends State<ResourcePage> {
           margin: const EdgeInsets.only(bottom: 16.0),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: SizedBox(
             width: double.infinity,
@@ -694,7 +777,7 @@ class _ResourcePageState extends State<ResourcePage> {
                     color: cardColor,
                     margin: const EdgeInsets.only(bottom: 16.0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
@@ -781,7 +864,7 @@ class _ResourcePageState extends State<ResourcePage> {
                   height: 100,
                   child: imageProvider != null
                       ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(20),
                     child: Image(
                       image: imageProvider,
                       fit: BoxFit.cover, // Ensure the image does not stretch
@@ -846,7 +929,18 @@ class _ResourcePageState extends State<ResourcePage> {
         color: Colors.grey[300],
         alignment: Alignment.center,
         child: Center(
-          child: Column(
+          child: widget.resource.resourceFile != null && ['jpg', 'jpeg', 'png'].contains(widget.resource.resourceFile!.type.toLowerCase())
+              ? Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              color: Colors.grey[300],
+              image: DecorationImage(
+                image: NetworkImage(domainURL + '/storage/${widget.resource.resourceFile!.name}'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          )
+          : Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
@@ -921,7 +1015,7 @@ class _ResourcePageState extends State<ResourcePage> {
                           child: Card(
                             color: AppColors.primary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -973,7 +1067,7 @@ class _ResourcePageState extends State<ResourcePage> {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return Padding(
@@ -990,7 +1084,7 @@ class _ResourcePageState extends State<ResourcePage> {
                   margin: const EdgeInsets.only(bottom: 16.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(2.0),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
               ),
@@ -1013,7 +1107,7 @@ class _ResourcePageState extends State<ResourcePage> {
                           child: Card(
                             color: AppColors.primary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -1110,18 +1204,30 @@ class _ResourcePageState extends State<ResourcePage> {
   }
 
   // Build segmented button
+
   Widget _buildSegmentedButton(String label) {
-    return ElevatedButton(
-      onPressed: () {
+    return GestureDetector(
+      onTap: () {
         setState(() {
           selectedFilter = label;
         });
         _applyFiltersAndSort();
       },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: selectedFilter == label ? AppColors.primary : AppColors.accent,
+      child: Card(
+
+        color: selectedFilter == label ? AppColors.secondary : Colors.grey[200],
+        elevation: 1,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selectedFilter == label ? Colors.white : Colors.black,
+              fontWeight: selectedFilter == label ? FontWeight.bold : FontWeight.normal, // Set font weight
+            ),
+          ),
+        ),
       ),
-      child: Text(label),
     );
   }
 

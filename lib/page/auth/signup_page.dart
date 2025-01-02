@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluentui_icons/fluentui_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:studysama/page/auth/login_Page.dart';
 import 'package:studysama/services/firebase_auth_services.dart';
@@ -21,6 +22,10 @@ class _SignupPageState extends State<SignupPage> {
 
   final _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
+
+  DateTime? currentBackPressTime;
+  bool canPopNow = false;
+  int requiredSeconds = 2;
 
   @override
   void dispose() {
@@ -72,145 +77,180 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: LoaderOverlay(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Form(
-              key: _formKey, // Associate the form key with the Form widget
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Spacer(flex: 4), // Add some space at the top
-                  Text(
-                    "StudySama",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.05), // 5% of screen height
-
-                  // Username TextField with validation
-                  TextFormField(
-                    controller: _usernameController,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                      labelText: "Username",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(FluentSystemIcons.ic_fluent_person_filled),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your username';
-                      }
-                      if (value.length < 6) {
-                        return 'Username must be at least 6 characters';
-                      }
-                      if (value.length > 16) {
-                        return 'Username must be at most 16 characters';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02), // 2% of screen height
-
-                  // Email TextField with validation
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(FluentSystemIcons.ic_fluent_mail_filled),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      // Basic email validation
-                      String emailPattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b';
-                      RegExp regExp = RegExp(emailPattern);
-                      if (!regExp.hasMatch(value)) {
-                        return 'Please enter a valid email address';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02), // 2% of screen height
-
-                  // Password TextField with validation
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(FluentSystemIcons.ic_fluent_lock_filled),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible ? FluentSystemIcons.ic_fluent_eye_show_filled : FluentSystemIcons.ic_fluent_eye_hide_filled,
+      backgroundColor: AppColors.background,
+      body: PopScope(
+        canPop: canPopNow,
+        onPopInvokedWithResult: onPopInvoked,
+        child: LoaderOverlay(
+          child: SafeArea(
+            child: SingleChildScrollView(
+              physics: ClampingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: screenHeight - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(height: screenHeight * 0.1),
+                        Image.asset(
+                          'assets/SS_Header_Transparent_16-9.png',
+                          height: 150,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      // Validate password length
-                      if (value.length < 8) {
-                        return 'Password must be at least 8 characters long';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.05), // 5% of screen height
+                        SizedBox(height: screenHeight * 0.05),
 
-                  // Sign Up Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _signup,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                        child: Text(
-                          "Sign Up",
-                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        // Username field
+                        TextFormField(
+                          controller: _usernameController,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            labelText: "Username",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            prefixIcon: Icon(FontAwesomeIcons.solidUser),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your username';
+                            }
+                            if (value.length < 6) {
+                              return 'Username must be at least 6 characters';
+                            }
+                            if (value.length > 16) {
+                              return 'Username must be at most 16 characters';
+                            }
+                            return null;
+                          },
                         ),
-                      ),
-                      // style: ElevatedButton.styleFrom(
-                      //   backgroundColor: Colors.blue,
-                      //   shape: RoundedRectangleBorder(
-                      //     borderRadius: BorderRadius.circular(10),
-                      //   ),
-                      // ),
-                    ),
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02), // 2% of screen height
+                        SizedBox(height: screenHeight * 0.02),
 
-                  // Back to login TextButton
-                  TextButton(
-                    onPressed: _login,
-                    child: Text(
-                      "Already have an account?",
-                      // style: TextStyle(color: Colors.blue),
+                        // Email field
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: "Email",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            prefixIcon: Icon(FontAwesomeIcons.solidEnvelope),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            String emailPattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b';
+                            RegExp regExp = RegExp(emailPattern);
+                            if (!regExp.hasMatch(value)) {
+                              return 'Please enter a valid email address';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+
+                        // Password field
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: !_isPasswordVisible,
+                          decoration: InputDecoration(
+                            labelText: "Password",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            prefixIcon: Icon(FontAwesomeIcons.lock),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            if (value.length < 8) {
+                              return 'Password must be at least 8 characters long';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: screenHeight * 0.05),
+
+                        // Sign Up Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _signup,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                              child: Text(
+                                "Sign Up",
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+
+                        // Login link
+                        TextButton(
+                          onPressed: _login,
+                          child: Text("Already have an account?"),
+                        ),
+
+                        // Add bottom padding when keyboard is open
+                        SizedBox(height: isKeyboardOpen ? screenHeight * 0.1 : screenHeight * 0.05),
+                      ],
                     ),
                   ),
-                  Spacer(flex: 3), // Add some space at the bottom
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  void onPopInvoked(bool didPop, dynamic result) {
+    if (didPop) return;
+
+    DateTime now = DateTime.now();
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime!) > Duration(seconds: requiredSeconds)) {
+      currentBackPressTime = now;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Press back twice to exit')),
+      );
+
+      Future.delayed(
+        Duration(seconds: requiredSeconds),
+            () {
+          setState(() {
+            canPopNow = false;
+          });
+        },
+      );
+
+      setState(() {
+        canPopNow = true;
+      });
+    }
   }
 }

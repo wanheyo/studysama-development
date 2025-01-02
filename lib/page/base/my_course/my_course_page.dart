@@ -46,6 +46,8 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
+  String get domainURL => apiService.domainUrl;
+
   String token = "";
   User? user;
   int user_id = 0;
@@ -283,12 +285,18 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
           ]
         ),
         backgroundColor: AppColors.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ), // Rounded corners
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
             Tab(text: "Created Courses"),
             Tab(text: "Joined Courses"),
           ],
+          dividerHeight: 0,
           labelStyle: TextStyle(
               fontFamily: 'Montserrat',
               fontSize: 16,
@@ -298,7 +306,7 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
               fontFamily: 'Montserrat',
               fontSize: 16,
               color: Colors.white),
-          indicatorColor: AppColors.background,
+          indicatorColor: AppColors.secondary,
           indicatorWeight: 5,
           // indicator: BoxDecoration(
           //     color: Colors.teal, borderRadius: BorderRadius.circular(8)),
@@ -323,7 +331,7 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
     return GestureDetector(
       onTap: () => onPressed(label),
       child: Card(
-        color: selected == label ? AppColors.primary : Colors.grey[200],
+        color: selected == label ? AppColors.secondary : Colors.grey[200],
         elevation: 1,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -346,10 +354,10 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
         hintText: "Search by name or description",
         hintStyle: const TextStyle(fontFamily: 'Montserrat'),
         prefixIcon: Icon(FontAwesomeIcons.magnifyingGlass, color: AppColors.primary),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.primary),
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(20),
         ),
       ),
       onChanged: (value) {
@@ -386,7 +394,7 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         ),
       ),
     );
@@ -410,7 +418,7 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
           ),
           TextSpan(
             text: text.substring(startIndex, endIndex), // Matched text
-            style: defaultStyle?.copyWith(color: AppColors.primary), // Highlight matched text
+            style: defaultStyle?.copyWith(color: AppColors.tertiary), // Highlight matched text
           ),
           TextSpan(
             text: text.substring(endIndex), // Text after match
@@ -528,22 +536,24 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
                       child: Card(
                         color: Colors.white,
                         margin: const EdgeInsets.only(bottom: 16.0),
-                        elevation: 3,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20), // Rounded corners
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Full-Width Placeholder Image (Optional if `course.image` is available)
                             ClipRRect(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                              child:
-                              // course.image != null && course.image.isNotEmpty
-                              //     ? Image.asset(
-                              //   course.image,
-                              //   fit: BoxFit.cover,
-                              //   width: double.infinity,
-                              //   height: 180,
-                              // ) :
-                              Container(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              child: course.image != null
+                                  ? Image.network(
+                                domainURL + '/storage/${course.image}',
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 180,
+                              )
+                                  : Container(
                                 width: double.infinity,
                                 height: 180,
                                 color: Colors.grey[300], // Blank grey background
@@ -552,7 +562,7 @@ class _MyCoursePageState extends State<MyCoursePage> with SingleTickerProviderSt
                                     course.name,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Colors.black,
+                                      color: Colors.black54,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18,
                                     ),

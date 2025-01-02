@@ -10,9 +10,10 @@ import '../../../services/api_service.dart';
 import '../../../utils/colors.dart';
 
 class AIQuizPage extends StatefulWidget {
-  final Resource resource;
+  final Resource? resource;
+  final String? content;
 
-  const AIQuizPage({Key? key, required this.resource}) : super(key: key);
+  const AIQuizPage({Key? key, this.resource, this.content}) : super(key: key);
 
   @override
   _AIQuizPageState createState() => _AIQuizPageState();
@@ -105,10 +106,22 @@ class _AIQuizPageState extends State<AIQuizPage> {
     setState(() {
       isLoading = true;
     });
-    //print("course_id: " + course_id.toString());
 
     try {
-      final data = await apiService.generateQuizFromUrl(widget.resource.link!);
+      String content = "";
+      if(widget.resource != null) {
+        if(widget.resource!.link != null) {
+          content = widget.resource!.link!;
+        }
+      }
+
+      if(widget.content != null) {
+        if(widget.content!.isNotEmpty) {
+          content = widget.content!;
+        }
+      }
+
+      final data = await apiService.generateQuizFromUrl(content);
       setState(() {
         title = data['title'] ?? 'null';
 
@@ -118,8 +131,6 @@ class _AIQuizPageState extends State<AIQuizPage> {
 
         userAnswers = List.filled(quizItem.length, null);
         startTime = DateTime.now();
-
-        // isLoading = false;
       });
     } catch (e) {
       setState(() {
@@ -128,10 +139,6 @@ class _AIQuizPageState extends State<AIQuizPage> {
     } finally {
       setState(() {
         isLoading = false;
-        // const SnackBar(
-        //   content: Text('Error'),
-        //   backgroundColor: Colors.red,
-        // );
       });
     }
   }
@@ -241,7 +248,7 @@ class _AIQuizPageState extends State<AIQuizPage> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.amber.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.amber),
               ),
               child: const Row(
@@ -316,98 +323,31 @@ class _AIQuizPageState extends State<AIQuizPage> {
             ),
         ],
       ),
-      body: isLoading ?
-      Center(
+      body: isLoading
+          ? Center(
         child: CircularProgressIndicator(color: Colors.white),
-      ) :
-      ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: quizItem.length,
-        itemBuilder: (context, index) {
-          final question = quizItem[index];
-          return Card(
-            elevation: 4,
-            margin: const EdgeInsets.only(bottom: 16),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isSubmitted
-                      ? (userAnswers[index] == question.correctAnswerIndex
-                      ? Colors.green
-                      : Colors.red)
-                      : Colors.transparent,
-                  width: 2,
-                ),
+      )
+          : Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Card(
+              color: Colors.yellow[100],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          child: Text(
-                            '${index + 1}',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            question.question,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ...List.generate(
-                      question.options.length,
-                          (optionIndex) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: InkWell(
-                          onTap: isSubmitted
-                              ? null
-                              : () {
-                            setState(() {
-                              userAnswers[index] = optionIndex;
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: _getOptionColor(
-                                  index, optionIndex, question.correctAnswerIndex),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: userAnswers[index] == optionIndex
-                                    ? Theme.of(context).primaryColor
-                                    : Colors.grey.shade300,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              children: [
-                                Text(
-                                  String.fromCharCode(65 + optionIndex),
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(child: Text(question.options[optionIndex])),
-                                if (isSubmitted &&
-                                    optionIndex == question.correctAnswerIndex)
-                                  const Icon(Icons.check_circle,
-                                      color: Colors.green),
-                              ],
-                            ),
-                          ),
+                    Icon(FontAwesomeIcons.circleInfo, color: Colors.yellow[800]),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "The AI Generated Quiz is not 100% guaranteed correct, please refer to your tutor for guidance.",
+                        style: TextStyle(
+                          color: Colors.yellow[800],
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -415,18 +355,154 @@ class _AIQuizPageState extends State<AIQuizPage> {
                 ),
               ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: quizItem.isEmpty
+                ? Center(
+              child: ElevatedButton(
+                onPressed: fetchQuiz,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: AppColors.tertiary, // Button background color
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: Text('Regenerate Quiz'),
+              ),
+            )
+                : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: quizItem.length,
+              itemBuilder: (context, index) {
+                final question = quizItem[index];
+                return Card(
+                  elevation: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSubmitted
+                            ? (userAnswers[index] ==
+                            question.correctAnswerIndex
+                            ? Colors.green
+                            : Colors.red)
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor:
+                                Theme.of(context).primaryColor,
+                                child: Text(
+                                  '${index + 1}',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  question.question,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          ...List.generate(
+                            question.options.length,
+                                (optionIndex) => Padding(
+                              padding:
+                              const EdgeInsets.only(bottom: 8),
+                              child: InkWell(
+                                onTap: isSubmitted
+                                    ? null
+                                    : () {
+                                  setState(() {
+                                    userAnswers[index] =
+                                        optionIndex;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _getOptionColor(
+                                        index,
+                                        optionIndex,
+                                        question
+                                            .correctAnswerIndex),
+                                    borderRadius:
+                                    BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: userAnswers[index] ==
+                                          optionIndex
+                                          ? Theme.of(context)
+                                          .primaryColor
+                                          : Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        String.fromCharCode(
+                                            65 + optionIndex),
+                                        style: const TextStyle(
+                                            fontWeight:
+                                            FontWeight.bold),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                          child: Text(question
+                                              .options[optionIndex])),
+                                      if (isSubmitted &&
+                                          optionIndex ==
+                                              question
+                                                  .correctAnswerIndex)
+                                        const Icon(Icons.check_circle,
+                                            color: Colors.green),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: !isSubmitted
           ? FloatingActionButton.extended(
         onPressed: _submitQuiz,
-        label: const Text('Submit Quiz', style: TextStyle(fontWeight: FontWeight.bold),),
+        label: const Text(
+          'Submit Quiz',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         icon: const Icon(FontAwesomeIcons.check),
       )
           : null,
     );
   }
+
 
   // Color _getOptionColor(int questionIndex, int optionIndex, int correctAnswer) {
   //   if (!isSubmitted) {

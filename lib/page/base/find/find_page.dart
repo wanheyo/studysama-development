@@ -318,12 +318,18 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
             ]
         ),
         backgroundColor: AppColors.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ), // Rounded corners
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
             Tab(text: "Courses"),
             Tab(text: "Users"),
           ],
+          dividerHeight: 0,
           labelStyle: TextStyle(
               fontFamily: 'Montserrat',
               fontSize: 16,
@@ -333,7 +339,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
               fontFamily: 'Montserrat',
               fontSize: 16,
               color: Colors.white),
-          indicatorColor: AppColors.background,
+          indicatorColor: AppColors.secondary,
           indicatorWeight: 5,
           // indicator: BoxDecoration(
           //     color: Colors.teal, borderRadius: BorderRadius.circular(8)),
@@ -358,7 +364,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
     return GestureDetector(
       onTap: () => onPressed(label),
       child: Card(
-        color: selected == label ? AppColors.primary : Colors.grey[200],
+        color: selected == label ? AppColors.secondary : Colors.grey[200],
         elevation: 1,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -381,10 +387,10 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
         hintText: hintText,
         hintStyle: const TextStyle(fontFamily: 'Montserrat'),
         prefixIcon: Icon(FontAwesomeIcons.magnifyingGlass, color: AppColors.primary),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.primary),
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(20),
         ),
       ),
       onChanged: (value) {
@@ -423,7 +429,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
         ),
       ),
@@ -448,7 +454,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
           ),
           TextSpan(
             text: text.substring(startIndex, endIndex), // Matched text
-            style: defaultStyle?.copyWith(color: AppColors.primary), // Highlight matched text
+            style: defaultStyle?.copyWith(color: AppColors.tertiary), // Highlight matched text
           ),
           TextSpan(
             text: text.substring(endIndex), // Text after match
@@ -545,145 +551,145 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
                         initializeData();
                       });
                     },
-                    child: Container(
-                      child: Card(
-                        color: Colors.white,
-                        margin: const EdgeInsets.only(bottom: 16.0),
-                        elevation: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Full-Width Placeholder Image (Optional if `course.image` is available)
-                            ClipRRect(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                              child:
-                              // course.image != null && course.image.isNotEmpty
-                              //     ? Image.asset(
-                              //   course.image,
-                              //   fit: BoxFit.cover,
-                              //   width: double.infinity,
-                              //   height: 180,
-                              // ) :
-                              Container(
-                                width: double.infinity,
-                                height: 180,
-                                color: Colors.grey[300], // Blank grey background
-                                child: Center(
-                                  child: Text(
-                                    course.name,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                    ),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20), // Rounded corners
+                      ),
+                      color: Colors.white,
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      elevation: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Full-Width Placeholder Image (Optional if `course.image` is available)
+                          ClipRRect(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                            child: course.image != null
+                                ? Image.network(
+                              domainURL + '/storage/${course.image}',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 180,
+                            )
+                                : Container(
+                              width: double.infinity,
+                              height: 180,
+                              color: Colors.grey[300], // Blank grey background
+                              child: Center(
+                                child: Text(
+                                  course.name,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
                                   ),
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Course Name
-                                  // Text(
-                                  //   course.name,
-                                  //   style: TextStyle(
-                                  //     color: AppColors.primary,
-                                  //     fontWeight: FontWeight.bold,
-                                  //     fontSize: 16,
-                                  //   ),
-                                  // ),
-                                  _highlightedText(
-                                    course.name,
-                                    _searchTerm,
-                                    defaultStyle: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Course Name
+                                // Text(
+                                //   course.name,
+                                //   style: TextStyle(
+                                //     color: AppColors.primary,
+                                //     fontWeight: FontWeight.bold,
+                                //     fontSize: 16,
+                                //   ),
+                                // ),
+                                _highlightedText(
+                                  course.name,
+                                  _searchTerm,
+                                  defaultStyle: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                if(course.desc != null)
+                                  if (course.desc != null)
+                                    _highlightedText(
+                                      course.desc!,
+                                      _searchTerm,
+                                      defaultStyle: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  if(course.desc != null)
-                                    if (course.desc != null)
-                                      _highlightedText(
-                                        course.desc!,
-                                        _searchTerm,
-                                        defaultStyle: TextStyle(
-                                          color: Colors.grey[700],
-                                          fontSize: 14,
+                                // Text(
+                                //   course.desc!,
+                                //   style: TextStyle(
+                                //     color: Colors.grey[700],
+                                //     fontSize: 14,
+                                //   ),
+                                //   maxLines: 1,
+                                //   overflow: TextOverflow.ellipsis,
+                                // ),
+                                SizedBox(height: 8),
+                                // Total Joined and Rating
+                                Row(
+                                  children: [
+                                    _highlightedText(
+                                      course.tutor?.username ?? "null",
+                                      _searchTerm,
+                                      defaultStyle: TextStyle(fontSize: 12, color: Colors.grey[600])
+                                    ),
+                                    Spacer(),
+                                    Text(
+                                      "|",
+                                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                    ),
+                                    Spacer(),
+                                    Text(
+                                      "${course.totalJoined} Joined",
+                                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                    ),
+                                    Spacer(),
+                                    Text(
+                                      "|",
+                                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                    ),
+                                    Spacer(),
+                                    Text(
+                                      "${formatDate(
+                                          course.createdAt.toLocal())}",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    Spacer(flex: 5,),
+                                    Row(
+                                      children: [
+                                        Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 18),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          course.averageRating.toStringAsFixed(1),
+                                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                                         ),
-                                      ),
-                                  // Text(
-                                  //   course.desc!,
-                                  //   style: TextStyle(
-                                  //     color: Colors.grey[700],
-                                  //     fontSize: 14,
-                                  //   ),
-                                  //   maxLines: 1,
-                                  //   overflow: TextOverflow.ellipsis,
-                                  // ),
-                                  SizedBox(height: 8),
-                                  // Total Joined and Rating
-                                  Row(
-                                    children: [
-                                      _highlightedText(
-                                        course.tutor?.username ?? "null",
-                                        _searchTerm,
-                                        defaultStyle: TextStyle(fontSize: 12, color: Colors.grey[600])
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "|",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "${course.totalJoined} Joined",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "|",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "${formatDate(
-                                            course.createdAt.toLocal())}",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      Spacer(flex: 5,),
-                                      Row(
-                                        children: [
-                                          Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 18),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            course.averageRating.toStringAsFixed(1),
-                                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  // const SizedBox(height: 8),
-                                  // // Created Date
-                                  // Text(
-                                  //   "Created on: ${course.createdAt}",
-                                  //   style: TextStyle(
-                                  //     fontSize: 12,
-                                  //     color: Colors.grey[600],
-                                  //   ),
-                                  // ),
-                                ],
-                              ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                // const SizedBox(height: 8),
+                                // // Created Date
+                                // Text(
+                                //   "Created on: ${course.createdAt}",
+                                //   style: TextStyle(
+                                //     fontSize: 12,
+                                //     color: Colors.grey[600],
+                                //   ),
+                                // ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -746,7 +752,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
                   return GestureDetector(
                     onTap: () {
                       if(userNow!.id == user.id) {
-                        widget.onTabChange(3);
+                        widget.onTabChange(4);
                       } else {
                         // Navigate to user detail page
                         Navigator.push(
@@ -761,7 +767,7 @@ class _FindPageState extends State<FindPage> with SingleTickerProviderStateMixin
                       elevation: 2,
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),

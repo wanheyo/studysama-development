@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 import '../../../models/course.dart';
 import '../../../models/user.dart';
@@ -26,11 +32,15 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
+  String get domainURL => apiService.domainUrl;
 
   User? user;
   int user_id = 0;
   String token = "";
   int? selectedStatus;
+
+  File? selectedImage; // Stores the selected or cropped image
+  final ImagePicker _picker = ImagePicker();
 
   Future<void> loadUser() async {
     try {
@@ -66,7 +76,7 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
 
     try {
       // Call the API and get the updated course data
-      final updatedData = await apiService.course_update(token, widget.course.id, name, desc, status);
+      final updatedData = await apiService.course_update(token, widget.course.id, name, desc, status, selectedImage);
 
       // Show success message with the updated course data
       final updatedCourse = Course.fromJson(updatedData['course']); // Convert response to Course model
@@ -109,7 +119,7 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
 
     try {
       // Call the API and get the updated course data
-      final updatedData = await apiService.course_update(token, widget.course.id, name, desc, status);
+      final updatedData = await apiService.course_update(token, widget.course.id, name, desc, status, selectedImage);
 
       // Show success message with the updated course data
       final updatedCourse = Course.fromJson(updatedData['course']); // Convert response to Course model
@@ -186,6 +196,64 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
     );
   }
 
+  Future<void> pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final fileSize = await pickedFile.length();
+      if (fileSize <= 5 * 1024 * 1024) {
+        cropImage(File(pickedFile.path));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Image size exceeds 5MB!")),
+        );
+      }
+    }
+  }
+
+  Future<void> cropImage(File? imageFile) async {
+    if (imageFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("No image selected for cropping!")),
+      );
+      return;
+    }
+
+    final croppedImage = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      aspectRatio: CropAspectRatio(ratioX: 16, ratioY: 9),
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 100,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: AppColors.primary,
+          toolbarWidgetColor: Colors.white,
+          lockAspectRatio: true,
+        ),
+        IOSUiSettings(
+          title: 'Crop Image',
+        ),
+      ],
+    );
+
+    if (croppedImage != null) {
+      final compressedImage = await compressImage(File(croppedImage.path));
+      setState(() {
+        selectedImage = compressedImage;
+      });
+    }
+  }
+
+  Future<File> compressImage(File file) async {
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      file.absolute.path + '_compressed.jpg',
+      quality: 70, // Adjust quality as needed
+    );
+    return File(compressedFile!.path); // Convert XFile to File
+  }
+
   @override
   void initState() {
     super.initState();
@@ -213,12 +281,6 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
           children: [
             const Text(
               'Manage Course',
-              // style: TextStyle(
-              //   fontFamily: 'Montserrat',
-              //   fontWeight: FontWeight.bold,
-              //   color: Colors.white,
-              //   fontSize: 18,
-              // ),
             ),
           ],
         ),
@@ -241,6 +303,53 @@ class _ManageCoursePageState extends State<ManageCoursePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Center(
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  color: Colors.grey[300],
+                                  image: selectedImage != null
+                                      ? DecorationImage(
+                                    image: FileImage(selectedImage!),
+                                    fit: BoxFit.cover,
+                                  )
+                                      : widget.course.image != null
+                                      ? DecorationImage(
+                                    image: NetworkImage(domainURL + '/storage/${widget.course.image!}',),
+                                    fit: BoxFit.cover,
+                                  )
+                                      : null,
+                                ),
+                                child: (widget.course.image == null && selectedImage == null)
+                                    ? Center(
+                                  child: Icon(
+                                    FontAwesomeIcons.image,
+                                    color: Colors.black54,
+                                    size: 50,
+                                  ),
+                                )
+                                    : null,
+                              ),
+                              Positioned(
+                                bottom: 10,
+                                right: 10,
+                                child: InkWell(
+                                  onTap: pickImage,
+                                  child: CircleAvatar(
+                                    radius: 25,
+                                    backgroundColor: AppColors.primary,
+                                    child: Icon(FontAwesomeIcons.camera, color: Colors.white, size: 20),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         // Course Name Field
                         TextFormField(
                           controller: nameController,

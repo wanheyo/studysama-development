@@ -158,134 +158,130 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: LoaderOverlay(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Form(
-              key: _formKey, // Associate the form key with the Form widget
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Spacer(flex: 4), // Add some space at the top
-                  Text(
-                    "StudySama",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.05), // 5% of screen height
-        
-                  // Email TextFormField
-                  TextFormField(
-                    controller: _usernameOrEmailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: "Username / Email",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(FontAwesomeIcons.solidEnvelope),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your username or email';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02), // 2% of screen height
-        
-                  // Password TextFormField
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(FontAwesomeIcons.lock),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: ClampingScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: screenHeight - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: screenHeight * 0.1),
+                      Image.asset(
+                        'assets/SS_Header_Transparent_16-9.png',
+                        height: 150,
+                      ),
+                      SizedBox(height: screenHeight * 0.05),
+                      // Form fields section
+                      TextFormField(
+                        controller: _usernameOrEmailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: "Username / Email",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          prefixIcon: Icon(FontAwesomeIcons.solidEnvelope),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your username or email';
+                          }
+                          return null;
                         },
                       ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      // Validate password length
-                      if (value.length < 8) {
-                        return 'Password must be at least 8 characters long';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.05), // 5% of screen height
-        
-                  // Login Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _login,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                        child: Text(
-                          "Login",
-                          style: TextStyle(fontSize: 18, color: Colors.white),
+                      SizedBox(height: screenHeight * 0.02),
+
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: !_isPasswordVisible,
+                        decoration: InputDecoration(
+                          labelText: "Password",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          prefixIcon: Icon(FontAwesomeIcons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          if (value.length < 8) {
+                            return 'Password must be at least 8 characters long';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: screenHeight * 0.05),
+
+                      // Buttons section
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _login,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                            child: Text(
+                              "Login",
+                              style: TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                          ),
                         ),
                       ),
-                      // style: ElevatedButton.styleFrom(
-                      //   backgroundColor: Colors.blue,
-                      //   shape: RoundedRectangleBorder(
-                      //     borderRadius: BorderRadius.circular(10),
-                      //   ),
-                      // ),
-                    ),
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02), // 2% of screen height
-        
-                  // Sign Up Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _signup,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                        child: Text(
-                          "Sign Up",
-                          style: TextStyle(fontSize: 18, color: Colors.white),
+                      SizedBox(height: screenHeight * 0.02),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _signup,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondary,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                            child: Text(
+                              "Sign Up",
+                              style: TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                          ),
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        // shape: RoundedRectangleBorder(
-                        //   borderRadius: BorderRadius.circular(10),
-                        // ),
+                      SizedBox(height: screenHeight * 0.02),
+
+                      TextButton(
+                        onPressed: () {
+                          // Navigate to password reset page or show a dialog
+                        },
+                        child: Text("Forgot Password?"),
                       ),
-                    ),
+
+                      // Add bottom padding when keyboard is open
+                      SizedBox(height: isKeyboardOpen ? screenHeight * 0.1 : screenHeight * 0.05),
+                    ],
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.02), // 2% of screen height
-        
-                  // Forgot Password TextButton
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to password reset page or show a dialog
-                    },
-                    child: Text(
-                      "Forgot Password?",
-                      // style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                  Spacer(flex: 3), // Add some space at the bottom
-                ],
+                ),
               ),
             ),
           ),

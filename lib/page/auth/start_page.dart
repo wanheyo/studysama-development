@@ -1,9 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For formatting date and time
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:studysama/utils/colors.dart';
+import '../base/base_page.dart';
 import 'login_page.dart'; // Import the login page
 
+class StartPage extends StatefulWidget {
+  @override
+  _StartPageState createState() => _StartPageState();
+}
 
-class StartPage extends StatelessWidget {
+class _StartPageState extends State<StartPage> {
+
+  void _checkStoredCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Retrieve token and auto-login if valid
+    final storedToken = prefs.getString('token');
+    // final storedUser = prefs.getString('user');
+
+    if (storedToken != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => BasePage()),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStoredCredentials(); // Check for stored credentials
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get the current date and time
@@ -11,7 +46,7 @@ class StartPage extends StatelessWidget {
     String formattedTime = DateFormat('hh:mm a').format(DateTime.now());
 
     return Scaffold(
-      backgroundColor: Color(0xFF8A56AC),
+      backgroundColor: AppColors.primary,
       body: SafeArea(
         child: Center(  // Center all the content
           child: Column(
@@ -19,51 +54,49 @@ class StartPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                 child: Text(
-                  'Welcome to\nStudy Sama',
+                  'Welcome to',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    fontFamily: 'Roboto', // Custom font
-                    letterSpacing: 1.2, // Adds space between letters
                   ),
                 ),
               ),
               // Replacing Image.asset with Image.network
               Image.asset(
-                'assets/logo.png', // Path relative to the assets folder
+                'assets/SS_Header_Transparent_16-9.png', // Path relative to the assets folder
                 fit: BoxFit.cover,
-                height: 250,
+                height: 100,
                 width: 300,
-              )
-              ,
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Column(
-                  children: [
-                    Text(
-                      '$formattedDate',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      '$formattedTime',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
               ),
+              SizedBox(height: 50,),
+              // Padding(
+              //   padding: const EdgeInsets.only(top: 20),
+              //   child: Column(
+              //     children: [
+              //       Text(
+              //         '$formattedDate',
+              //         style: TextStyle(
+              //           fontSize: 18,
+              //           color: Colors.white70,
+              //           fontWeight: FontWeight.w500,
+              //         ),
+              //       ),
+              //       SizedBox(height: 5),
+              //       Text(
+              //         '$formattedTime',
+              //         style: TextStyle(
+              //           fontSize: 18,
+              //           color: Colors.white70,
+              //           fontWeight: FontWeight.w500,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
                 child: ElevatedButton(
@@ -74,7 +107,7 @@ class StartPage extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF6B4FA6),
+                    backgroundColor: AppColors.secondary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30), // Slightly rounded corners
                     ),
@@ -85,7 +118,7 @@ class StartPage extends StatelessWidget {
                   child: Text(
                     'LET’S START',
                     style: TextStyle(
-                      fontSize: 24, // Larger font size
+                      fontSize: 16, // Larger font size
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),

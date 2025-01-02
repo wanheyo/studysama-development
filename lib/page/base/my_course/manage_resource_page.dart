@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
@@ -8,6 +10,7 @@ import 'dart:io';
 import 'package:studysama/models/resource.dart';
 
 import '../../../services/api_service.dart';
+import '../../../utils/colors.dart';
 
 class ManageResourcePage extends StatefulWidget {
   final Resource resource;
@@ -57,17 +60,23 @@ class _ManageResourcePageState extends State<ManageResourcePage> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: [
-        'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx',
-        'png', 'jpg', 'jpeg'
+        'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg'
       ],
     );
 
     if (result != null) {
       if (result.files.single.size <= 5 * 1024 * 1024) {
-        selectedFile = File(result.files.single.path!);
-        setState(() {
-          fileName = result.files.single.name; // Update with selected file name
-        });
+        final fileExtension = result.files.single.extension;
+        if (['png', 'jpg', 'jpeg'].contains(fileExtension)) {
+          // If the file is an image, call the pickImage function
+          await cropAndCompressImage(File(result.files.single.path!));
+        } else {
+          // Otherwise, handle the file as usual
+          selectedFile = File(result.files.single.path!);
+          setState(() {
+            fileName = result.files.single.name; // Update with selected file name
+          });
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("File size exceeds the 5MB limit!")),
@@ -75,6 +84,54 @@ class _ManageResourcePageState extends State<ManageResourcePage> {
       }
     }
   }
+
+  Future<void> cropAndCompressImage(File imageFile) async {
+    final croppedImage = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      // aspectRatio: CropAspectRatio(ratioX: 16, ratioY: 9),
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 100,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: AppColors.primary,
+          toolbarWidgetColor: Colors.white,
+          lockAspectRatio: true,
+        ),
+        IOSUiSettings(
+          title: 'Crop Image',
+        ),
+      ],
+    );
+
+    if (croppedImage != null) {
+      final compressedImage = await compressImage(File(croppedImage.path));
+      setState(() {
+        selectedFile = compressedImage;
+        fileName = selectedFile!.path.split('/').last;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Image cropping failed!")),
+      );
+    }
+  }
+
+  Future<File> compressImage(File file) async {
+    final targetPath = file.absolute.path.replaceAll(
+      file.absolute.path.split('/').last,
+      'compressed_${file.absolute.path.split('/').last}',
+    );
+
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 70, // Adjust quality as needed
+    );
+    return File(compressedFile!.path); // Convert XFile to File
+  }
+
+
 
   bool isValidUrl(String url) {
     // Add your URL validation logic here
@@ -194,8 +251,10 @@ class _ManageResourcePageState extends State<ManageResourcePage> {
               TextField(
                 controller: _deleteConfirmationController,
                 decoration: InputDecoration(
-                  labelText: 'Type lesson name to confirm',
-                  border: OutlineInputBorder(),
+                  labelText: 'Type resource name to confirm',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
               ),
             ],
@@ -260,6 +319,7 @@ class _ManageResourcePageState extends State<ManageResourcePage> {
           icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        backgroundColor: AppColors.background,
       ),
       body: LoaderOverlay(
         child: Column(
@@ -327,9 +387,11 @@ class _ManageResourcePageState extends State<ManageResourcePage> {
                             const SizedBox(height: 16.0),
                             TextFormField(
                               controller: nameController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Resource Name',
-                                border: OutlineInputBorder(),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
                                 hintText: 'Example: My Personal Note',
                               ),
                               validator: (value) {
@@ -343,18 +405,22 @@ class _ManageResourcePageState extends State<ManageResourcePage> {
                             TextFormField(
                               controller: descController,
                               maxLines: 3,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Description (optional)',
-                                border: OutlineInputBorder(),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 10.0),
                             DropdownButtonFormField<int>(
                               value: category,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Category',
                                 hintText: ' It is note? Or an assignment?',
-                                border: OutlineInputBorder(),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
                               ),
                               items: const [
                                 DropdownMenuItem(value: 1, child: Text("Note")),
@@ -372,9 +438,11 @@ class _ManageResourcePageState extends State<ManageResourcePage> {
                             if (!isFileUploadSelected) ...[
                               TextFormField(
                                 controller: linkController,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Link',
-                                  border: OutlineInputBorder(),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
                                 ),
                                 validator: (value) {
                                   if (!isFileUploadSelected && (value == null || value.isEmpty)) {

@@ -56,6 +56,7 @@ dependencies:
   image_cropper: ^8.1.0
   phone_numbers_parser: ^9.0.3
   html: ^0.15.5
+  flutter_image_compress: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -101,6 +102,13 @@ flutter:
      - assets/teach.png
      - assets/connect.png
      - assets/achievement.png
+     - assets/SS_Header_Transparent.png
+     - assets/SS_Header_Transparent_16-9.png
+     - assets/SS_Mobile_Transparent.png
+     - assets/badges/Badge1_Transparent.png
+     - assets/badges/Badge2_Transparent.png
+     - assets/badges/Badge3_Transparent.png
+     - assets/badges/Badge4_Transparent.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

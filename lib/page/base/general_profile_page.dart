@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'dart:math' as math;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/page/base/profile/edit_profile.dart';
 
@@ -9,7 +10,10 @@ import '../../../models/user.dart';
 import '../../../models/user_course.dart';
 import '../../../services/api_service.dart';
 import '../../../utils/colors.dart';
+import '../../models/badge_achievement.dart';
+import '../../models/user_badge.dart';
 import '../../models/user_follow.dart';
+import 'general_user_list_page.dart';
 import 'my_course/course_detail_page.dart';
 
 class GeneralProfilePage extends StatefulWidget {
@@ -37,6 +41,8 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
   List<Course> joinedCourses = [];
   List<UserCourse> joinedUserCourses = []; //tutor
 
+  List<UserBadge> userBadges = [];
+
   String token = "";
   User? userNow;
   bool isLoading = true; // Add a loading state
@@ -55,7 +61,8 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
     await loadUser();
     await fetchUser();
     await fetchUserFollow();
-    fetchCourses();
+    await fetchCourses();
+    await fetchUserBadge();
     //
     // // Apply filters for both Created and Joined Courses
     // _applyFiltersAndSortCourse(true);  // Filter created courses
@@ -213,21 +220,47 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
     try {
       final data = await apiService.index_follow(token, widget.user.id);
 
-      setState(() {
-        userFollowing = (data['user_following'] as List)
-            .map((json) => UserFollow.fromJson(json))
-            .toList();
+      final userFollowingMap = {
+        for (var file in (data['following'] as List))
+          file['id']: User.fromJson(file)
+      };
 
+      final userFollowerMap = {
+        for (var file in (data['follower'] as List))
+          file['id']: User.fromJson(file)
+      };
+
+      setState(() {
         userFollower = (data['user_follower'] as List)
-            .map((json) => UserFollow.fromJson(json))
-            .toList();
+            .map((json) {
+          final follower = UserFollow.fromJson(json);
+          follower.userFollower = userFollowerMap[follower.userFollowerId];
+          return follower;
+        }).toList();
+
+        userFollowing = (data['user_following'] as List)
+            .map((json) {
+          final following = UserFollow.fromJson(json);
+          following.userFollowed = userFollowingMap[following.userFollowedId];
+          return following;
+        }).toList();
 
         for(UserFollow uf in userFollower) {
           if(uf.userFollowerId == userNow?.id)
             isFollowedByYou = true;
         }
-
       });
+
+      // setState(() {
+      //   userFollowing = (data['user_following'] as List)
+      //       .map((json) => UserFollow.fromJson(json))
+      //       .toList();
+      //
+      //   userFollower = (data['user_follower'] as List)
+      //       .map((json) => UserFollow.fromJson(json))
+      //       .toList();
+      //
+      // });
     } catch (e) {
       setState(() {
         // errorMessage = e.toString();
@@ -275,6 +308,50 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
     }
   }
 
+  Future<void> fetchUserBadge() async {
+    setState(() {
+      // context.loaderOverlay.show();
+      isLoading = true;
+      // errorMessage = null;
+    });
+
+    // print('token: ' + token);
+    try {
+      final data = await apiService.index_user_badge(token, widget.user.id);
+
+      final badgesMap = {
+        for (var file in (data['badges'] as List))
+          file['id']: BadgeAchievement.fromJson(file)
+      };
+
+      setState(() {
+        // userBadges = (data['userBadges'] as List)
+        //     .map((json) => UserBadge.fromJson(json))
+        //     .toList();
+
+        userBadges = (data['user_badges'] as List)
+            .map((json) {
+          final userbadge = UserBadge.fromJson(json);
+          userbadge.badgeAchievement = badgesMap[userbadge.badgeId];
+          return userbadge;
+        }).toList();
+
+        print(userBadges[1].badgeAchievement!.logoImage!);
+
+      });
+    } catch (e) {
+      setState(() {
+        // errorMessage = e.toString();
+        print("Response: " + e.toString());
+      });
+    } finally {
+      setState(() {
+        // context.loaderOverlay.hide();
+        isLoading = false;
+      });
+    }
+  }
+
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear all data from SharedPreferences
@@ -304,232 +381,235 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
       body: Column(
         children: <Widget>[
           // Top Purple Section
-          Container(
-            color: AppColors.primary,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Profile Information
-                      if (!isLoading) ...[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // // Username
-                            // Text(
-                            //   '@' + (widget.user.username ?? 'null'),
-                            //   style: TextStyle(
-                            //     fontFamily: 'Montserrat',
-                            //     fontWeight: FontWeight.bold,
-                            //     color: Colors.white,
-                            //     fontSize: 14,
-                            //   ),
-                            //   overflow: TextOverflow.ellipsis, // Handle long names
-                            // ),
-                            // SizedBox(height: 16),
-                            // Circular Profile Picture Placeholder
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.grey[300],
-                                image: widget.user.image != null
-                                    ? DecorationImage(
-                                  image: NetworkImage(domainURL + '/storage/${widget.user.image!}',),
-                                  fit: BoxFit.cover,
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+            child: Container(
+              color: AppColors.primary,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Profile Information
+                        if (!isLoading) ...[
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // // Username
+                              // Text(
+                              //   '@' + (widget.user.username ?? 'null'),
+                              //   style: TextStyle(
+                              //     fontFamily: 'Montserrat',
+                              //     fontWeight: FontWeight.bold,
+                              //     color: Colors.white,
+                              //     fontSize: 14,
+                              //   ),
+                              //   overflow: TextOverflow.ellipsis, // Handle long names
+                              // ),
+                              // SizedBox(height: 16),
+                              // Circular Profile Picture Placeholder
+                              Container(
+                                width: screenWidth * 0.25,
+                                height: screenWidth * 0.25,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.grey[300],
+                                  image: widget.user.image != null
+                                      ? DecorationImage(
+                                    image: NetworkImage(domainURL + '/storage/${widget.user.image!}',),
+                                    fit: BoxFit.cover,
+                                  )
+                                      : null,
+                                ),
+                                child: widget.user.image == null
+                                    ? Center(
+                                  child: Text(
+                                    widget.user.username != null
+                                        ? widget.user.username[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
                                 )
                                     : null,
                               ),
-                              child: widget.user.image == null
-                                  ? Center(
-                                child: Text(
-                                  widget.user.username != null
-                                      ? widget.user.username[0].toUpperCase()
-                                      : '?',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54,
+                              SizedBox(height: 16),
+                            ],
+                          ),
+                          Spacer(),
+                          // Follower and Post Information
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                children: [
+                                  _buildStatColumn('Followers', userFollower.length.toString() ?? '0', screenWidth, userFollower),
+                                  SizedBox(width: screenWidth * 0.05),
+                                  _buildStatColumn('Following', userFollowing.length.toString() ?? '0', screenWidth, userFollowing),
+                                ],
+                              ),
+                              SizedBox(height: screenHeight * 0.02),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildResponsiveButton(
+                                    context,
+                                    isFollowedByYou ? 'Followed' : 'Follow',
+                                    screenWidth,
+                                    onPressed: () {
+                                      updateFollow();
+                                    },
                                   ),
-                                ),
-                              )
-                                  : null,
-                            ),
-                            SizedBox(height: 16),
-                          ],
-                        ),
-                        Spacer(),
-                        // Follower and Post Information
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                _buildStatColumn('Followers', userFollower.length.toString() ?? '0', screenWidth),
-                                SizedBox(width: screenWidth * 0.05),
-                                _buildStatColumn('Following', userFollowing.length.toString() ?? '0', screenWidth),
-                              ],
-                            ),
-                            SizedBox(height: screenHeight * 0.02),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _buildResponsiveButton(
-                                  context,
-                                  isFollowedByYou ? 'Followed' : 'Follow',
-                                  screenWidth,
-                                  onPressed: () {
-                                    updateFollow();
-                                  },
-                                ),
-                                SizedBox(width: screenWidth * 0.02),
-                                _buildResponsiveButton(
-                                  context,
-                                  'Share',
-                                  screenWidth,
-                                  onPressed: () {
-                                    // Share profile action
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ] else ...[
-                        // Blank content while loading
-                        Expanded(
-                          child: Center(
-                            child: CircularProgressIndicator(color: Colors.white,),
+                                  SizedBox(width: screenWidth * 0.02),
+                                  _buildResponsiveButton(
+                                    context,
+                                    'Share',
+                                    screenWidth,
+                                    onPressed: () {
+                                      // Share profile action
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ),
+                        ] else ...[
+                          // Blank content while loading
+                          Expanded(
+                            child: Center(
+                              child: CircularProgressIndicator(color: Colors.white,),
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                if (!isLoading) ...[
-                  SizedBox(height: 12),
-                  // User Info ExpansionTile
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Card(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.0),
-                      ),
-                      child: ExpansionTile(
-                        title: Text(
-                          'User Info',
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontSize: 16,
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  if (!isLoading) ...[
+                    SizedBox(height: 12),
+                    // User Info ExpansionTile
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Card(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(FontAwesomeIcons.solidUser, color: AppColors.primary),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      widget.user.name ?? 'null',
-                                      style: TextStyle(
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 14,
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.bold,
+                        child: ExpansionTile(
+                          title: Text(
+                            'User Info',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 16,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(FontAwesomeIcons.solidUser, color: AppColors.primary),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        widget.user.name ?? 'null',
+                                        style: TextStyle(
+                                          fontFamily: 'Montserrat',
+                                          fontSize: 14,
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(FontAwesomeIcons.circleInfo, color: AppColors.primary),
-                                    SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        widget.user.bio ?? 'No bio available',
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(FontAwesomeIcons.circleInfo, color: AppColors.primary),
+                                      SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          widget.user.bio ?? 'No bio available',
+                                          style: TextStyle(
+                                            fontFamily: 'Montserrat',
+                                            fontSize: 12,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(FontAwesomeIcons.solidEnvelope, color: AppColors.primary),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        widget.user.email ?? 'null',
                                         style: TextStyle(
                                           fontFamily: 'Montserrat',
                                           fontSize: 12,
                                           color: AppColors.primary,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(FontAwesomeIcons.solidEnvelope, color: AppColors.primary),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      widget.user.email ?? 'null',
-                                      style: TextStyle(
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 12,
-                                        color: AppColors.primary,
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(FontAwesomeIcons.phone, color: AppColors.primary),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        widget.user.phoneNum ?? '-',
+                                        style: TextStyle(
+                                          fontFamily: 'Montserrat',
+                                          fontSize: 12,
+                                          color: AppColors.primary,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(FontAwesomeIcons.phone, color: AppColors.primary),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      widget.user.phoneNum ?? '-',
-                                      style: TextStyle(
-                                        fontFamily: 'Montserrat',
-                                        fontSize: 12,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 12),
-                ],
-                // TabBar Section
-                TabBar(
-                  controller: _tabController,
-                  tabs: const [
-                    Tab(text: "Created"),
-                    Tab(text: "Joined"),
-                    Tab(text: "Badge"), // Added new tab
+                    SizedBox(height: 12),
                   ],
-                  labelStyle: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                  // TabBar Section
+                  TabBar(
+                    controller: _tabController,
+                    tabs: const [
+                      Tab(text: "Created"),
+                      Tab(text: "Joined"),
+                      Tab(text: "Badge"), // Added new tab
+                    ],
+                    labelStyle: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    unselectedLabelStyle: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                    indicatorColor: AppColors.secondary,
+                    indicatorWeight: 5,
                   ),
-                  unselectedLabelStyle: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                  indicatorColor: AppColors.background,
-                  indicatorWeight: 5,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           // Tab Bar View Section
@@ -541,7 +621,7 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
               children: [
                 _buildCoursesTab(createdCourses, "No created courses found.", true),
                 _buildCoursesTab(joinedCourses, "No joined courses found.", false),
-                _buildBadgeButtonTab(), // Added new tab content
+                _buildBadgeTab(), // Added new tab content
               ],
             ),
           ),
@@ -550,27 +630,47 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
     );
   }
 
-  Widget _buildStatColumn(String label, String count, double screenWidth) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 16,
-            fontFamily: 'Montserrat',
-          ),
+  Widget _buildStatColumn(String label, String count, double screenWidth, List<UserFollow> userFollows) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          String title = '';
+          if(label == "Followers") {
+            title = "follower";
+          } else {
+            title = "following";
+          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GeneralUserListPage(title: title, userFollows: userFollows,),
+            ),
+          );
+        },
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+                fontFamily: 'Montserrat',
+              ),
+            ),
+            Text(
+              count,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+              ),
+            ),
+          ],
         ),
-        Text(
-          count,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Montserrat',
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -586,7 +686,7 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
           foregroundColor: AppColors.primary,
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
         child: Text(
@@ -644,16 +744,15 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
                           children: [
                             // Full-Width Placeholder Image (Optional if `course.image` is available)
                             ClipRRect(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                              child:
-                              // course.image != null && course.image.isNotEmpty
-                              //     ? Image.asset(
-                              //   course.image,
-                              //   fit: BoxFit.cover,
-                              //   width: double.infinity,
-                              //   height: 180,
-                              // ) :
-                              Container(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              child: course.image != null
+                                  ? Image.network(
+                                domainURL + '/storage/${course.image}',
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 180,
+                              )
+                                  : Container(
                                 width: double.infinity,
                                 height: 180,
                                 color: Colors.grey[300], // Blank grey background
@@ -662,7 +761,7 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
                                     course.name,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Colors.black,
+                                      color: Colors.black54,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18,
                                     ),
@@ -784,70 +883,204 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
     );
   }
 
-  Widget _buildBadgeButtonTab() {
-    // Simulate the number of courses created by the user.
-    int coursesCreated = 5; // Replace this with dynamic data from your app
-
-    // Check if the user has created at least 5 courses
-    bool showCard = coursesCreated >= 5;
-
-    return Center(
-      child: showCard
-          ? Container(
-        width: 300,
-        height: 200,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
+  Widget _buildBadgeTab() {
+    if (userBadges.isEmpty) {
+      // Show "No badge earned" message if the list is empty
+      return Center(
+        child: Text(
+          "No badge earned.",
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Badge Icon (you can replace this with an actual icon or image)
-            Icon(
-              Icons.star, // Example: star icon
-              size: 50,
-              color: Colors.amber,
+      );
+    }
+
+    // Otherwise, show the grid of badges
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 1,
+      ),
+      itemCount: userBadges.length,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () => _showBadgeDetail(index),
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            SizedBox(height: 10),
-            // Badge Text
-            Text(
-              "Congratulations!",
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.black,
+            elevation: 2,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Image.asset(
+                  'assets/badges/' + userBadges[index].badgeAchievement!.logoImage!,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-            SizedBox(height: 5),
-            Text(
-              "You've created at least 5 courses!",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontSize: 16,
-                color: Colors.grey,
+          ),
+        );
+      },
+    );
+  }
+
+
+  void _showBadgeDetail(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: BadgeDetailCard(
+          badgeAsset: userBadges[index],
+        ),
+      ),
+    );
+  }
+}
+
+class BadgeDetailCard extends StatefulWidget {
+  final UserBadge badgeAsset;
+
+  const BadgeDetailCard({
+    Key? key,
+    required this.badgeAsset,
+  }) : super(key: key);
+
+  @override
+  _BadgeDetailCardState createState() => _BadgeDetailCardState();
+}
+
+class _BadgeDetailCardState extends State<BadgeDetailCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  bool _isBackView = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() {
+    if (_controller.isAnimating) return;
+
+    if (_controller.value == 0.0) {
+      _controller.forward().then((_) {
+        setState(() => _isBackView = true);
+      });
+    } else {
+      _controller.reverse().then((_) {
+        setState(() => _isBackView = false);
+      });
+    }
+  }
+
+  String formatDate(DateTime date) {
+    final DateFormat dateFormat = DateFormat("dd/MM/yyyy hh:mm a");
+    return dateFormat.format(date);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _handleTap,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) // Perspective
+              ..rotateY(_controller.value * math.pi),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: 8,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.width * 0.8,
+                  padding: const EdgeInsets.all(24),
+                  child: _isBackView && _controller.value >= 0.5
+                      ? Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..rotateY(math.pi),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Description",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          widget.badgeAsset.badgeAchievement!.desc,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          "Date Earned",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          formatDate(widget.badgeAsset.createdAt!.toLocal()),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          "Tap to flip back",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.tertiary,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                      : Image.asset(
+                    'assets/badges/' + widget.badgeAsset.badgeAchievement!.logoImage!,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
-      )
-          : Text(
-        "Keep going! Create 5 courses to earn a badge.",
-        style: TextStyle(
-          fontFamily: 'Montserrat',
-          fontSize: 16,
-          color: Colors.grey,
-        ),
-        textAlign: TextAlign.center,
+          );
+        },
       ),
     );
   }

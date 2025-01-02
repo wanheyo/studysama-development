@@ -156,7 +156,9 @@ class _ManageLessonPageState extends State<ManageLessonPage> {
                 controller: _deleteConfirmationController,
                 decoration: InputDecoration(
                   labelText: 'Type lesson name to confirm',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
               ),
             ],
@@ -248,7 +250,9 @@ class _ManageLessonPageState extends State<ManageLessonPage> {
                           controller: nameController,
                           decoration: InputDecoration(
                             labelText: 'Lesson Name',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             hintText: 'Enter new lesson name',
                           ),
                           validator: (value) {
@@ -264,7 +268,9 @@ class _ManageLessonPageState extends State<ManageLessonPage> {
                           controller: descriptionController,
                           decoration: InputDecoration(
                             labelText: 'Description (Optional)',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             hintText: widget.lesson.description == null ? 'Enter new course description' : null,
                           ),
                           maxLines: 3,
@@ -275,7 +281,9 @@ class _ManageLessonPageState extends State<ManageLessonPage> {
                           controller: learnOutcomeController,
                           decoration: InputDecoration(
                             labelText: 'Learning Outcome (Optional)',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             hintText: widget.lesson.learnOutcome == null ? 'Enter new lesson learning outcome' : null,
                           ),
                           maxLines: 3,

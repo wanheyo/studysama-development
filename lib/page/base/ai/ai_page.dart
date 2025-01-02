@@ -1,110 +1,271 @@
-
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../models/user.dart';
+import '../../../services/api_service.dart';
 import '../../../utils/colors.dart';
-import '../../../utils/user_data_util.dart';
+import '../my_course/ai_quiz_page.dart';
 
 class AiPage extends StatefulWidget {
+  const AiPage({Key? key}) : super(key: key);
+
   @override
-  _AiPageState createState() => _AiPageState();
+  _AIPageState createState() => _AIPageState();
 }
 
-class _AiPageState extends State<AiPage> {
-  User? user;
-  String? username;
-  bool isLoading = true;
+class _AIPageState extends State<AiPage> {
+  final TextEditingController _topicController = TextEditingController();
+  bool _isGenerating = false;
+
+  final ApiService apiService = ApiService();
+  String get domainURL => apiService.domainUrl;
+  String token = "";
 
   @override
   void initState() {
     super.initState();
-    loadUser();
+    initializeData();
+  }
+
+  @override
+  void dispose() {
+    _topicController.dispose();
+    super.dispose();
+  }
+
+  Future<void> initializeData() async {
+    await loadUser();
   }
 
   Future<void> loadUser() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final userString = prefs.getString('user');
-      if (userString != null) {
-        Map<String, dynamic> userMap = jsonDecode(userString);
-        user = User.fromJson(userMap);
+      final tokenString = prefs.getString('token');
+      if (tokenString != null) {
+        token = tokenString;
       }
+
       setState(() {
-        username = user!.username;
-        isLoading = false;
+        // context.loaderOverlay.show();
       });
     } catch (e) {
-      print('Error loading username: $e');
+      print('Error loading user: $e');
       setState(() {
-        isLoading = false;
+        // context.loaderOverlay.hide();
       });
     }
   }
 
-  Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Clear all data from SharedPreferences
-
-    // Navigate back to the login screen (replace this with your LoginPage route)
-    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
           children: [
-            Icon(FontAwesomeIcons.bots, size: 100, color: Colors.blue),
-            SizedBox(height: 20),
-            if (isLoading)
-              CircularProgressIndicator()
-            else
-              Column(
+            Icon(
+              FontAwesomeIcons.robot,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 8), // Space between the icon and text
+            Text(
+              ' | Generate MCQ Quiz Using AI',
+              style: TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 18
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ), // Rounded corners
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // const Text(
+            //   'Generate Quiz Using AI',
+            //   style: TextStyle(
+            //     fontSize: 24,
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            // const SizedBox(height: 20),
+
+            // Input field
+            TextField(
+              controller: _topicController,
+              maxLength: 40,
+              decoration: InputDecoration(
+                labelText: 'Enter Topic/Subject',
+                hintText: 'e.g., Solar System, World War II',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                prefixIcon: const Icon(FontAwesomeIcons.book, color: AppColors.primary,),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Instructions
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.primary),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'AI Page',
-                    style: TextStyle(fontFamily: 'Montserrat', fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    username != null
-                        ? 'Hello, $username!'
-                        : 'User not found',
+                    'How to use:',
                     style: TextStyle(
-                      fontSize: 18,
-                      color: username != null ? Colors.blue : Colors.red,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary
                     ),
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        _logout(context);
-                      },
-                      icon: const Icon(FontAwesomeIcons.arrowRightFromBracket),
-                      label: const Text(
-                        "Log Out",
-                        style: TextStyle(fontFamily: 'Montserrat'),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                      ),
-                    ),
+                  SizedBox(height: 8),
+                  _buildInstructionItem(
+                      '1. Enter a specific topic or subject (max 40 characters)',
+                      FontAwesomeIcons.pencil,
+                      AppColors.tertiary
+                  ),
+                  _buildInstructionItem(
+                      '2. Be clear and concise with your topic',
+                      FontAwesomeIcons.lightbulb,
+                      AppColors.secondary
+                  ),
+                  _buildInstructionItem(
+                      '3. Avoid broad or vague subjects',
+                      FontAwesomeIcons.triangleExclamation,
+                      Colors.red
                   ),
                 ],
               ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Limitations
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.tertiary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.tertiary),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Limitations:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.tertiary
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text('• Questions are generated based on available data, using gpt-3.5-turbo model'),
+                  Text('• Accuracy may vary depending on the topic'),
+                  Text('• Some topics might not generate optimal results'),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Disclaimer
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.secondary),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Disclaimer:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.secondary
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'The quiz content is generated by AI and should be used for practice purposes only. While we strive for accuracy, the information provided may not always be 100% accurate or up-to-date.',
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Generate button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isGenerating
+                    ? null
+                    : () async {
+                  if (_topicController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please enter a topic'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+                  // Handle generation
+                  // Navigator.push(...) to your quiz page
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AIQuizPage(content: _topicController.text.trim(),),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: AppColors.primary, // Button background color
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: Text(
+                  _isGenerating ? 'Generating...' : 'Generate Quiz',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInstructionItem(String text, IconData icon, Color iconColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: iconColor),
+          const SizedBox(width: 8),
+          Expanded(child: Text(text)),
+        ],
       ),
     );
   }

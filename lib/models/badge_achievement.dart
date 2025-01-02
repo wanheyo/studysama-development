@@ -1,6 +1,6 @@
-// File: models/badge.dart
+// File: models/badge_achievement.dart
 
-class Badge {
+class BadgeAchievement {
   final int id;
   final String name;
   final String desc;
@@ -12,7 +12,7 @@ class Badge {
   final DateTime? updatedAt;
 
   // Constructor
-  Badge({
+  BadgeAchievement({
     required this.id,
     required this.name,
     required this.desc,
@@ -25,8 +25,8 @@ class Badge {
   });
 
   // Factory method to create an instance from a JSON map
-  factory Badge.fromJson(Map<String, dynamic> json) {
-    return Badge(
+  factory BadgeAchievement.fromJson(Map<String, dynamic> json) {
+    return BadgeAchievement(
       id: json['id'] as int,
       name: json['name'] as String,
       desc: json['desc'] as String,

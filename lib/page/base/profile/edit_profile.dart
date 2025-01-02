@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -171,15 +172,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
 
     if (croppedImage != null) {
+      final compressedImage = await compressImage(File(croppedImage.path));
       setState(() {
-        selectedImage = File(croppedImage.path);
+        selectedImage = compressedImage;
       });
     }
-    // else {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text("Image cropping cancelled!")),
-    //   );
-    // }
+  }
+
+  Future<File> compressImage(File file) async {
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      file.absolute.path + '_compressed.jpg',
+      quality: 70, // Adjust quality as needed
+    );
+    return File(compressedFile!.path); // Convert XFile to File
   }
 
   String extractPhoneDetails(String? fullNumber) {
@@ -317,7 +323,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     child: InkWell(
                       onTap: pickImage,
                       child: CircleAvatar(
-                        radius: 18,
+                        radius: 20,
                         backgroundColor: AppColors.primary,
                         child: Icon(FontAwesomeIcons.camera, color: Colors.white, size: 18),
                       ),
@@ -338,7 +344,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     controller: _usernameController,
                     decoration: InputDecoration(
                       labelText: "Username",
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       helperText: canChangeUsername()
                           ? 'Username can be changed once per week'
                           : 'Username can be changed in ${getRemainingTime()}',
@@ -368,7 +376,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     controller: _nameController,
                     decoration: InputDecoration(
                       labelText: "Name",
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -384,7 +394,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     controller: _bioController,
                     decoration: InputDecoration(
                       labelText: "Bio (Optional)",
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                     maxLines: 3,
                   ),
@@ -394,7 +406,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     controller: _phoneController,
                     decoration: InputDecoration(
                       labelText: "Phone Number (Optional)",
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       prefixText: '$selectedCountryCode ',
                     ),
                     keyboardType: TextInputType.phone,
@@ -449,7 +463,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: "Email",
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       // prefixIcon: Icon(FluentSystemIcons.ic_fluent_mail_filled),
                     ),
                     validator: (value) {

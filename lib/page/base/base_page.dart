@@ -22,12 +22,17 @@ class _BasePageState extends State<BasePage> {
 
   late List<Widget> _pages; // Declare without initialization
 
+  DateTime? currentBackPressTime;
+  bool canPopNow = false;
+  int requiredSeconds = 2;
+
   @override
   void initState() {
     super.initState();
     // Initialize the _pages list here
     _pages = [
       HomePage(onTabChange: _onItemTapped),
+      AiPage(),
       FindPage(onTabChange: _onItemTapped), // Pass the callback here
       MyCoursePage(),
       ProfilePage(),
@@ -46,41 +51,54 @@ class _BasePageState extends State<BasePage> {
       appBar: AppBar(
         title: Row(
           children: [
-            // SizedBox(width: 10),
-            Text(
-              'StudySama',
-              style: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            Image.asset(
+              'assets/SS_Header_Transparent_16-9.png',
+              height: 100, // You can adjust the height
+              // fit: BoxFit.cover,
+              // height: 140,
+              // width: double.infinity,
             ),
+            // SizedBox(width: 10),
+            // Text(
+            //   'StudySama',
+            //   style: TextStyle(
+            //     fontFamily: 'Montserrat',
+            //     fontWeight: FontWeight.bold,
+            //     color: Colors.white,
+            //   ),
+            // ),
           ],
         ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        shape: _selectedIndex == 0 ?
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ), // Rounded corners
+        ) : null,
         actions: [
-          PopupMenuButton<String>(
-            icon: Icon(Icons.menu),
-            onSelected: (value) {
-              // Handle menu options
-              if (value == 'Profile') {
-                // Navigate to Profile
-              } else if (value == 'Settings') {
-                // Navigate to Settings
-              } else if (value == 'Logout') {
-                // Handle Logout
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem(value: 'Profile', child: Text('Profile')),
-                PopupMenuItem(value: 'Settings', child: Text('Settings')),
-                PopupMenuItem(value: 'Logout', child: Text('Logout')),
-              ];
-            },
-          ),
-          if (_selectedIndex == 3) // Index for Profile Page
+          // PopupMenuButton<String>(
+          //   icon: Icon(Icons.menu),
+          //   onSelected: (value) {
+          //     // Handle menu options
+          //     if (value == 'Profile') {
+          //       // Navigate to Profile
+          //     } else if (value == 'Settings') {
+          //       // Navigate to Settings
+          //     } else if (value == 'Logout') {
+          //       // Handle Logout
+          //     }
+          //   },
+          //   itemBuilder: (BuildContext context) {
+          //     return [
+          //       PopupMenuItem(value: 'Profile', child: Text('Profile')),
+          //       PopupMenuItem(value: 'Settings', child: Text('Settings')),
+          //       PopupMenuItem(value: 'Logout', child: Text('Logout')),
+          //     ];
+          //   },
+          // ),
+          if (_selectedIndex == 4) // Index for Profile Page
             IconButton(
               icon: Icon(
                 FontAwesomeIcons.gear,
@@ -96,45 +114,88 @@ class _BasePageState extends State<BasePage> {
             ),
         ],
       ),
-      body: _pages[_selectedIndex], // Display selected page
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.house),
-            label: 'Home',
+      body: PopScope(
+          canPop: canPopNow,
+          onPopInvokedWithResult: onPopInvoked,
+          child: _pages[_selectedIndex]
+      ), // Display selected page
+        bottomNavigationBar: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            elevation: 2,
+            backgroundColor: Colors.white,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.house),
+                activeIcon: Icon(FontAwesomeIcons.house, size: 24),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.robot),
+                activeIcon: Icon(FontAwesomeIcons.robot, size: 24),
+                label: 'AI Quiz',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.magnifyingGlass),
+                activeIcon: Icon(FontAwesomeIcons.magnifyingGlass, size: 24),
+                label: 'Find',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.scroll),
+                activeIcon: Icon(FontAwesomeIcons.scroll, size: 24),
+                label: 'My Course',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.solidUser),
+                activeIcon: Icon(FontAwesomeIcons.solidUser, size: 24),
+                label: 'Profile',
+              ),
+            ],
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: Colors.grey,
+            selectedLabelStyle: const TextStyle(
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.normal,
+              fontSize: 12,
+            ),
+            type: BottomNavigationBarType.fixed,
+            showUnselectedLabels: false,
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(FontAwesomeIcons.robot),
-          //   label: 'Chatbot',
-          // ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.magnifyingGlass),
-            label: 'Find',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.scroll),
-            label: 'My Course',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.solidUser),
-            label: 'Profile',
-          ),
-        ],
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: Colors.grey,
-        selectedLabelStyle: TextStyle(
-          fontFamily: 'Montserrat',
-          fontWeight: FontWeight.bold,
         ),
-        unselectedLabelStyle: TextStyle(
-          fontFamily: 'Montserrat',
-          fontWeight: FontWeight.normal,
-        ),
-        type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: false,
-      ),
     );
+  }
+
+  void onPopInvoked(bool didPop, dynamic result) {
+    if (didPop) return;
+
+    DateTime now = DateTime.now();
+    if (currentBackPressTime == null ||
+        now.difference(currentBackPressTime!) > Duration(seconds: requiredSeconds)) {
+      currentBackPressTime = now;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Press back twice to exit')),
+      );
+
+      Future.delayed(
+        Duration(seconds: requiredSeconds),
+            () {
+          setState(() {
+            canPopNow = false;
+          });
+        },
+      );
+
+      setState(() {
+        canPopNow = true;
+      });
+    }
   }
 }
