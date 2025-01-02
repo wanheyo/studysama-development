@@ -465,15 +465,15 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
                                       updateFollow();
                                     },
                                   ),
-                                  SizedBox(width: screenWidth * 0.02),
-                                  _buildResponsiveButton(
-                                    context,
-                                    'Share',
-                                    screenWidth,
-                                    onPressed: () {
-                                      // Share profile action
-                                    },
-                                  ),
+                                  // SizedBox(width: screenWidth * 0.02),
+                                  // _buildResponsiveButton(
+                                  //   context,
+                                  //   'Share',
+                                  //   screenWidth,
+                                  //   onPressed: () {
+                                  //     // Share profile action
+                                  //   },
+                                  // ),
                                 ],
                               ),
                             ],
@@ -678,7 +678,7 @@ class _GeneralProfilePageState extends State<GeneralProfilePage> with SingleTick
       double screenWidth,
       {required VoidCallback onPressed}) {
     return SizedBox(
-      width: screenWidth * 0.3,
+      width: screenWidth * 0.6,
       height: 40,
       child: ElevatedButton(
         onPressed: onPressed,

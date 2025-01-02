@@ -418,7 +418,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                 children: [
                                   _buildResponsiveButton(
                                     context,
-                                    'Edit',
+                                    'Edit Profile',
                                     screenWidth,
                                     AppColors.primary,
                                     Colors.white,
@@ -429,17 +429,6 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                           builder: (context) => EditProfilePage(user: user!),
                                         ),
                                       );
-                                    },
-                                  ),
-                                  SizedBox(width: screenWidth * 0.02),
-                                  _buildResponsiveButton(
-                                    context,
-                                    'Share',
-                                    screenWidth,
-                                    AppColors.primary,
-                                    Colors.white,
-                                    onPressed: () {
-                                      // Share profile action
                                     },
                                   ),
                                 ],
@@ -568,9 +557,9 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                       fontWeight: FontWeight.bold,
                     ),
                     unselectedLabelStyle: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 16,
-                      color: Colors.white
+                        fontFamily: 'Montserrat',
+                        fontSize: 16,
+                        color: Colors.white
                     ),
                     indicatorColor: AppColors.secondary,
                     indicatorWeight: 5,
@@ -645,7 +634,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
       BuildContext context, String label, double screenWidth, Color fgColor, Color bgColor,
       {required VoidCallback onPressed}) {
     return SizedBox(
-      width: screenWidth * 0.3,
+      width: screenWidth * 0.6,
       height: 40,
       child: ElevatedButton(
         onPressed: onPressed,
@@ -737,104 +726,104 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Course Name
-                                  Text(
-                                    course.name,
-                                    style: TextStyle(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  // _highlightedText(
-                                  //   course.name,
-                                  //   _searchTerm,
-                                  //   defaultStyle: TextStyle(
-                                  //     color: Colors.black,
-                                  //     fontWeight: FontWeight.bold,
-                                  //     fontSize: 16,
-                                  //   ),
-                                  // ),
-                                  const SizedBox(height: 8),
-                                  if(course.desc != null)
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Course Name
                                     Text(
-                                      course.desc!,
+                                      course.name,
                                       style: TextStyle(
-                                        color: Colors.grey[700],
-                                        fontSize: 14,
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                      // _highlightedText(
-                                      //   course.desc!,
-                                      //   _searchTerm,
-                                      //   defaultStyle: TextStyle(
-                                      //     color: Colors.grey[700],
-                                      //     fontSize: 14,
-                                      //   ),
-                                      // ),
-
-                                  SizedBox(height: 8),
-                                  // Total Joined and Rating
-                                  Row(
-                                    children: [
+                                    // _highlightedText(
+                                    //   course.name,
+                                    //   _searchTerm,
+                                    //   defaultStyle: TextStyle(
+                                    //     color: Colors.black,
+                                    //     fontWeight: FontWeight.bold,
+                                    //     fontSize: 16,
+                                    //   ),
+                                    // ),
+                                    const SizedBox(height: 8),
+                                    if(course.desc != null)
                                       Text(
-                                        course.tutor?.username ?? "null",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "|",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "${course.totalJoined} Joined",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "|",
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                      ),
-                                      Spacer(),
-                                      Text(
-                                        "${formatDate(
-                                            course.createdAt.toLocal())}",
+                                        course.desc!,
                                         style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
+                                          color: Colors.grey[700],
+                                          fontSize: 14,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      Spacer(flex: 5,),
-                                      Row(
-                                        children: [
-                                          Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 18),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            course.averageRating.toStringAsFixed(1),
-                                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                                    // _highlightedText(
+                                    //   course.desc!,
+                                    //   _searchTerm,
+                                    //   defaultStyle: TextStyle(
+                                    //     color: Colors.grey[700],
+                                    //     fontSize: 14,
+                                    //   ),
+                                    // ),
+
+                                    SizedBox(height: 8),
+                                    // Total Joined and Rating
+                                    Row(
+                                      children: [
+                                        Text(
+                                          course.tutor?.username ?? "null",
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          "|",
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          "${course.totalJoined} Joined",
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          "|",
+                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          "${formatDate(
+                                              course.createdAt.toLocal())}",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  // const SizedBox(height: 8),
-                                  // // Created Date
-                                  // Text(
-                                  //   "Created on: ${course.createdAt}",
-                                  //   style: TextStyle(
-                                  //     fontSize: 12,
-                                  //     color: Colors.grey[600],
-                                  //   ),
-                                  // ),
-                                ],
-                              )
+                                        ),
+                                        Spacer(flex: 5,),
+                                        Row(
+                                          children: [
+                                            Icon(FontAwesomeIcons.solidStar, color: Colors.amber, size: 18),
+                                            SizedBox(width: 4),
+                                            Text(
+                                              course.averageRating.toStringAsFixed(1),
+                                              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    // const SizedBox(height: 8),
+                                    // // Created Date
+                                    // Text(
+                                    //   "Created on: ${course.createdAt}",
+                                    //   style: TextStyle(
+                                    //     fontSize: 12,
+                                    //     color: Colors.grey[600],
+                                    //   ),
+                                    // ),
+                                  ],
+                                )
                             ),
                           ],
                         ),
