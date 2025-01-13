@@ -1,16 +1,42 @@
-# studysama
+# **StudySama**
 
-A new Flutter project.
+**BITU3923 WORKSHOP II Project**  
+**"StudySama"** is a mobile-based platform designed to enhance access to quality education through peer learning. This initiative aligns with **SDG 4 (Quality Education)** by creating opportunities for students to either offer or receive tutoring in various subjects, fostering an inclusive and collaborative learning environment.
 
-## Getting Started
+The platform addresses the challenges of affordability and accessibility faced by many students, offering a cost-effective alternative to private tutoring by leveraging the expertise of peers.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## **Latest Version**  
+**AlphaTest-1.0.1** *(13/01/2025)*  
+👉 [Download the app here](https://drive.google.com/drive/folders/1tKzUmp6ftaqE2aKTUVDYPzShZYPmFBYx?usp=drive_link)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## **How to Install**
+
+### **For Android:**
+1. Open the **"Latest Version"** folder from the link above.
+2. Download the APK file named `StudySama-AlphaTest-1.0.1.apk`.
+3. Once the download is complete, tap on the file to install.
+4. During installation, **allow/enable "Install from Unknown Sources"** if prompted.
+
+### **For iOS:**
+Currently, the app does **not support iOS devices**.
+
+---
+
+## **Changelog**
+
+### **<2/1/2025> AlphaTest-1.0.0**
+- Initial app launch for alpha testing.
+
+### **<13/1/2025> AlphaTest-1.0.1**
+- Added course analytics page.
+- Added reset password functionality.
+- Improved overall performance and user experience.
+- Fixed various bugs.
+
+---
+
+> For any issues or feedback, feel free to create a new [issue](https://github.com/) in this repository!
