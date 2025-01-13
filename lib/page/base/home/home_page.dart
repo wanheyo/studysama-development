@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +35,7 @@ class _HomePageState  extends  State<HomePage> {
   List<UserCourse> userCoursesHighRating = []; //tutor
 
   bool isLoading = false;
+  int randomIndex = 0;
   PageController _pageControllerMostJoined = PageController(); // PageController for PageView
   PageController _pageControllerHighestRated = PageController(); // PageController for PageView
   int _currentPageMostJoined = 0; // Current page index
@@ -113,6 +116,8 @@ class _HomePageState  extends  State<HomePage> {
           }
         }
 
+        randomIndex = Random().nextInt(courses.length);
+
         // Sort courses by total joined and average rating
         courses.sort((a, b) => b.totalJoined.compareTo(a.totalJoined)); // Most joined
         mostJoinedCourses = courses.take(5).toList();
@@ -153,7 +158,7 @@ class _HomePageState  extends  State<HomePage> {
 
   Future<void> initializeData() async {
     await loadUser();
-    fetchCourses();
+    await fetchCourses();
   }
 
   @override
@@ -184,7 +189,7 @@ class _HomePageState  extends  State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'WELCOME TO StudySama!',
+                      'Welcome to StudySama!',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -245,6 +250,69 @@ class _HomePageState  extends  State<HomePage> {
               ),
               SizedBox(height: 20),
 
+              // Random Courses Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Find Your Courses',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      widget.onTabChange(2);
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      backgroundColor: AppColors.secondary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Text(
+                      'View More',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              if (isLoading) // Show loading indicator if loading
+                Center(child: CircularProgressIndicator(color: AppColors.primary))
+              else if (courses.isEmpty) // Check if courses list is empty
+                Center(
+                  child: Text(
+                    'No course created',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: [
+                    Container(
+                      height: 310, // Set a fixed height for the course list
+                      child: buildCourseCard(
+                        courses[randomIndex], // Random index
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                  ],
+                ),
+
+              SizedBox(height: 20),
+
               // Popular Courses Section
               Text(
                 'Most Popular Courses',
@@ -276,7 +344,21 @@ class _HomePageState  extends  State<HomePage> {
                                   // Navigate to the view more page or perform an action
                                   widget.onTabChange(2);
                                 },
-                                child: const Text("View More"),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  backgroundColor: AppColors.secondary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: Text(
+                                  'View More',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             );
                           }
@@ -334,9 +416,23 @@ class _HomePageState  extends  State<HomePage> {
                               child: TextButton(
                                 onPressed: () {
                                   // Navigate to the view more page or perform an action
-                                  widget.onTabChange(1);
+                                  widget.onTabChange(2);
                                 },
-                                child: const Text("View More"),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  backgroundColor: AppColors.secondary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'View More',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             );
                           }
@@ -380,7 +476,7 @@ class _HomePageState  extends  State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'ABOUT US',
+                      'About Us',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -535,65 +631,137 @@ class _HomePageState  extends  State<HomePage> {
     required String title,
     required String subtitle,
     required String image,
-    // required int totalJoined,
   }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20), // Rounded corners
-      ),
-      child: SizedBox(
-        width: 250,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image
-            ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Image.asset(
-                  image,
-                  fit: BoxFit.cover,
-                  height: 140,
-                  width: double.infinity,
+    return GestureDetector(
+      onTap: () {
+        // Show dialog to enlarge the card
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.all(16), // Adjust padding
+              child: Center(
+                child: Card(
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Image
+                        ClipRRect(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          child: Image.asset(
+                            image,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: 200,
+                          ),
+                        ),
+                        // Details
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                subtitle,
+                                style: TextStyle(
+                                  color: Colors.grey[700],
+                                  fontSize: 16,
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text(
+                                    'Close',
+                                    style: TextStyle(
+                                      color: AppColors.secondary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-            // Details
-            Padding(
-              padding: const EdgeInsets.all(14.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+            );
+          },
+        );
+      },
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20), // Rounded corners
+        ),
+        child: SizedBox(
+          width: 250,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Image.asset(
+                    image,
+                    fit: BoxFit.cover,
+                    height: 140,
+                    width: double.infinity,
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontSize: 14,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  // Text(
-                  //   '$totalJoined Enrolled',
-                  //   style: TextStyle(
-                  //     fontSize: 12,
-                  //     color: Colors.grey[600],
-                  //   ),
-                  // ),
-                ],
+                ),
               ),
-            ),
-          ],
+              // Details
+              Padding(
+                padding: const EdgeInsets.all(14.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

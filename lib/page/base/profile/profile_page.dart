@@ -369,33 +369,108 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                               ),
                               SizedBox(height: 16),
                               // Circular Profile Picture Placeholder
-                              Container(
-                                width: screenWidth * 0.25,
-                                height: screenWidth * 0.25,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.grey[300],
-                                  image: user?.image != null
-                                      ? DecorationImage(
-                                    image: NetworkImage(domainURL + '/storage/${user!.image!}'),
-                                    fit: BoxFit.cover,
+                              // Container(
+                              //   width: screenWidth * 0.25,
+                              //   height: screenWidth * 0.25,
+                              //   decoration: BoxDecoration(
+                              //     shape: BoxShape.circle,
+                              //     color: Colors.grey[300],
+                              //     image: user?.image != null
+                              //         ? DecorationImage(
+                              //       image: NetworkImage(domainURL + '/storage/${user!.image!}'),
+                              //       fit: BoxFit.cover,
+                              //     )
+                              //         : null,
+                              //   ),
+                              //   child: user?.image == null
+                              //       ? Center(
+                              //     child: Text(
+                              //       user?.username != null
+                              //           ? user!.username[0].toUpperCase()
+                              //           : '?',
+                              //       style: TextStyle(
+                              //         fontSize: 24,
+                              //         fontWeight: FontWeight.bold,
+                              //         color: Colors.black54,
+                              //       ),
+                              //     ),
+                              //   )
+                              //       : null,
+                              // ),
+                              GestureDetector(
+                                onTap: () {
+                                  if (user?.image != null) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                          backgroundColor: Colors.transparent,
+                                          insetPadding: EdgeInsets.all(0),
+                                          child: Stack(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () => Navigator.pop(context), // Close dialog on tap outside
+                                                child: Container(
+                                                  color: Colors.black.withOpacity(0.7), // Background overlay
+                                                ),
+                                              ),
+                                              Center(
+                                                child: Image.network(
+                                                  domainURL + '/storage/${user!.image!}',
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                              Positioned(
+                                                top: 10, // Adjust this for proper placement
+                                                right: 10, // Adjust this for proper placement
+                                                child: GestureDetector(
+                                                  onTap: () => Navigator.pop(context), // Close dialog
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.black.withOpacity(0.6),
+                                                    ),
+                                                    padding: EdgeInsets.all(8), // Add padding for better tap area
+                                                    child: Icon(
+                                                      FontAwesomeIcons.xmark,
+                                                      color: Colors.white
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }
+                                },
+                                child: Container(
+                                  width: screenWidth * 0.25,
+                                  height: screenWidth * 0.25,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey[300],
+                                    image: user?.image != null
+                                        ? DecorationImage(
+                                      image: NetworkImage(domainURL + '/storage/${user!.image!}'),
+                                      fit: BoxFit.cover,
+                                    )
+                                        : null,
+                                  ),
+                                  child: user?.image == null
+                                      ? Center(
+                                    child: Text(
+                                      user?.username != null ? user!.username[0].toUpperCase() : '?',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
                                   )
                                       : null,
                                 ),
-                                child: user?.image == null
-                                    ? Center(
-                                  child: Text(
-                                    user?.username != null
-                                        ? user!.username[0].toUpperCase()
-                                        : '?',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                )
-                                    : null,
                               ),
                               SizedBox(height: 16),
                             ],
@@ -423,12 +498,18 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                                     AppColors.primary,
                                     Colors.white,
                                     onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => EditProfilePage(user: user!),
-                                        ),
-                                      );
+                                      if(user != null) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => EditProfilePage(user: user!),
+                                          ),
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Error')),
+                                        );
+                                      }
                                     },
                                   ),
                                 ],

@@ -9,6 +9,7 @@ import 'package:studysama/models/tutor_slot.dart';
 import 'package:studysama/models/user_badge.dart';
 import 'package:studysama/models/user_course.dart';
 import 'package:studysama/page/base/general_user_list_page.dart';
+import 'package:studysama/page/base/my_course/course_analytics_page.dart';
 import 'package:studysama/page/base/my_course/manage_course_page.dart';
 import '../../../main.dart';
 import '../../../models/course.dart';
@@ -60,6 +61,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
   bool isStudent = false;
   UserCourse? userCourse;
   User? tutor;
+  List<UserCourse> userCourseList = [];
 
   String token = "";
   bool isGrid = false; // Toggle state for grid or list view in lessons
@@ -205,6 +207,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
     //print("course_id: " + course_id.toString());
     try {
       final data = await apiService.index_user_course(token, course_id);
+
+      final userMap = {
+        for (var file in (data['user_course_list_detail'] as List))
+          file['id']: User.fromJson(file)
+      };
+
       setState(() {
         // Extract boolean values from the response
         isTutor = data['is_user_tutor'] ?? false;
@@ -216,6 +224,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
         tutor = data['tutor'] != null
             ? User.fromJson(data['tutor'])
             : null;
+
+        userCourseList = (data['user_course_list'] as List)
+            .map((json) {
+          final userCourse = UserCourse.fromJson(json);
+          userCourse.user = userMap[userCourse.userId];
+          return userCourse;
+        }).toList();
+
       });
     } catch (e) {
       setState(() {
@@ -748,6 +764,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                         initializeData();
                       });
                       break;
+                    case 'View Course Analytics':
+                      Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => CourseAnalyticsPage(course: widget.course, userCourseList: userCourseList,),),
+                      );
+                      break;
                     case 'Add Lesson':
                       _showAddLessonBottomSheet(context);
                       break;
@@ -761,6 +782,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                     const PopupMenuItem<String>(
                       value: 'Manage Course',
                       child: Text('Manage Course'),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'View Course Analytics',
+                      child: Text('View Course Analytics'),
                     ),
                     const PopupMenuItem<String>(
                       value: 'Add Lesson',
@@ -1164,7 +1189,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
               ),
 
               // Fifth Card: Manage Course Button
-              if(isTutor)
+              if(isTutor)...[
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -1202,6 +1227,29 @@ class _CourseDetailPageState extends State<CourseDetailPage> with TickerProvider
                     child: const Text("Manage Course"),
                   ),
                 ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.push(
+                        context, MaterialPageRoute(builder: (context) => CourseAnalyticsPage(course: widget.course, userCourseList: userCourseList,),),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondary,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32.0, vertical: 12.0),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: const Text("View Course Analytics"),
+                  ),
+                ),
+              ],
               if(isStudent)
                 SizedBox(
                   width: double.infinity,

@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:studysama/page/auth/start_page.dart';
 import 'package:studysama/page/base/base_page.dart';
 import 'package:studysama/page/base/home/home_page.dart';
@@ -11,31 +15,90 @@ final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Lock the app to portrait mode
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
-// test
-  // This widget is the root of your application.
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  bool isOffline = false;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Check initial connection status
+    Connectivity().checkConnectivity().then((result) {
+      _updateConnectionStatus(result);
+    });
+    _monitorConnectivity();
+  }
+
+  void _monitorConnectivity() {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+      _updateConnectionStatus(result);
+    });
+  }
+
+  Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
+    bool previousStatus = isOffline;
+    isOffline = !result.contains(ConnectivityResult.mobile) &&
+        !result.contains(ConnectivityResult.wifi) &&
+        !result.contains(ConnectivityResult.ethernet);
+
+    if (isOffline && !previousStatus) {
+      _showSnackbar('No internet connection', isError: true);
+    } else if (!isOffline && previousStatus) {
+      _showSnackbar('Internet connection restored', isError: false);
+    }
+  }
+
+  void _showSnackbar(String message, {bool isError = false}) {
+    if (mounted) {
+      _scaffoldKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isError ? Colors.red : Colors.green,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: _scaffoldKey,  // Add this line
       debugShowCheckedModeBanner: false,
-      title: 'StudySama dev',
-      theme: AppTheme.lightTheme, // Light Theme
-      darkTheme: AppTheme.lightTheme, // Dark Theme
-      themeMode: ThemeMode.system, // Use system settings
-      // colorScheme: ColorScheme.fromSeed(seedColor: Color.fromRGBO(38, 38, 38, 0.4)),
-      //   useMaterial3: true,
-      // ),
-      // home: const BottomNavbar(),
-      //home: LoginPage(),
+      title: 'StudySama',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.lightTheme,
+      themeMode: ThemeMode.system,
       initialRoute: '/',
       routes: {
-        // '/': (context) => LoginPage(), //start page
-        '/': (context) => StartPage(), //start page
+        '/': (context) => StartPage(),
         '/home': (context) => BasePage(),
       },
       navigatorObservers: [routeObserver],

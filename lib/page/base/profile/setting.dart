@@ -4,7 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studysama/page/auth/login_page.dart'; // Import your LoginPage
 import 'package:studysama/utils/colors.dart';
 
-import '../../../services/api_service.dart'; // Import your AppColors
+import '../../../models/user.dart';
+import '../../../services/api_service.dart';
+import 'edit_profile.dart'; // Import your AppColors
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -15,15 +17,22 @@ class _SettingsPageState extends State<SettingsPage> {
   final ApiService apiService = ApiService();
   String token = "";
 
+  User? user;
+
   @override
   void initState() {
     super.initState();
-    loadUser (); // Call loadUser  when the page is opened
+    initializeData();
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<void> initializeData() async {
+    await loadUser();
+    await fetchUser();
   }
 
   Future<void> loadUser () async {
@@ -37,6 +46,21 @@ class _SettingsPageState extends State<SettingsPage> {
       }
     } catch (e) {
       print('Error loading user: $e');
+    }
+  }
+
+  Future<void> fetchUser() async {
+    try {
+      final data = await apiService.index_user(token, null);
+      setState(() {
+        user = User.fromJson(data['user']);
+        // isLoading = false; // Set loading to false once data is fetched
+      });
+    } catch (e) {
+      print("Response: " + e.toString());
+      setState(() {
+        // isLoading = false; // Set loading to false even if there's an error
+      });
     }
   }
 
@@ -93,7 +117,7 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (e) {
       final errorMsg = e.toString().replaceFirst('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Course update failed: $errorMsg')),
+        SnackBar(content: Text('Logout failed: $errorMsg')),
       );
       print(errorMsg);
     } finally {
@@ -119,6 +143,22 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            ListTile(
+              leading: Icon(FontAwesomeIcons.pencil),
+              title: Text(
+                "Edit Profile",
+                style: TextStyle(fontFamily: 'Montserrat'),
+              ),
+              onTap: () {
+                //_showLogOutConfirmation(context);  // Trigger logout confirmation on tap
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditProfilePage(user: user!),
+                  ),
+                );
+              },
+            ),
             ListTile(
               leading: Icon(FontAwesomeIcons.arrowRightFromBracket),
               title: Text(

@@ -18,7 +18,9 @@ class _SignupPageState extends State<SignupPage> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();  // Controller for confirm password
   bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;  // Visibility for confirm password
 
   final _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
@@ -32,6 +34,7 @@ class _SignupPageState extends State<SignupPage> {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();  // Dispose the confirm password controller
     super.dispose();
   }
 
@@ -43,9 +46,18 @@ class _SignupPageState extends State<SignupPage> {
     final username = _usernameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;  // Get confirm password
 
     if (!_formKey.currentState!.validate()) {
       return; // Exit if the form is invalid
+    }
+
+    if (password != confirmPassword) {
+      // Check if passwords match
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Passwords do not match!')),
+      );
+      return;
     }
 
     setState(() {
@@ -63,9 +75,9 @@ class _SignupPageState extends State<SignupPage> {
       _login(); // Navigate to the login page
     } catch (e) {
       // Extract meaningful error messages if available
-      final errorMsg = e.toString().replaceFirst('Exception: ', '\n');
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: $errorMsg\n')),
+        SnackBar(content: Text('$errorMsg\n')),
       );
       print(errorMsg);
     } finally {
@@ -100,13 +112,21 @@ class _SignupPageState extends State<SignupPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(height: screenHeight * 0.1),
+                        SizedBox(height: screenHeight * 0.01),
                         Image.asset(
                           'assets/SS_Header_Transparent_16-9.png',
                           height: 150,
                         ),
                         SizedBox(height: screenHeight * 0.05),
 
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            " Hi New Member!",
+                            style: TextStyle(fontSize: 18, color: AppColors.primary, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
                         // Username field
                         TextFormField(
                           controller: _usernameController,
@@ -182,6 +202,39 @@ class _SignupPageState extends State<SignupPage> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your password';
+                            }
+                            if (value.length < 8) {
+                              return 'Password must be at least 8 characters long';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+
+                        // Confirm Password field
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          obscureText: !_isConfirmPasswordVisible,
+                          decoration: InputDecoration(
+                            labelText: "Confirm Password",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            prefixIcon: Icon(FontAwesomeIcons.lock),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isConfirmPasswordVisible ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please confirm your password';
                             }
                             if (value.length < 8) {
                               return 'Password must be at least 8 characters long';

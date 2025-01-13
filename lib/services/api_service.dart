@@ -10,10 +10,10 @@ import 'package:html/parser.dart' as html;
 
 
 class ApiService {
-  //production
+  //development
   // final String domainUrl = 'https://{domain}';
 
-  //development
+  //production
   final String domainUrl = 'http://khairulvps.cloud';
   late final String baseUrl;
 
@@ -23,6 +23,58 @@ class ApiService {
   ApiService() {
     baseUrl = domainUrl + '/api/studysama';
   }
+
+  // SECTION START: AUTH
+
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/forgot-password'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.body.isEmpty) {
+        throw Exception('Empty response from server');
+      }
+
+      final responseData = json.decode(response.body);
+
+      // Check the status code and handle accordingly
+      if (response.statusCode == 200 && responseData['status'] == true) {
+        return {
+          'success': true,
+          'message': responseData['message'] ?? 'Password reset email sent successfully!',
+        };
+      } else if (response.statusCode == 422) {
+        // Validation errors
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Validation error occurred',
+          'errors': responseData['errors'], // Validation errors (if available)
+        };
+      } else if (response.statusCode == 429) {
+        // Rate-limiting errors
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Too many requests. Please try again later.',
+        };
+      } else {
+        // Generic error for other status codes
+        throw Exception(responseData['message'] ?? 'Failed to process the request.');
+      }
+    } catch (e) {
+      // Catch and handle unexpected errors
+      return {
+        'success': false,
+        'message': e.toString().replaceFirst('Exception: ', ''), // Remove "Exception: " prefix
+      };
+    }
+  }
+
+  // SECTION END: AUTH
 
   // SECTION START: USER
 
@@ -136,7 +188,8 @@ class ApiService {
     } catch (e) {
       // Rethrow the exception for the caller to handle
       // throw Exception('Error registering user: $e');
-      throw Exception(e);
+      // throw Exception(e);
+      throw Exception(e.toString().replaceFirst('Exception: ', 'Registration Failed:\n'));
     }
   }
 
@@ -250,7 +303,8 @@ class ApiService {
         }
       }
     } catch (e) {
-      throw Exception('Error logging in: $e');
+      // throw Exception('Error logging in: $e');
+      throw Exception(e.toString().replaceFirst('Exception: ', 'Login Failed: '));
     }
   }
 

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:studysama/page/auth/reset_password_page.dart';
 import 'package:studysama/page/base/base_page.dart';
 import 'package:studysama/page/auth/signup_page.dart';
 import 'package:studysama/page/base/home/home_page.dart';
@@ -104,9 +105,9 @@ class _LoginPageState extends State<LoginPage> {
       _basepage(); // Navigate to the Home page
     } catch (e) {
       // Extract meaningful error messages if available
-      final errorMsg = e.toString().replaceFirst('Exception: ', '\n');
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $errorMsg\n')),
+        SnackBar(content: Text('$errorMsg')),
       );
       print(errorMsg);
     } finally {
@@ -152,6 +153,10 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => SignupPage()), (route) => false);
   }
 
+  void _resetPasswordPage() {
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => ResetPasswordPage()), (route) => false);
+  }
+
   void _basepage() {
     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => BasePage()), (route) => false);
   }
@@ -184,6 +189,15 @@ class _LoginPageState extends State<LoginPage> {
                         height: 150,
                       ),
                       SizedBox(height: screenHeight * 0.05),
+
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          " Welcome back!",
+                          style: TextStyle(fontSize: 18, color: AppColors.primary, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
                       // Form fields section
                       TextFormField(
                         controller: _usernameOrEmailController,
@@ -271,9 +285,7 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(height: screenHeight * 0.02),
 
                       TextButton(
-                        onPressed: () {
-                          // Navigate to password reset page or show a dialog
-                        },
+                        onPressed: _resetPasswordPage,
                         child: Text("Forgot Password?"),
                       ),
 
