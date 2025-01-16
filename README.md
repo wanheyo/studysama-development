@@ -17,7 +17,7 @@ The platform addresses the challenges of affordability and accessibility faced b
 
 ### **For Android:**
 1. Open the **"Latest Version"** folder from the link above.
-2. Download the APK file named `StudySama-AlphaTest-1.0.1.apk`.
+2. Download the APK file named `StudySama-AlphaTest-1.0.2.apk`.
 3. Once the download is complete, tap on the file to install.
 4. During installation, **allow/enable "Install from Unknown Sources"** if prompted.
 
