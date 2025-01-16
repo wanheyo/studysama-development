@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/api_service.dart';
 import '../../../utils/colors.dart';
 import '../my_course/ai_quiz_page.dart';
+import 'ai_word_search_page.dart';
 
 class AiPage extends StatefulWidget {
   const AiPage({Key? key}) : super(key: key);
@@ -20,6 +21,8 @@ class _AIPageState extends State<AiPage> {
   final ApiService apiService = ApiService();
   String get domainURL => apiService.domainUrl;
   String token = "";
+
+  Set<String> _selectedSegments = {'MCQ'}; // Default selected segment
 
   @override
   void initState() {
@@ -68,7 +71,7 @@ class _AIPageState extends State<AiPage> {
             ),
             const SizedBox(width: 8), // Space between the icon and text
             Text(
-              ' | Generate MCQ Quiz Using AI',
+              ' | Generate Quiz Using AI',
               style: TextStyle(
                   fontFamily: 'Montserrat',
                   fontWeight: FontWeight.bold,
@@ -105,11 +108,56 @@ class _AIPageState extends State<AiPage> {
               maxLength: 40,
               decoration: InputDecoration(
                 labelText: 'Enter Topic/Subject',
-                hintText: 'e.g., Solar System, World War II',
+                hintText: 'e.g., Database, C++ Programming',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
                 prefixIcon: const Icon(FontAwesomeIcons.book, color: AppColors.primary,),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Segmented Button
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<String>(
+                style: SegmentedButton.styleFrom(
+                  textStyle: TextStyle(
+                    fontFamily: 'Montserrat',
+                  ),
+                  selectedForegroundColor: Colors.white,
+                  selectedBackgroundColor: AppColors.secondary,
+                ),
+                segments: [
+                  ButtonSegment<String>(
+                    value: 'MCQ',
+                    label: Text(
+                      'MCQ',
+                      style: TextStyle(
+                        fontWeight: _selectedSegments.contains('MCQ')
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                  ButtonSegment<String>(
+                    value: 'SWP',
+                    label: Text(
+                      'Search Word Puzzle',
+                      style: TextStyle(
+                        fontWeight: _selectedSegments.contains('SWP')
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ],
+                selected: _selectedSegments,
+                onSelectionChanged: (Set<String> newSelection) {
+                  setState(() {
+                    _selectedSegments = newSelection;
+                  });
+                },
               ),
             ),
             const SizedBox(height: 16),
@@ -137,17 +185,22 @@ class _AIPageState extends State<AiPage> {
                   _buildInstructionItem(
                       '1. Enter a specific topic or subject (max 40 characters)',
                       FontAwesomeIcons.pencil,
-                      AppColors.tertiary
+                      AppColors.primary
                   ),
                   _buildInstructionItem(
                       '2. Be clear and concise with your topic',
                       FontAwesomeIcons.lightbulb,
-                      AppColors.secondary
+                      AppColors.primary
                   ),
                   _buildInstructionItem(
                       '3. Avoid broad or vague subjects',
                       FontAwesomeIcons.triangleExclamation,
-                      Colors.red
+                      AppColors.primary
+                  ),
+                  _buildInstructionItem(
+                      '4.  Choose "MCQ" (Multiple Choice Question) or "Word Search Puzzle"',
+                      FontAwesomeIcons.solidHandPointUp,
+                      AppColors.primary
                   ),
                 ],
               ),
@@ -175,7 +228,7 @@ class _AIPageState extends State<AiPage> {
                     ),
                   ),
                   SizedBox(height: 8),
-                  Text('• Questions are generated based on available data, using gpt-3.5-turbo model'),
+                  Text('• Questions/Keyword are generated based on available data, using gpt-3.5-turbo model'),
                   Text('• Accuracy may vary depending on the topic'),
                   Text('• Some topics might not generate optimal results'),
                 ],
@@ -229,14 +282,22 @@ class _AIPageState extends State<AiPage> {
                     );
                     return;
                   }
-                  // Handle generation
-                  // Navigator.push(...) to your quiz page
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AIQuizPage(content: _topicController.text.trim(),),
-                    ),
-                  );
+
+                  if (_selectedSegments.contains("MCQ")) {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AIQuizPage(content: _topicController.text.trim(),),
+                      ),
+                    );
+                  } else {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AIWordSearchPage(content: _topicController.text.trim(),),
+                      ),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

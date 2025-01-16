@@ -16,6 +16,7 @@ import '../../../models/course.dart';
 import '../../../models/resource.dart';
 import '../../../models/user.dart';
 import '../../../services/api_service.dart';
+import '../ai/ai_word_search_page.dart';
 import 'ai_quiz_page.dart';
 
 class ResourcePage extends StatefulWidget {
@@ -409,12 +410,47 @@ class _ResourcePageState extends State<ResourcePage> {
                     child: ElevatedButton(
                       onPressed: (widget.resource.link != null && _isWebPageLink(widget.resource.link!))
                           ? () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AIQuizPage(resource: widget.resource),
-                          ),
+                        // Show a dialog with options to choose between MCQ or Word Search Puzzle
+                        final String? selectedOption = await showDialog<String>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Generate Option'),
+                              content: const Text('Please choose what you want AI to generate:'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop('MCQ'); // Return "MCQ"
+                                  },
+                                  child: const Text('MCQ'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop('WordSearch'); // Return "WordSearch"
+                                  },
+                                  child: const Text('Search Word Puzzle'),
+                                ),
+                              ],
+                            );
+                          },
                         );
+
+                        // Navigate based on the selected option
+                        if (selectedOption == 'MCQ') {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AIQuizPage(resource: widget.resource),
+                            ),
+                          );
+                        } else if (selectedOption == 'WordSearch') {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AIWordSearchPage(content: widget.resource.link!), // Add logic to generate word list
+                            ),
+                          );
+                        }
                       }
                           : null,
                       style: ElevatedButton.styleFrom(

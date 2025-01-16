@@ -121,7 +121,7 @@ class _AIQuizPageState extends State<AIQuizPage> {
         }
       }
 
-      final data = await apiService.generateQuizFromUrl(content);
+      final data = await apiService.generateMCQFromUrl(content);
       setState(() {
         title = data['title'] ?? 'null';
 
@@ -291,7 +291,7 @@ class _AIQuizPageState extends State<AIQuizPage> {
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
-        title: Text('AI Generated Quiz'),
+        title: Text('AI MCQ Quiz'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         leading: IconButton(
@@ -490,7 +490,7 @@ class _AIQuizPageState extends State<AIQuizPage> {
           ),
         ],
       ),
-      floatingActionButton: !isSubmitted
+      floatingActionButton: !isSubmitted && !isLoading
           ? FloatingActionButton.extended(
         onPressed: _submitQuiz,
         label: const Text(

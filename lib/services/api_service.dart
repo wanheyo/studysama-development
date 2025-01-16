@@ -1551,7 +1551,7 @@ class ApiService {
 
 // SECTION START: OPEN AI
 
-  Future<Map<String, dynamic>> generateQuizFromUrl(String textContent) async {;
+  Future<Map<String, dynamic>> generateMCQFromUrl(String textContent) async {;
     try {
       final openAiResponse = await http.post(
         openAIUrl,
@@ -1601,7 +1601,7 @@ class ApiService {
             print('Raw Text from OpenAI: $rawText');
 
             // Process the raw text into structured format
-            final questions = _processQuizText(rawText);
+            final questions = _processMCQText(rawText);
 
             final response = {
               "title": "Quiz from $textContent",
@@ -1630,7 +1630,7 @@ class ApiService {
   }
 
   // Helper function to parse raw text into structured format
-  List<Map<String, dynamic>> _processQuizText(String rawText) {
+  List<Map<String, dynamic>> _processMCQText(String rawText) {
     final lines = rawText.split('\n').where((line) => line.trim().isNotEmpty).toList();
     final questions = <Map<String, dynamic>>[];
 
@@ -1655,8 +1655,90 @@ class ApiService {
         }
       }
     }
-
     return questions;
+  }
+
+  Future<List<String>> generateFindWordFromUrl(String textContent, int numWord) async {
+    try {
+      final openAiResponse = await http.post(
+        openAIUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $openAIKey',
+        },
+        body: jsonEncode({
+          'model': 'gpt-3.5-turbo',
+          'messages': [
+            {
+              'role': 'system',
+              'content': 'You are an assistant that generates key words for Find Word Puzzle based on input text.',
+            },
+            {
+              'role': 'user',
+              'content': '''
+            Generate $numWord key words for Find Word Puzzle based on the following url/content(subject/topic):
+            $textContent
+            Each word should not have space. Provide the response in this structure:
+            words: [word1; word2; word3; word4]
+            Response should be like this.
+            Example = {words: [newyork; tokyo; london; berlin]}
+            Also please avoid giving word that exceed 10 characters as the Find Word Puzzle is 10 x 10.
+            Please follow this instruction and example I provided or else my cat died :(
+          ''',
+            },
+          ],
+          'max_tokens': 800,
+          'temperature': 0.7,
+        }),
+      );
+
+      // Log the raw response body for debugging
+      print('OpenAI Raw Response: ${openAiResponse.body}');
+
+      if (openAiResponse.statusCode == 200) {
+        final data = jsonDecode(openAiResponse.body);
+
+        // Verify the presence of 'choices' and 'message' keys
+        if (data.containsKey('choices') && data['choices'].isNotEmpty) {
+          final message = data['choices'][0]['message'];
+          if (message != null && message.containsKey('content')) {
+            final rawText = message['content'];
+            print('Raw Text from OpenAI: $rawText');
+
+            // Extract the list of words
+            final words = _processFindWordText(rawText);
+
+            print('Extracted Words: $words');
+            return words;
+          } else {
+            throw Exception('Invalid OpenAI response: Missing "content" in "message".');
+          }
+        } else {
+          throw Exception('Invalid OpenAI response: Missing "choices" or "message".');
+        }
+      } else {
+        throw Exception('Failed to generate quiz: ${openAiResponse.body}');
+      }
+    } catch (e) {
+      // Log the error for debugging
+      print('Error in generateFindWordFromUrl: $e');
+      rethrow;
+    }
+  }
+
+  // Helper function to parse raw text into a list of strings
+  List<String> _processFindWordText(String rawText) {
+    final RegExp wordListRegex = RegExp(r'words:\s*\[(.*)\]');
+    final match = wordListRegex.firstMatch(rawText);
+
+    if (match != null && match.groupCount == 1) {
+      final wordsString = match.group(1)!;
+      // Split the words by `;`, trim whitespace, and convert to lowercase
+      final words = wordsString.split(';').map((word) => word.trim().toLowerCase()).toList();
+      return words;
+    }
+
+    throw Exception('Unable to extract words from response: $rawText');
   }
 
 // SECTION END: OPEN AI
