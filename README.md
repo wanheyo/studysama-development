@@ -8,7 +8,7 @@ The platform addresses the challenges of affordability and accessibility faced b
 ---
 
 ## **Latest Version**  
-**AlphaTest-1.0.1** *(13/01/2025)*  
+**AlphaTest-1.0.2** *(16/01/2025)*  
 👉 [Download the app here](https://drive.google.com/drive/folders/1tKzUmp6ftaqE2aKTUVDYPzShZYPmFBYx?usp=drive_link)
 
 ---
@@ -35,6 +35,10 @@ Currently, the app does **not support iOS devices**.
 - Added course analytics page.
 - Added reset password functionality.
 - Improved overall performance and user experience.
+- Fixed various bugs.
+
+### **<16/1/2025> AlphaTest-1.0.2**
+- Added new option "Search Word Puzzle" for AI Quiz generator. Now AI Quiz generator have 2 option which are MCQ and Search Word Puzzle.
 - Fixed various bugs.
 
 ---
